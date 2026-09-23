@@ -10,14 +10,14 @@ body, html {
 /*tiêu đề lớn*/
 h1 {
     color: #7F0303;
-    font-family: 'Futura', sans-serif;
+    font-family: 'Bodoni Moda', sans-serif;
     font-size: 50px;
 }
 
 /*các tiêu đề cấp dưới*/
 h2, h3 {
     color: #0F414A; /* midnight blue */
-    font-family: 'Futura', sans-serif;
+    font-family: 'Bodoni Moda', sans-serif;
     font-size: 28px;
 }
 
@@ -38,7 +38,7 @@ button, .btn {
     border: none;
     padding: 10px 20px;
     cursor: pointer;
-    font-family: 'Futura', sans-serif;
+    font-family: 'Bodoni Moda', sans-serif;
 }
 button:hover, .btn:hover {
     opacity: 0.9;
@@ -73,7 +73,7 @@ button:hover, .btn:hover {
 /*riêng cho chữ Menu ở side bar vì nó chìm quá*/
 .menu-title {
     color: #96C0CE;
-    font-family: 'Futura', sans-serif;
+    font-family: 'Bodoni Moda', sans-serif;
     margin-top: 0;
     font-size: 40px;
 }

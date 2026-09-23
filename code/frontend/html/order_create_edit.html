@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Order</title>
+    <link rel="stylesheet" href="../css/order_create_edit.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda&display=swap" rel="stylesheet">
+    </head>
+<body>
+    <!--collapsed navigation button-->
+    <header class="topbar">
+        <button class="menu-btn">☰</button>
+        <h1>Order</h1>
+    </header>
+
+    <!--switching button between new and check order-->
+    <div class="order-tabs">
+        <button class="tab-btn active">New order</button>
+        <button class="tab-btn">Check orders</button>
+    </div>
+
+    <!--main part-->
+    <div class="order-container">
+        <!--shop menu zone-->
+        <section class="product-menu">
+        <h2>Menu</h2>
+        <p>Chưa render đâu, mốt nó hiện ở đây...</p>
+        </section>
+
+        <!--bill zone-->
+        <aside class="bill-panel">
+        <!--search and sort bar-->
+        <div class="search-bar">
+            <button class="search-btn">🔍</button>
+            <!--đại đại đi, không thích thì kiếm cái hình kính lúp hợp style hơn-->
+            <input type="text" placeholder="Type a product to search...">
+            <button class="sort-btn">≡</button>
+        </div>
+
+        <!--cart list-->
+        <div class="cart-list">
+            <p>Mốt hiện cart list ở đây (có thể cuộn)...</p>
+            <!-- mỗi dòng nhớ phải có nút - + để điều chỉnh số lượng mua-->
+        </div>
+
+        <!--sum-->
+        <div class="bill-footer">
+            <span>Total: 0$</span>
+            <button class="sum-btn">Sum</button>
+        </div>
+        </aside>
+    </div>
+</body>
+</html>
