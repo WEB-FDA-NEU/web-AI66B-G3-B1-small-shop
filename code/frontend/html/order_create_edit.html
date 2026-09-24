@@ -6,50 +6,111 @@
     <link rel="stylesheet" href="../css/order_create_edit.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda&display=swap" rel="stylesheet">
-    </head>
+</head>
+
 <body>
-    <!--collapsed navigation button-->
-    <header class="topbar">
-        <button class="menu-btn">☰</button>
-        <h1>Order</h1>
-    </header>
-
-    <!--switching button between new and check order-->
-    <div class="order-tabs">
-        <button class="tab-btn active">New order</button>
-        <button class="tab-btn">Check orders</button>
-    </div>
-
-    <!--main part-->
-    <div class="order-container">
-        <!--shop menu zone-->
-        <section class="product-menu">
-        <h2>Menu</h2>
-        <p>Chưa render đâu, mốt nó hiện ở đây...</p>
-        </section>
-
-        <!--bill zone-->
-        <aside class="bill-panel">
-        <!--search and sort bar-->
-        <div class="search-bar">
-            <button class="search-btn">🔍</button>
-            <!--đại đại đi, không thích thì kiếm cái hình kính lúp hợp style hơn-->
-            <input type="text" placeholder="Type a product to search...">
-            <button class="sort-btn">≡</button>
-        </div>
-
-        <!--cart list-->
-        <div class="cart-list">
-            <p>Mốt hiện cart list ở đây (có thể cuộn)...</p>
-            <!-- mỗi dòng nhớ phải có nút - + để điều chỉnh số lượng mua-->
-        </div>
-
-        <!--sum-->
-        <div class="bill-footer">
-            <span>Total: 0$</span>
-            <button class="sum-btn">Sum</button>
-        </div>
+    <div class="layout">
+        <!--navigation zone-->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <h1>YUMS</h1>
+                <p>YOU MANAGE YOUR SHOP</p>
+            </div>
+            <div class="sidebar-divider"></div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="order_create_edit.html">
+                            <span class="nav-icon">🍽️</span>
+                            <span>Orders</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="customers.html">
+                            <span class="nav-icon">👥</span>
+                            <span>Customers</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="inventory.html">
+                            <span class="nav-icon">📦</span>
+                            <span>Inventory</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="employees.html">
+                            <span class="nav-icon">👤</span>
+                            <span>Employees</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="sales.html">
+                            <span class="nav-icon">📈</span>
+                            <span>Sales</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                © 2026 YUMS v1.0
+            </div>
         </aside>
+
+        <!--Main zone-->
+        <main class="main-content">
+            <!--page header-->
+            <header class="page-header">
+                <div class="page-heading">
+                    <h1>Order Directory</h1>
+                    <p>Create and manage customer orders</p>
+                </div>
+                <div class="account-card">
+                    <div class="avatar">AD</div>
+                    <div class="account-info">
+                        <div class="role-name">Store Manager</div>
+                        <div class="role-sub">ADMINISTRATOR</div>
+                    </div>
+                </div>
+            </header>
+
+            <!--switching button between new and check order-->
+            <div class="order-tabs">
+                <button class="tab-btn active">New order</button>
+                <button class="tab-btn">Check orders</button>
+            </div>
+
+            <!--menu part-->
+            <div class="order-container">
+                <!--shop menu zone-->
+                <section class="product-menu">
+                    <h2>Menu</h2>
+                    <p>Chưa render đâu, mốt nó hiện ở đây...</p>
+                </section>
+
+                <!--bill zone-->
+                <aside class="bill-panel">
+                    <!--search and sort bar-->
+                    <div class="search-bar">
+                        <button class="search-btn">🔍</button>
+                        <!--đại đại đi, không thích thì kiếm cái hình kính lúp hợp style hơn-->
+                        <input type="text" placeholder="Type a product to search...">
+                        <button class="sort-btn">≡</button>
+                    </div>
+
+                    <!--cart list-->
+                    <div class="cart-list">
+                        <p>Mốt hiện cart list ở đây (có thể cuộn)...</p>
+                        <!-- mỗi dòng nhớ phải có nút - + để điều chỉnh số lượng mua-->
+                    </div>
+
+                    <!--sum-->
+                    <div class="bill-footer">
+                        <span>Total: 0$</span>
+                        <button class="sum-btn">Sum</button>
+                    </div>
+                </aside>
+            </div>
+        </main>
     </div>
 </body>
 </html>
