@@ -107,6 +107,8 @@ body {
 
 /*main content*/
 .main-content {
+    display: flex;
+    flex-direction: column;
     box-sizing: border-box;
     width: calc(100% - 285px);
     height: 100dvh;
@@ -123,6 +125,7 @@ body {
     justify-content: space-between;
     border-bottom: 1px solid #96C0CE;
     padding-bottom: 20px;
+    flex-shrink: 0;
 }
 .page-heading h1 {
     margin: 0;
@@ -179,6 +182,7 @@ body {
 /*2 nút New/Check*/
 .order-tabs {
     display: flex;
+    flex-shrink: 0;
     background-color: #96C0CE;
     padding: 10px;
     margin-top: 20px;
@@ -209,18 +213,6 @@ body {
 }
 
 /*nhét 2 cột dô container chia ra*/
-.order-container {
-    display: flex;
-    height: calc(100vh - 210px); /*trừ đi phần top bar với tab*/
-    min-height: 450px;
-}
-
-.product-menu {
-    flex: 3;
-    padding: 20px;
-    background-color: #EFE8DF;
-    overflow-y: auto;
-}
 .product-menu h2 {
     margin-top: 0;
     color: #0F414A;
@@ -231,16 +223,6 @@ body {
 }
 
 /*bill zone*/
-.bill-panel {
-    flex: 1;
-    min-width: 300px;
-    background-color: #D8BA98;
-    border-left: 2px solid #96C0CE;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
 /*search and sort button*/
 .search-btn, .sort-btn {
     height: 36px;
@@ -275,39 +257,282 @@ body {
     font-size: 14px;
 }
 
-/*cart*/
-.cart-list {
+/*ordered list zone*/
+.new-order-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(380px, 1fr);
+    gap: 24px;
+    width: 100%;
     flex: 1;
-    overflow-y: auto;
-    padding: 10px;
+    min-height: 0;
+    overflow: hidden;
 }
-.cart-list p {
-    color: #5C5147;
+.menu-zone,
+.bill-zone {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    background-color: #EFE8DF;
+    border: 1px solid #D8BA98;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+.menu-zone {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    background-color: #EFE8DF;
+    border: 1px solid #D8BA98;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+.menu-zone-header,
+.bill-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px 22px;
+    border-bottom: 1px solid #D8BA98;
+    flex-shrink: 0;
+}
+.menu-zone-header h2,
+.bill-header h2 {
+    margin: 0;
+    color: #0F414A;
+    font-family: 'Bodoni Moda', serif;
+    font-size: 24px;
+}
+.menu-zone-header p,
+.bill-header p {
+    margin: 5px 0 0;
+    color: #0F414A;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+}
+.dish-grid {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+    gap: 18px;
+    padding: 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    align-content: start;
+}
+.dish-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border: 1px solid #D8BA98;
+    background-color: #EFE8DF;
+    color: #0F414A;
+    font-family: 'Montserrat', sans-serif;
+    text-align: left;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.dish-card:hover {
+    transform: translateY(-2px);
+    border-color: #96C0CE;
+}
+.dish-image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background-color: #D8BA98;
+}
+.dish-image img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+.dish-info {
+    min-height: 72px;
+    padding: 10px 12px 12px;
+    box-sizing: border-box;
+}
+.dish-name {
+    color: #0F414A;
     font-size: 14px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+.dish-price {
+    margin-top: 5px;
+    color: #0F414A;
+    font-size: 12px;
+    font-weight: 500;
+}
+.no-dishes {
+    grid-column: 1 / -1;
+    padding: 40px;
+    color: #0F414A;
+    font-family: 'Montserrat', sans-serif;
+    text-align: center;
 }
 
-/*Sum button as footer*/
-.bill-footer {
-    flex-shrink: 0;
-    padding: 15px;
-    border-top: 1px solid #96C0CE;
+/*bill zone*/
+.bill-zone {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    overflow: hidden;
 }
-.bill-footer span {
+.bill-search {
+    flex-shrink: 0;
+}
+.bill-search input {
+    width: 210px;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid #96C0CE;
+    outline: none;
+    background-color: #EFE8DF;
     color: #0F414A;
-    font-size: 15px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    box-sizing: border-box;
+}
+.bill-search input::placeholder {
+    color: #0F414A;
+    opacity: 0.6;
+}
+.bill-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+}
+.bill-items {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 10px 20px 130px;
+}
+.bill-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    min-height: 64px;
+    padding: 10px 0;
+    border-bottom: 1px solid #D8BA98;
+    box-sizing: border-box;
+}
+.bill-item-info {
+    min-width: 0;
+    flex: 1;
+}
+.bill-item-name {
+    color: #0F414A;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+.bill-item-price {
+    margin-top: 4px;
+    color: #0F414A;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+}
+.quantity-control {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    border: 1px solid #96C0CE;
+}
+.quantity-btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    background-color: #EFE8DF;
+    color: #0F414A;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+}
+.quantity-btn:hover {
+    background-color: #D8BA98;
+}
+.quantity-value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-left: 1px solid #96C0CE;
+    border-right: 1px solid #96C0CE;
+    color: #0F414A;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    box-sizing: border-box;
+}
+.empty-bill {
+    padding: 40px 15px;
+    color: #0F414A;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    text-align: center;
+    opacity: 0.7;
+}
+.bill-footer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 8px;
+    z-index: 10;
+    padding: 14px 20px 12px;
+    border-top: 2px solid #D8BA98;
+    background-color: #EFE8DF;
+    box-sizing: border-box;
+}
+.bill-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #0F414A;
+    font-family: 'Montserrat', sans-serif;
+}
+.bill-total span {
+    font-size: 14px;
     font-weight: 600;
 }
+.bill-total strong {
+    font-size: 17px;
+    font-weight: 700;
+}
 .sum-btn {
+    display: block;
+    width: 100%;
+    height: 42px;
+    min-height: 42px;
+    margin-top: 12px;
+    padding: 0;
+    border: none;
     background-color: #0F414A;
     color: #EFE8DF;
-    border: none;
-    padding: 12px 24px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 42px;
     cursor: pointer;
-    font-family: 'Bodoni Moda', sans-serif;
-    font-size: 20px;
+    box-sizing: border-box;
 }
 .sum-btn:hover {
     opacity: 0.9;
