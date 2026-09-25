@@ -119,7 +119,7 @@ body {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    border-bottom: 1px solid rgba(15, 65, 74, 0.2);
+    border-bottom: 1px solid #96C0CE;
     padding-bottom: 20px;
 }
 .page-heading h1 {
@@ -142,11 +142,11 @@ body {
     align-items: center;
     gap: 12px;
     background-color: #F8F4ED;
-    border: 1px solid rgba(15, 65, 74, 0.18);
+    border: 1px solid #96C0CE;
     border-radius: 30px;
     padding: 7px 17px 7px 8px;
     min-width: 170px;
-    box-shadow: 0 2px 5px rgba(15, 65, 74, 0.05);
+    box-shadow: 0 2px 5px #F8F4ED;
 }
 .avatar {
     width: 38px;
@@ -245,7 +245,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(15, 65, 74, 0.15);
+    border: 1px solid #96C0CE;
     background-color: #F8F4ED;
     color: #0F414A;
     cursor: pointer;
@@ -255,7 +255,7 @@ body {
     height: 38px;
     min-width: 0;
     padding: 5px 12px;
-    border: 1px solid rgba(15, 65, 74, 0.15);
+    border: 1px solid #96C0CE;
     border-left: none;
     border-right: none;
     outline: none;
@@ -268,11 +268,87 @@ body {
     width: 100%;
     min-height: 400px;
     background-color: #F8F4ED;
-    border: 1px solid rgba(15, 65, 74, 0.15);
+    border: 1px solid #96C0CE;
     padding: 25px;
 }
-.order-list-content p {
-    margin: 0;
-    color: #77716A;
-    font-size: 14px;
+.order-list-content {
+    width: 100%;
+    min-height: 400px;
+    background-color: #EFE8DF;
+    border: none;
+    padding: 0;
+    overflow-x: auto;
+}
+
+/*bảng fake*/
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #EFE8DF;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    color: #0F414A;
+}
+.orders-table th,
+.orders-table td {
+    border: 1px solid #D8BA98;
+    padding: 15px 14px;
+    text-align: left;
+    vertical-align: middle;
+}
+.orders-table thead th {
+    background-color: #D8BA98;
+    color: #0F414A;
+    font-weight: 700;
+    font-size: 15px;
+    border-bottom: 3px solid #D8BA98;
+    white-space: nowrap;
+}
+.orders-table tbody tr {
+    background-color: #EFE8DF;
+    transition: background-color 0.2s ease;
+}
+.orders-table tbody tr:hover {
+    background-color: #EFE8DF;
+}
+.orders-table .order-id {
+    font-weight: 600;
+    white-space: nowrap;
+}
+.orders-table .order-items {
+    max-width: 360px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.clickable-order {
+    cursor: pointer;
+}
+.clickable-order:hover {
+    background-color: #D8BA98 !important;
+}
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.status-badge.success {
+    background-color: #DDEFD5;
+    color: #39702C;
+    border: 1px solid #B9DCA9;
+}
+.status-badge.pending {
+    background-color: #F8EBCB;
+    color: #8A6818;
+    border: 1px solid #E7D39A;
+}
+.status-badge.cancelled {
+    background-color: #F3D6D2;
+    color: #7F0303;
+    border: 1px solid #DEB0A9;
 }

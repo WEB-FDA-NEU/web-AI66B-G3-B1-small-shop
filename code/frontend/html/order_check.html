@@ -89,7 +89,60 @@
                     </div>
                 </div>
                 <div class="order-list-content">
-                    <p>List những đơn hàng đã tạo sẽ hiển thị ở đây...</p>
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Tên các món</th>
+                                <th>Số lượng</th>
+                                <th>Tổng tiền</th>
+                                <th>Khách hàng</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="clickable-order" onclick="window.location.href='order_view.html?id=ORD-001'">
+                                <td class="order-id">ORD-001</td>
+                                <td class="order-items">Matcha Latte, Cappuccino, Sữa tươi trân châu đườ...</td>
+                                <td>4</td>
+                                <td>195.000₫</td>
+                                <td>Trần Văn A</td>
+                                <td><span class="status-badge success">Đã thành công</span></td>
+                            </tr>
+                            <tr>
+                                <td class="order-id">ORD-002</td>
+                                <td class="order-items">Dữ liệu giả định, không bấm vào</td>
+                                <td>2</td>
+                                <td>125.000₫</td>
+                                <td>Nguyễn Thị B</td>
+                                <td><span class="status-badge pending">Đang xử lý</span></td>
+                            </tr>
+                            <tr>
+                                <td class="order-id">ORD-003</td>
+                                <td class="order-items">Dữ liệu giả định, không bấm vào</td>
+                                <td>3</td>
+                                <td>175.000₫</td>
+                                <td>Lê Minh C</td>
+                                <td><span class="status-badge pending">Đang xử lý</span></td>
+                            </tr>
+                            <tr>
+                                <td class="order-id">ORD-004</td>
+                                <td class="order-items">Dữ liệu giả định, không bấm vào</td>
+                                <td>2</td>
+                                <td>95.000₫</td>
+                                <td>Phạm Thị D</td>
+                                <td><span class="status-badge cancelled">Đã hủy</span></td>
+                            </tr>
+                            <tr>
+                                <td class="order-id">ORD-005</td>
+                                <td class="order-items">Dữ liệu giả định, không bấm vào</td>
+                                <td>1</td>
+                                <td>85.000₫</td>
+                                <td>Hoàng Văn E</td>
+                                <td><span class="status-badge pending">Đang xử lý</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
         </main>
