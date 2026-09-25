@@ -2,29 +2,57 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YUMS - You Manage your Shop</title>
-    <link rel="stylesheet" href="../css/style.css">
+    
     <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href = "../css/index.css"></link>
+    
 </head>
 <body>
     <div class="container">
+
         <!--navigation bar at left side-->
-        <nav class="sidebar">
-            <h2 class="menu-title">Menu</h2>
-            <ul>
-                <li><a href="order_create_edit.html">Order</a></li>
-                <li><a href="inventory.html">Inventory</a></li>
-                <li><a href="customer.html">Customer</a></li>
-                <li><a href="employee.html">Employee</a></li>
-                <li><a href="sales.html">Sales dashboard</a></li>
-                <!--Thêm thì viết vào đây sau nhé-->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <h1>YUMS</h1>
+                <p>You Manage your Shop</p>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="order_create_edit.html"><i class="fa-solid fa-receipt"></i> Orders</a>
+                </li>
+                <li>
+                    <a href="#customers"><i class="fa-solid fa-users"></i> Customers</a>
+                </li>
+                <li>
+                    <a href="#inventory"><i class="fa-solid fa-utensils"></i> Inventory</a>
+                </li>
+                <li>
+                    <a href="employees.html"><i class="fa-solid fa-id-badge"></i> Employees</a>
+                </li>
+                <li>
+                    <a href="#sales"><i class="fa-solid fa-chart-line"></i> Sales</a>
+                </li>
             </ul>
-        </nav>
+                <!--khi nào ae code thêm html thì đổi tên href vào-->
+
+            <div class="sidebar-footer">
+                <p>&copy; 2026 YUMS v1.0</p>
+            </div>
+
+        </aside>
+
 
         <!--The main screen-->
         <main class="content">
-            <h1>Welcome, group 3!</h1>
+            <h1>HEllO, ... !</h1>
             <p>This is the main screen created from index.html. Choose a button from the left side bar to move around.</p>
         </main>
     </div>

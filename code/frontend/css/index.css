@@ -1,0 +1,115 @@
+:root {
+    --bg-sidebar: #0F414A;
+    --bg-main: #EFE8DF;
+    --color-accent-red: #7F0303;
+    --color-soft-blue: #96C0CE;
+    --color-warm-beige: #D8BA98;
+
+    --text-dark: #2A2421;
+    --text-light: #F7F4EF;
+
+    --font-title: 'Bodoni Moda', serif;
+    --font-content: 'Montserrat', sans-serif;
+
+    --transition-speed: 0.25s;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-main);
+    font-family: var(--font-content);
+    color: var(--text-dark);
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+aside.sidebar {
+    width: 260px;
+    background-color: var(--bg-sidebar);
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    border-right: 1px solid rgba(216, 186, 152, 0.2);
+}
+
+.sidebar-brand {
+    padding: 35px 25px 25px 25px;
+    text-align: center;
+    border-bottom: 1px solid rgba(216, 186, 152, 0.25);
+}
+
+.sidebar-brand h1 {
+    font-family: var(--font-title);
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--color-warm-beige);
+    text-transform: uppercase;
+    line-height: 1.2;
+}
+
+.sidebar-brand p {
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    color: var(--color-soft-blue);
+    margin-top: 6px;
+    text-transform: uppercase;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 25px 0;
+    flex: 1;
+}
+
+.sidebar-menu li {
+    margin-bottom: 4px;
+}
+
+.sidebar-menu a {
+    display: flex;
+    align-items: center;
+    padding: 14px 28px;
+    color: #C2D3D6;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    transition: all var(--transition-speed) ease;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-menu a i {
+    width: 24px;
+    font-size: 1.1rem;
+    margin-right: 12px;
+    color: var(--color-soft-blue);
+    transition: color var(--transition-speed) ease;
+}
+
+.sidebar-menu a:hover {
+    color: var(--text-light);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+
+.sidebar-footer {
+    padding: 20px 25px;
+    border-top: 1px solid rgba(216, 186, 152, 0.2);
+    font-size: 0.75rem;
+    color: var(--color-soft-blue);
+    text-align: center;
+}
