@@ -2,15 +2,14 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Create Order</title>
-    <link rel="stylesheet" href="../css/order_create_edit.css">
+    <title>Check Orders</title>
+    <link rel="stylesheet" href="../css/order_check.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda&display=swap" rel="stylesheet">
 </head>
-
 <body>
     <div class="layout">
-        <!--navigation zone-->
+        <!-- NAVIGATION ZONE -->
         <aside class="sidebar">
             <div class="logo-area">
                 <h1>YUMS</h1>
@@ -55,10 +54,9 @@
                 © 2026 YUMS v1.0
             </div>
         </aside>
-
-        <!--Main zone-->
+        <!-- MAIN ZONE -->
         <main class="main-content">
-            <!--page header-->
+            <!-- PAGE HEADER -->
             <header class="page-header">
                 <div class="page-heading">
                     <h1>Order Directory</h1>
@@ -72,44 +70,28 @@
                     </div>
                 </div>
             </header>
-
-            <!--switching button between new and check order-->
+            <!-- SWITCHING BUTTON BETWEEN NEW AND CHECK ORDER -->
             <div class="order-tabs">
-                <a class="tab-btn active" href="order_create_edit.html">New order</a>
-                <a class="tab-btn" href="order_check.html">Check orders</a>
+                <a class="tab-btn" href="order_create_edit.html">New order</a>
+                <a class="tab-btn active" href="order_check.html">Check orders</a>
             </div>
-
-            <!--menu part-->
-            <div class="order-container">
-                <!--shop menu zone-->
-                <section class="product-menu">
-                    <h2>Menu</h2>
-                    <p>Chưa render đâu, mốt nó hiện ở đây...</p>
-                </section>
-
-                <!--bill zone-->
-                <aside class="bill-panel">
-                    <!--search and sort bar-->
-                    <div class="search-bar">
+            <!-- ORDER LIST ZONE -->
+            <section class="order-list">
+                <div class="order-list-header">
+                    <div>
+                        <h2>Orders</h2>
+                        <p>Review and manage created orders</p>
+                    </div>
+                    <div class="order-search">
                         <button class="search-btn">🔍</button>
-                        <!--đại đại đi, không thích thì kiếm cái hình kính lúp hợp style hơn-->
-                        <input type="text" placeholder="Type a product to search...">
+                        <input type="text" placeholder="Search for created order...">
                         <button class="sort-btn">≡</button>
                     </div>
-
-                    <!--cart list-->
-                    <div class="cart-list">
-                        <p>Mốt hiện cart list ở đây (có thể cuộn)...</p>
-                        <!-- mỗi dòng nhớ phải có nút - + để điều chỉnh số lượng mua-->
-                    </div>
-
-                    <!--sum-->
-                    <div class="bill-footer">
-                        <span>Total: 0$</span>
-                        <button class="sum-btn">Sum</button>
-                    </div>
-                </aside>
-            </div>
+                </div>
+                <div class="order-list-content">
+                    <p>List những đơn hàng đã tạo sẽ hiển thị ở đây...</p>
+                </div>
+            </section>
         </main>
     </div>
 </body>
