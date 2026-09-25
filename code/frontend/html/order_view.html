@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Check Orders</title>
-    <link rel="stylesheet" href="../css/order_check.css">
+    <title>View Order</title>
+    <link rel="stylesheet" href="../css/order_view.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda&display=swap" rel="stylesheet">
 </head>
@@ -75,74 +75,71 @@
                 <a class="tab-btn" href="order_create_edit.html">New order</a>
                 <a class="tab-btn active" href="order_check.html">Check orders</a>
             </div>
-            <!--orders list zone-->
-            <section class="order-list">
-                <div class="order-list-header">
-                    <div>
-                        <h2>Orders</h2>
-                        <p>Review and manage created orders</p>
+            <!--order detail zone-->
+            <section class="order-detail">
+                <div class="order-detail-header">
+                    <div class="order-code">
+                        <span class="detail-label">Order code</span>
+                        <strong>ORD-001</strong>
                     </div>
-                    <div class="order-search">
-                        <button class="search-btn">🔍</button>
-                        <input type="text" placeholder="Search for created order...">
-                        <button class="sort-btn">≡</button>
+                    <div class="customer-name">
+                        <span class="detail-label">Customer</span>
+                        <strong>Tran Van A</strong>
+                    </div>
+                    <div class="order-status">
+                        <span class="detail-label">Status</span>
+                        <span class="status-badge success">Success</span>
                     </div>
                 </div>
-                <div class="order-list-content">
-                    <table class="orders-table">
+                <div class="order-detail-content">
+                    <table class="order-detail-table">
                         <thead>
                             <tr>
-                                <th>Order code</th>
-                                <th>Name of dishes</th>
+                                <th>Dish code</th>
+                                <th>Dish name</th>
+                                <th>Unit price</th>
                                 <th>Quantity</th>
-                                <th>Total</th>
-                                <th>Customer</th>
-                                <th>Status</th>
+                                <th>Amount</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="clickable-order" onclick="window.location.href='order_view.html?id=ORD-001'">
-                                <td class="order-id">ORD-001</td>
-                                <td class="order-items">Matcha Latte, Cappuccino, Strawberry Milkshake, Chocolate Cake</td>
-                                <td>4</td>
-                                <td>195.000VND</td>
-                                <td>Tran Van A</td>
-                                <td><span class="status-badge success">Success</span></td>
-                            </tr>
                             <tr>
-                                <td class="order-id">ORD-002</td>
-                                <td class="order-items">Dữ liệu giả định, không bấm vào</td>
-                                <td>2</td>
-                                <td>125.000VND</td>
-                                <td>Nguyen Thi B</td>
-                                <td><span class="status-badge pending">Pending</span></td>
-                            </tr>
-                            <tr>
-                                <td class="order-id">ORD-003</td>
-                                <td class="order-items">Dữ liệu giả định, không bấm vào</td>
-                                <td>3</td>
-                                <td>175.000VND</td>
-                                <td>Le Van C</td>
-                                <td><span class="status-badge pending">Pending</span></td>
-                            </tr>
-                            <tr>
-                                <td class="order-id">ORD-004</td>
-                                <td class="order-items">Dữ liệu giả định, không bấm vào</td>
-                                <td>2</td>
-                                <td>95.000VND</td>
-                                <td>Pham Thi D</td>
-                                <td><span class="status-badge cancelled">Cancelled</span></td>
-                            </tr>
-                            <tr>
-                                <td class="order-id">ORD-005</td>
-                                <td class="order-items">Dữ liệu giả định, không bấm vào</td>
+                                <td class="dish-id">MON-001</td>
+                                <td>Matcha Latte</td>
+                                <td>45.000VND</td>
                                 <td>1</td>
-                                <td>85.000VND</td>
-                                <td>Hoang Van E</td>
-                                <td><span class="status-badge pending">Pending</span></td>
+                                <td>45.000VND</td>
+                            </tr>
+                            <tr>
+                                <td class="dish-id">MON-002</td>
+                                <td>Cappuccino</td>
+                                <td>50.000VND</td>
+                                <td>1</td>
+                                <td>50.000VND</td>
+                            </tr>
+                            <tr>
+                                <td class="dish-id">MON-003</td>
+                                <td>Strawberry Milkshake</td>
+                                <td>45.000VND</td>
+                                <td>1</td>
+                                <td>45.000VND</td>
+                            </tr>
+                            <tr>
+                                <td class="dish-id">MON-004</td>
+                                <td>Chocolate Cake</td>
+                                <td>55.000VND</td>
+                                <td>1</td>
+                                <td>55.000VND</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="4">Total</td>
+                                <td>195.000VND</td>
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                <div class="order-detail-footer">
+                    <a class="back-btn" href="order_check.html">Back</a>
                 </div>
             </section>
         </main>
