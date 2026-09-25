@@ -4,9 +4,12 @@
     <meta charset="UTF-8">
     <title>Check Orders</title>
     <link rel="stylesheet" href="../css/order_check.css">
+    <script src="../js/orders_data.js" defer></script>
+    <script src="../js/order_check.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div class="layout">
         <!--navigation bar-->
@@ -83,9 +86,13 @@
                         <p>Review and manage created orders</p>
                     </div>
                     <div class="order-search">
-                        <button class="search-btn">🔍</button>
                         <input type="text" placeholder="Search for created order...">
-                        <button class="sort-btn">≡</button>
+                        <select class="status-filter" id="statusFilter">
+                            <option value="">All</option>
+                            <option value="Success">Success</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
                     </div>
                 </div>
                 <div class="order-list-content">
@@ -100,48 +107,7 @@
                                 <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr class="clickable-order" onclick="window.location.href='order_view.html?id=ORD-001'">
-                                <td class="order-id">ORD-001</td>
-                                <td class="order-items">Matcha Latte, Cappuccino, Strawberry Milkshake, Chocolate Cake</td>
-                                <td>4</td>
-                                <td>195.000VND</td>
-                                <td>Tran Van A</td>
-                                <td><span class="status-badge success">Success</span></td>
-                            </tr>
-                            <tr>
-                                <td class="order-id">ORD-002</td>
-                                <td class="order-items">Dữ liệu giả định, không bấm vào</td>
-                                <td>2</td>
-                                <td>125.000VND</td>
-                                <td>Nguyen Thi B</td>
-                                <td><span class="status-badge pending">Pending</span></td>
-                            </tr>
-                            <tr>
-                                <td class="order-id">ORD-003</td>
-                                <td class="order-items">Dữ liệu giả định, không bấm vào</td>
-                                <td>3</td>
-                                <td>175.000VND</td>
-                                <td>Le Van C</td>
-                                <td><span class="status-badge pending">Pending</span></td>
-                            </tr>
-                            <tr>
-                                <td class="order-id">ORD-004</td>
-                                <td class="order-items">Dữ liệu giả định, không bấm vào</td>
-                                <td>2</td>
-                                <td>95.000VND</td>
-                                <td>Pham Thi D</td>
-                                <td><span class="status-badge cancelled">Cancelled</span></td>
-                            </tr>
-                            <tr>
-                                <td class="order-id">ORD-005</td>
-                                <td class="order-items">Dữ liệu giả định, không bấm vào</td>
-                                <td>1</td>
-                                <td>85.000VND</td>
-                                <td>Hoang Van E</td>
-                                <td><span class="status-badge pending">Pending</span></td>
-                            </tr>
-                        </tbody>
+                        <tbody></tbody>
                     </table>
                 </div>
             </section>

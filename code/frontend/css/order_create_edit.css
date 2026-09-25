@@ -4,6 +4,7 @@ html, body {
     margin: 0;
     width: 100%;
     min-height: 100%;
+    overflow: hidden;
 }
 body {
     font-family: 'Montserrat', sans-serif;
@@ -106,10 +107,12 @@ body {
 
 /*main content*/
 .main-content {
-    width: calc(100% - 300px);
-    min-height: 100vh;
+    box-sizing: border-box;
+    width: calc(100% - 285px);
+    height: 100dvh;
     margin-left: 285px;
-    padding: 34px 38px 0;
+    padding: 34px 38px;
+    overflow: hidden;
 }
 
 /*page header*/

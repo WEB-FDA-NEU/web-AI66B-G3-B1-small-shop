@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <title>View Order</title>
     <link rel="stylesheet" href="../css/order_view.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda&display=swap">
+    <script src="../js/orders_data.js" defer></script>
+    <script src="../js/order_view.js" defer></script>
 </head>
 <body>
     <div class="layout">
@@ -80,15 +82,15 @@
                 <div class="order-detail-header">
                     <div class="order-code">
                         <span class="detail-label">Order code</span>
-                        <strong>ORD-001</strong>
+                        <strong id="orderCode"></strong>
                     </div>
                     <div class="customer-name">
                         <span class="detail-label">Customer</span>
-                        <strong>Tran Van A</strong>
+                        <strong id="customerName"></strong>
                     </div>
                     <div class="order-status">
                         <span class="detail-label">Status</span>
-                        <span class="status-badge success">Success</span>
+                        <span class="status-badge" id="orderStatus"></span>
                     </div>
                 </div>
                 <div class="order-detail-content">
@@ -102,40 +104,7 @@
                                 <th>Amount</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td class="dish-id">MON-001</td>
-                                <td>Matcha Latte</td>
-                                <td>45.000VND</td>
-                                <td>1</td>
-                                <td>45.000VND</td>
-                            </tr>
-                            <tr>
-                                <td class="dish-id">MON-002</td>
-                                <td>Cappuccino</td>
-                                <td>50.000VND</td>
-                                <td>1</td>
-                                <td>50.000VND</td>
-                            </tr>
-                            <tr>
-                                <td class="dish-id">MON-003</td>
-                                <td>Strawberry Milkshake</td>
-                                <td>45.000VND</td>
-                                <td>1</td>
-                                <td>45.000VND</td>
-                            </tr>
-                            <tr>
-                                <td class="dish-id">MON-004</td>
-                                <td>Chocolate Cake</td>
-                                <td>55.000VND</td>
-                                <td>1</td>
-                                <td>55.000VND</td>
-                            </tr>
-                            <tr class="total-row">
-                                <td colspan="4">Total</td>
-                                <td>195.000VND</td>
-                            </tr>
-                        </tbody>
+                        <tbody id="orderItems"></tbody>
                     </table>
                 </div>
                 <div class="order-detail-footer">
