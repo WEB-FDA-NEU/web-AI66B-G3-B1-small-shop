@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUMS - Sales & Forecasting Dashboard</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../css/employee.css">
+    <link rel="stylesheet" href="../css/sales.css">
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-brand">
+                <h1>YUMS</h1>
+                <p>You Manage your Shop</p>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li><a href="order_create_edit.html"><i class="fa-solid fa-receipt"></i> Orders</a></li>
+                <li><a href="customer.html"><i class="fa-solid fa-users"></i> Customers</a></li>
+                <li><a href="inventory.html"><i class="fa-solid fa-utensils"></i> Inventory</a></li>
+                <li><a href="employees.html"><i class="fa-solid fa-id-badge"></i> Employees</a></li>
+                <li class="active"><a href="sales.html"><i class="fa-solid fa-chart-line"></i> Sales</a></li>
+            </ul>
+        </div>
+
+        <div class="sidebar-footer">
+            <p>&copy; 2026 YUMS v1.0</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <header class="top-header">
+            <div class="header-title">
+                <h2>Sales & Demand Analytics</h2>
+                <p>Revenue overview and predictive restocking intelligence</p>
+            </div>
+
+            <div class="user-profile">
+                <div class="user-avatar">SM</div>
+                <div class="user-info">
+                    <div class="user-name">Store Manager</div>
+                    <div class="user-role">Administrator</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="tab-navigation">
+            <button class="tab-btn active" id="btn-overview">Sales & Profit Overview</button>
+            <button class="tab-btn" id="btn-prediction">Demand Prediction & Restock</button>
+        </div>
+
+        <!-- TAB 1: OVERVIEW -->
+        <section id="tab-overview" class="tab-content active">
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <span class="kpi-title">Total Sales</span>
+                    <span class="kpi-value" id="kpiSales">45,200,000 ₫</span>
+                    <span class="kpi-subtext">+12% from last period</span>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-title">Net Profit</span>
+                    <span class="kpi-value" id="kpiProfit">18,400,000 ₫</span>
+                    <span class="kpi-subtext">40.7% profit margin</span>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-title">Completed Orders</span>
+                    <span class="kpi-value" id="kpiOrders">1,240</span>
+                    <span class="kpi-subtext">100% paid</span>
+                </div>
+            </div>
+
+            <section class="action-bar-inline">
+                <div class="filter-group-inline">
+                    
+                    <!-- Filter 1: Top Items -->
+                    <div class="filter-item">
+                        <label for="topNDropdown">Top Items:</label>
+                        <select id="topNDropdown">
+                            <option value="3">Top 3 Items</option>
+                            <option value="5" selected>Top 5 Items</option>
+                            <option value="10">Top 10 Items</option>
+                            <option value="ALL">All Items</option>
+                        </select>
+                    </div>
+
+                    <!-- Filter 2: Category Dropdown (Chỉ chọn, không nhập) -->
+                    <div class="filter-item">
+                        <label for="categoryInput">Category:</label>
+                        <select id="categoryInput" style="min-width: 150px;">
+                            <option value="">All Categories</option>
+                            <option value="Beverage">Beverage</option>
+                            <option value="Food">Food</option>
+                            <option value="Dessert">Dessert</option>
+                        </select>
+                    </div>
+
+                    <!-- Filter 3: Timeframe -->
+                    <div class="filter-item">
+                        <label for="timeframeFilter">Timeframe:</label>
+                        <select id="timeframeFilter">
+                            <option value="daily">Today</option>
+                            <option value="weekly">This Week</option>
+                            <option value="monthly" selected>This Month</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <!-- Nút Reset màu đỏ -->
+                <button class="btn-reset-red" id="btnResetFilter">
+                    <i class="fa-solid fa-rotate-left"></i> Reset
+                </button>
+            </section>
+
+            <section class="table-wrapper">
+                <table class="employee-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Item ID</th>
+                            <th>Item Name</th>
+                            <th>Category</th>
+                            <th>Units Sold</th>
+                            <th>Unit Price</th>
+                            <th>Total Revenue</th>
+                            <th>Profit Margin</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topSellingTableBody">
+                    </tbody>
+                </table>
+            </section>
+        </section>
+
+        <!-- TAB 2: DEMAND PREDICTION -->
+        <section id="tab-prediction" class="tab-content">
+            <section class="action-bar-inline">
+                <div class="filter-group-inline">
+                    <div class="filter-item">
+                        <label for="predictionWindowSelect">Forecasting Window:</label>
+                        <select id="predictionWindowSelect">
+                            <option value="7">Next 7 Days (Short Term)</option>
+                            <option value="14">Next 14 Days</option>
+                            <option value="30" selected>Next 30 Days (Monthly Plan)</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <section class="table-wrapper">
+                <table class="employee-table">
+                    <thead>
+                        <tr>
+                            <th>Item ID</th>
+                            <th>Item Name</th>
+                            <th>Current Stock</th>
+                            <th>Predicted Demand</th>
+                            <th>Suggested Restock</th>
+                            <th>Status & Risk Alert</th>
+                        </tr>
+                    </thead>
+                    <tbody id="predictionTableBody">
+                    </tbody>
+                </table>
+            </section>
+        </section>
+    </main>
+
+    <div class="toast" id="toastNotification">System Notification</div>
+    <script src="../js/sales_script.js"></script>
+</body>
+</html>
