@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUMS - Customer Detail</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/customer_detail.css">
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <!-- giống các trang khác -->
+    </aside>
+
+    <!-- Main -->
+    <main class="main-content">
+
+        <!-- Header -->
+        <header class="top-header">
+
+            <div class="header-title">
+                <h2>Customer Detail</h2>
+
+                <p>
+                    View customer profile, membership and purchase history.
+                </p>
+            </div>
+
+            <div class="header-actions">
+
+                <button class="btn-secondary">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    Back
+                </button>
+
+                <button class="btn-add">
+                    <i class="fa-solid fa-pen"></i>
+                    Edit Customer
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- =========================
+             CUSTOMER PROFILE
+        ========================== -->
+
+        <section class="customer-profile-card">
+
+            <div class="customer-avatar-section">
+
+                <div class="customer-avatar">
+                    TM
+                </div>
+
+                <h3>Trần Minh Hoàng</h3>
+
+                <span class="membership-badge gold">
+                    Gold Member
+                </span>
+
+            </div>
+
+
+            <div class="customer-info-grid">
+
+                <div class="info-item">
+                    <label>Customer ID</label>
+                    <p>KH-001</p>
+                </div>
+
+                <div class="info-item">
+                    <label>Email</label>
+                    <p>123@gmail.com</p>
+                </div>
+
+                <div class="info-item">
+                    <label>Phone</label>
+                    <p>0905 123 456</p>
+                </div>
+
+                <div class="info-item">
+                    <label>Join Date</label>
+                    <p>15/01/2026</p>
+                </div>
+
+                <div class="info-item">
+                    <label>Status</label>
+                    <p>Active</p>
+                </div>
+
+                <div class="info-item">
+                    <label>Discount</label>
+                    <p>10%</p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             STATISTICS
+        ========================== -->
+
+        <section class="customer-stats">
+
+            <div class="stat-card">
+                <h4>Total Orders</h4>
+                <h2>15</h2>
+            </div>
+
+            <div class="stat-card">
+                <h4>Total Spending</h4>
+                <h2>5,200,000 VND</h2>
+            </div>
+
+            <div class="stat-card">
+                <h4>Average Order</h4>
+                <h2>346,000 VND</h2>
+            </div>
+
+            <div class="stat-card">
+                <h4>Total Discount</h4>
+                <h2>420,000 VND</h2>
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             RECENT ORDERS
+        ========================== -->
+
+        <section class="table-wrapper">
+
+            <div class="section-header">
+                <h3>Recent Orders</h3>
+            </div>
+
+            <table class="orders-table">
+
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Discount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>ORD-001</td>
+                        <td>20/09/2026</td>
+                        <td>Latte, Cake</td>
+                        <td>120,000 VND</td>
+                        <td>10%</td>
+                        <td>Completed</td>
+                    </tr>
+
+                    <tr>
+                        <td>ORD-002</td>
+                        <td>15/09/2026</td>
+                        <td>Tea, Bread</td>
+                        <td>90,000 VND</td>
+                        <td>5%</td>
+                        <td>Completed</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+
+        <!-- =========================
+             NOTES
+        ========================== -->
+
+        <section class="customer-notes">
+
+            <h3>Notes</h3>
+
+            <textarea placeholder="Add customer notes..."></textarea>
+
+        </section>
+
+    </main>
+
+</body>
+</html>
