@@ -38,6 +38,7 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+/* Sidebar Navigation */
 aside.sidebar {
     width: 260px;
     background-color: var(--bg-sidebar);
@@ -132,6 +133,7 @@ aside.sidebar {
     text-align: center;
 }
 
+/* Main Content Area */
 main.main-content {
     margin-left: 260px;
     flex: 1;
@@ -203,6 +205,7 @@ header.top-header {
     letter-spacing: 0.5px;
 }
 
+/* Filter & Action Bar */
 .action-bar {
     display: flex;
     justify-content: space-between;
@@ -217,7 +220,7 @@ header.top-header {
     align-items: center;
     gap: 15px;
     flex: 1;
-    max-width: 650px;
+    max-width: 780px;
 }
 
 .search-box {
@@ -291,6 +294,7 @@ header.top-header {
     box-shadow: 0 2px 6px rgba(127, 3, 3, 0.25);
 }
 
+/* Data Table */
 .table-wrapper {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -299,13 +303,13 @@ header.top-header {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
 }
 
-table.employee-table {
+table.inventory-table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
 }
 
-table.employee-table th {
+table.inventory-table th {
     background-color: #F2EAE0;
     color: var(--text-dark);
     font-family: var(--font-content);
@@ -317,7 +321,7 @@ table.employee-table th {
     border-bottom: 2px solid var(--border-color);
 }
 
-table.employee-table td {
+table.inventory-table td {
     padding: 16px 20px;
     font-size: 0.88rem;
     color: var(--text-dark);
@@ -325,45 +329,25 @@ table.employee-table td {
     vertical-align: middle;
 }
 
-table.employee-table tbody tr {
+table.inventory-table tbody tr {
     transition: background-color var(--transition-speed);
 }
 
-table.employee-table tbody tr:hover {
+table.inventory-table tbody tr:hover {
     background-color: var(--hover-beige);
 }
 
-table.employee-table tbody tr:last-child td {
+table.inventory-table tbody tr:last-child td {
     border-bottom: none;
 }
 
-.emp-id {
+.item-sku {
     font-weight: 600;
     color: var(--bg-sidebar);
     letter-spacing: 0.5px;
 }
 
-.emp-name-cell {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.emp-avatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background-color: var(--color-warm-beige);
-    color: var(--bg-sidebar);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 0.82rem;
-    border: 1px solid var(--border-color);
-}
-
-/* Status Badges */
+/* Badges for Inventory Statuses */
 .badge {
     display: inline-block;
     padding: 4px 10px;
@@ -373,16 +357,22 @@ table.employee-table tbody tr:last-child td {
     letter-spacing: 0.3px;
 }
 
-.badge-active {
+.badge-instock {
     background-color: #E2EFCB;
     color: #2E5A1C;
     border: 1px solid #C4E197;
 }
 
-.badge-leave {
+.badge-lowstock {
     background-color: #FDF3D6;
     color: #7A5B0B;
     border: 1px solid #F5E1A4;
+}
+
+.badge-expired {
+    background-color: #F8D7DA;
+    color: #842029;
+    border: 1px solid #F5C2C7;
 }
 
 .action-buttons {
@@ -416,6 +406,7 @@ table.employee-table tbody tr:last-child td {
     color: var(--text-light);
 }
 
+/* Modal Overlay & Card */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -567,7 +558,7 @@ table.employee-table tbody tr:last-child td {
     background-color: #175763;
 }
 
-/* Toast notification */
+/* Toast Notification */
 .toast {
     position: fixed;
     bottom: 25px;
