@@ -207,24 +207,26 @@ header.top-header {
 
 .action-bar {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
+    width: 100%;
     margin-bottom: 25px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 }
 
 .filter-group {
     display: flex;
     align-items: center;
     gap: 15px;
+
     flex: 1;
-    max-width: 650px;
+    min-width: 0;
 }
 
 .search-box {
     position: relative;
     flex: 1;
+    min-width: 0;
 }
 
 .search-box i {
@@ -468,7 +470,7 @@ table.customers-table .emp-id {
 
 .badge-active {
     background-color: #E2EFCB;
-    color: #2E5A1C;
+    color: #31aa41;
     border: 1px solid #C4E197;
 }
 
