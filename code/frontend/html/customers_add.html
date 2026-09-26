@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUMS - Employee Management</title>
+    
+    <!-- Google Fonts: Bodoni Moda & Montserrat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/customers.css">
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-brand">
+                <h1>YUMS</h1>
+                <p>You Manage your Shop</p>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="#orders"><i class="fa-solid fa-receipt"></i> Orders</a>
+                </li>
+                <li class="active">
+                    <a href="/customers"><i class="fa-solid fa-users"></i> Customers</a>
+                </li>
+                <li>
+                    <a href="#inventory"><i class="fa-solid fa-utensils"></i> Inventory</a>
+                </li>
+                <li>
+                    <a href="/employee"><i class="fa-solid fa-id-badge"></i> Employees</a>
+                </li>
+                <li>
+                    <a href="#sales"><i class="fa-solid fa-chart-line"></i> Sales</a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-footer">
+            <p>&copy; 2026 YUMS v1.0</p>
+        </div>
+    </aside>
+
+ <!-- ========================================
+         MAIN CONTENT
+    ========================================= -->
+
+    <main class="main-content">
+
+
+        <!-- ========================================
+             TOP HEADER
+        ========================================= -->
+
+        <header class="top-header">
+
+            <div class="header-title">
+
+                <h2>Add New Customer</h2>
+
+                <p>
+                    Create a new customer profile and membership details.
+                </p>
+
+            </div>
+
+
+            <!-- User Profile -->
+            <div class="user-profile">
+
+                <div class="user-avatar">
+                    AD
+                </div>
+
+                <div class="user-info">
+
+                    <div class="user-name">
+                        Store Manager
+                    </div>
+
+                    <div class="user-role">
+                        Administrator
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- ========================================
+             CUSTOMER FORM
+        ========================================= -->
+
+        <section class="customer-form-container">
+
+
+            <!-- Form Header -->
+            <div class="form-header">
+
+                <h3>Customer Information</h3>
+
+                <p>
+                    Enter the customer's information below.
+                </p>
+
+            </div>
+
+
+            <!-- Form -->
+            <form id="customerForm">
+
+
+                <!-- ========================================
+                     CUSTOMER NAME
+                ========================================= -->
+
+                <div class="form-grid">
+
+
+                    <!-- First Name -->
+                    <div class="form-group">
+
+                        <label for="firstName">
+                            First Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="firstName"
+                            name="firstName"
+                            placeholder="Enter first name"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- Last Name -->
+                    <div class="form-group">
+
+                        <label for="lastName">
+                            Last Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="lastName"
+                            name="lastName"
+                            placeholder="Enter last name"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- ========================================
+                         EMAIL
+                    ========================================= -->
+
+                    <div class="form-group">
+
+                        <label for="email">
+                            Email Address
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="Enter email address"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- ========================================
+                         PHONE
+                    ========================================= -->
+
+                    <div class="form-group">
+
+                        <label for="phone">
+                            Phone Number
+                        </label>
+
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            placeholder="Enter phone number"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- ========================================
+                         MEMBERSHIP
+                    ========================================= -->
+
+                    <div class="form-group">
+
+                        <label for="membership">
+                            Membership
+                        </label>
+
+                        <select
+                            id="membership"
+                            name="membership"
+                        >
+
+                            <option value="">
+                                Select membership
+                            </option>
+
+                            <option value="Silver">
+                                Silver
+                            </option>
+
+                            <option value="Gold">
+                                Gold
+                            </option>
+
+                            <option value="Platinum">
+                                Platinum
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- ========================================
+                         DISCOUNT
+                    ========================================= -->
+
+                    <div class="form-group">
+
+                        <label for="discount">
+                            Discount
+                        </label>
+
+                        <select
+                            id="discount"
+                            name="discount"
+                        >
+
+                            <option value="">
+                                Select discount
+                            </option>
+
+                            <option value="0%">
+                                0%
+                            </option>
+
+                            <option value="5%">
+                                5%
+                            </option>
+
+                            <option value="10%">
+                                10%
+                            </option>
+
+                            <option value="15%">
+                                15%
+                            </option>
+
+                            <option value="20%">
+                                20%
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- ========================================
+                         STATUS
+                    ========================================= -->
+
+                    <div class="form-group">
+
+                        <label for="status">
+                            Status
+                        </label>
+
+                        <select
+                            id="status"
+                            name="status"
+                        >
+
+                            <option value="Active">
+                                Active
+                            </option>
+
+                            <option value="Inactive">
+                                Inactive
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- ========================================
+                         CUSTOMER ID
+                    ========================================= -->
+
+                    <div class="form-group">
+
+                        <label for="customerId">
+                            Customer ID
+                        </label>
+
+                        <input
+                            type="text"
+                            id="customerId"
+                            name="customerId"
+                            placeholder="Auto-generated"
+                            readonly
+                        >
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ========================================
+                     FORM ACTIONS
+                ========================================= -->
+
+                <div class="form-actions">
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                        id="saveCustomerBtn"
+                    >
+                        <i class="fa-solid fa-check"></i>
+                        Save
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="btn-primary secondary-action"
+                        id="saveAddAnotherBtn"
+                    >
+                        <i class="fa-solid fa-plus"></i>
+                        Save & Add Another
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="btn-secondary"
+                        id="cancelCustomerBtn"
+                    >
+                        Cancel
+                    </button>
+
+                </div>
+
+
+            </form>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- ========================================
+         JAVASCRIPT
+    ========================================= -->
+
+    <script src="../js/customers_add.js"></script>
+
+</body>
