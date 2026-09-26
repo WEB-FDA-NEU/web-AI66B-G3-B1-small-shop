@@ -157,7 +157,7 @@ if (openAddCustomerBtn) {
 
 window.viewCustomer = function(id) {
 
-  window.location.href = `customer-detail.html?id=${id}`;
+  window.location.href = `customers_detail.html?id=${id}`;
 
 };
 
