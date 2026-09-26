@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>View Order</title>
+    <link rel="stylesheet" href="../css/order_view.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../js/orders_data.js" defer></script>
+    <script src="../js/order_view.js" defer></script>
+</head>
+<body>
+    <div class="layout">
+        <!--navigation bar-->
+        <button type="button" class="menu-btn" id="menuBtn">☰</button>
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <h1>YUMS</h1>
+                <p>You Manage your Shop</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="order_create_edit.html">
+                        <i class="fa-solid fa-receipt"></i>
+                        <span>Orders</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="customer.html">
+                        <i class="fa-solid fa-users"></i>
+                        <span>Customers</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="inventory.html">
+                        <i class="fa-solid fa-utensils"></i>
+                        <span>Inventory</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="employees.html">
+                        <i class="fa-solid fa-id-badge"></i>
+                        <span>Employees</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="sales.html">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>Sales</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <p>&copy; 2026 YUMS v1.0</p>
+            </div>
+        </aside>
+        <!--main zone-->
+        <main class="main-content">
+            <!--page header-->
+            <header class="page-header">
+                <div class="page-heading">
+                    <h1>Order Directory</h1>
+                    <p>Create and manage orders</p>
+                </div>
+                <div class="account-card">
+                    <div class="avatar">AD</div>
+                    <div class="account-info">
+                        <div class="role-name">Store Manager</div>
+                        <div class="role-sub">ADMINISTRATOR</div>
+                    </div>
+                </div>
+            </header>
+            <!--switching buttons between New and Check-->
+            <div class="order-tabs">
+                <a class="tab-btn" href="order_create_edit.html">New order</a>
+                <a class="tab-btn active" href="order_check.html">Check orders</a>
+            </div>
+            <!--order detail zone-->
+            <section class="order-detail">
+                <div class="order-detail-header">
+                    <div class="order-code">
+                        <span class="detail-label">Order code</span>
+                        <strong id="orderCode"></strong>
+                    </div>
+                    <div class="customer-name">
+                        <span class="detail-label">Customer</span>
+                        <strong id="customerName"></strong>
+                    </div>
+                    <div class="order-status">
+                        <span class="detail-label">Status</span>
+                        <span class="status-badge" id="orderStatus"></span>
+                    </div>
+                </div>
+                <div class="order-detail-content">
+                    <table class="order-detail-table">
+                        <thead>
+                            <tr>
+                                <th>Dish code</th>
+                                <th>Dish name</th>
+                                <th>Unit price</th>
+                                <th>Quantity</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderItems"></tbody>
+                    </table>
+                </div>
+                <div class="view-actions">
+                    <div class="pending-actions" id="pendingActions">
+                        <button type="button" class="order-action-btn cancel-order-btn" id="cancelOrderBtn">Cancel</button>
+                        <button type="button" class="order-action-btn confirm-payment-btn" id="confirmPaymentBtn">Confirm payment</button>
+                    </div>
+                    <a href="order_check.html" class="back-btn">Back</a>
+                </div>
+            </section>
+        </main>
+    </div>
+    <div class="status-confirm-overlay" id="statusConfirmOverlay">
+        <div class="status-confirm-modal">
+            <div class="status-confirm-header">
+                <h2 id="statusConfirmTitle">Confirm action</h2>
+                <button type="button" class="status-confirm-close" id="statusConfirmClose">×</button>
+            </div>
+            <div class="status-confirm-content">
+                <p id="statusConfirmMessage">Are you sure?</p>
+            </div>
+            <div class="status-confirm-actions">
+                <button type="button" class="status-confirm-btn no-btn" id="statusConfirmNo">No</button>
+                <button type="button" class="status-confirm-btn yes-btn" id="statusConfirmYes">Yes</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
