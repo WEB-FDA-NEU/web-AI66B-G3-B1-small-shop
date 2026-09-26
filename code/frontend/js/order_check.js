@@ -1,4 +1,15 @@
-let orders = [...ordersData];
+const savedOrders = JSON.parse(localStorage.getItem("yumsOrders") || "[]");
+const statusOverrides = JSON.parse(localStorage.getItem("yumsOrderStatusOverrides") || "{}");
+const updatedSampleOrders = ordersData.map(order => {
+    if (statusOverrides[order.id]) {
+        return {
+            ...order,
+            status: statusOverrides[order.id]
+        };
+    }
+    return order;
+});
+let orders = [...updatedSampleOrders, ...savedOrders];
 const ordersTableBody = document.querySelector(".orders-table tbody");
 const searchInput = document.querySelector(".order-search input");
 const statusFilter = document.querySelector("#statusFilter");
@@ -26,7 +37,6 @@ function getStatusClass(status) {
     }
     return "";
 }
-
 function renderOrders(data) {
     ordersTableBody.innerHTML = "";
     if (data.length === 0) {
@@ -60,7 +70,6 @@ function renderOrders(data) {
         ordersTableBody.appendChild(row);
     });
 }
-
 function filterData() {
     const searchTerm = searchInput.value.toLowerCase().trim();
     const selectedStatus = statusFilter.value;

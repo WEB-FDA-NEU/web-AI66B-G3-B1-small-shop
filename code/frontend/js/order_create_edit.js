@@ -121,8 +121,95 @@ function searchDishes() {
     renderDishes(filteredDishes);
 }
 dishSearch.addEventListener("input", searchDishes);
-sumBtn.addEventListener("click", () => {
-    billTotal.textContent = formatCurrency(calculateTotal());
+const orderConfirmOverlay = document.querySelector("#orderConfirmOverlay");
+const customerNameInput = document.querySelector("#customerNameInput");
+const confirmItems = document.querySelector("#confirmItems");
+const confirmTotal = document.querySelector("#confirmTotal");
+const confirmClose = document.querySelector("#confirmClose");
+const cancelOrderBtn = document.querySelector("#cancelOrderBtn");
+const payNowBtn = document.querySelector("#payNowBtn");
+const payLaterBtn = document.querySelector("#payLaterBtn");
+
+function getNextOrderId() {
+    const savedOrders = JSON.parse(localStorage.getItem("yumsOrders") || "[]");
+    const allIds = [...ordersData, ...savedOrders].map(order => {
+        const number = parseInt(order.id.replace("ORD-", ""), 10);
+        return isNaN(number) ? 0 : number;
+    });
+    const nextNumber = Math.max(...allIds, 0) + 1;
+    return `ORD-${String(nextNumber).padStart(3, "0")}`;
+}
+
+function renderConfirmItems() {
+    confirmItems.innerHTML = "";
+    selectedDishes.forEach(dish => {
+        const item = document.createElement("div");
+        item.className = "confirm-item";
+        item.innerHTML = `
+            <div class="confirm-item-name">${dish.name}</div>
+            <div class="confirm-item-quantity">× ${dish.quantity}</div>
+            <div class="confirm-item-amount">${formatCurrency(dish.price * dish.quantity)}</div>
+        `;
+        confirmItems.appendChild(item);
+    });
+    confirmTotal.textContent = formatCurrency(calculateTotal());
+}
+function openConfirmDialog() {
+    if (selectedDishes.length === 0) {
+        return;
+    }
+    customerNameInput.value = "";
+    renderConfirmItems();
+    orderConfirmOverlay.classList.add("show");
+    customerNameInput.focus();
+}
+function closeConfirmDialog() {
+    orderConfirmOverlay.classList.remove("show");
+
+}
+function saveNewOrder(status) {
+    const customerName = customerNameInput.value.trim();
+    if (customerName === "") {
+        customerNameInput.focus();
+        customerNameInput.style.borderColor = "#7F0303";
+        return;
+    }
+    const newOrder = {
+        id: getNextOrderId(),
+        customer: customerName,
+        status: status,
+        items: selectedDishes.map(dish => ({
+            id: dish.id,
+            name: dish.name,
+            price: dish.price,
+            quantity: dish.quantity
+        }))
+    };
+    const savedOrders = JSON.parse(localStorage.getItem("yumsOrders") || "[]");
+    savedOrders.push(newOrder);
+    localStorage.setItem("yumsOrders", JSON.stringify(savedOrders));
+    orderConfirmOverlay.classList.remove("show");
+    selectedDishes = [];
+    renderBill();
+    window.location.href = "order_check.html";
+}
+
+sumBtn.addEventListener("click", openConfirmDialog);
+confirmClose.addEventListener("click", closeConfirmDialog);
+cancelOrderBtn.addEventListener("click", closeConfirmDialog);
+payNowBtn.addEventListener("click", () => {
+    saveNewOrder("Success");
+});
+payLaterBtn.addEventListener("click", () => {
+    saveNewOrder("Pending");
+});
+orderConfirmOverlay.addEventListener("click", event => {
+    if (event.target === orderConfirmOverlay) {
+        closeConfirmDialog();
+    }
+});
+customerNameInput.addEventListener("input", () => {
+    customerNameInput.style.borderColor = "#96C0CE";
 });
 renderDishes(dishesData);
 renderBill();
