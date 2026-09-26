@@ -132,6 +132,7 @@ aside.sidebar {
     text-align: center;
 }
 
+/* Main Content */
 main.main-content {
     margin-left: 260px;
     flex: 1;
@@ -139,6 +140,7 @@ main.main-content {
     min-width: 0;
 }
 
+/* Header */
 header.top-header {
     display: flex;
     justify-content: space-between;
@@ -291,40 +293,66 @@ header.top-header {
     box-shadow: 0 2px 6px rgba(127, 3, 3, 0.25);
 }
 
+/* ========================================
+   CUSTOMER TABLE
+======================================== */
+
 .table-wrapper {
+    width: 100%;
+    max-width: 100%;
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 6px;
-    overflow: hidden;
+    overflow-x: auto;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
 }
 
-table.employee-table {
+/* Table itself */
+table.customers-table {
     width: 100%;
+    min-width: 900px;
+    table-layout: fixed;
     border-collapse: collapse;
     text-align: left;
 }
 
-table.employee-table th {
+/* Header */
+table.customers-table th {
     background-color: #F2EAE0;
     color: var(--text-dark);
     font-family: var(--font-content);
     font-weight: 600;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 16px 20px;
+    letter-spacing: 0.5px;
+
+    padding: 12px 14px;
+
     border-bottom: 2px solid var(--border-color);
+
+    white-space: nowrap;
 }
 
+/* Body cells */
 table.customers-table td {
-    padding: 16px 20px;
-    font-size: 0.88rem;
+    padding: 12px 14px;
+
+    font-size: 0.78rem;
     color: var(--text-dark);
+
     border-bottom: 1px solid var(--border-color);
+
     vertical-align: middle;
+
+    white-space: nowrap;
 }
 
+/* Remove bottom border from last row */
+table.customers-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Hover */
 table.customers-table tbody tr {
     transition: background-color var(--transition-speed);
 }
@@ -333,44 +361,109 @@ table.customers-table tbody tr:hover {
     background-color: var(--hover-beige);
 }
 
-table.customers-table tbody tr:last-child td {
-    border-bottom: none;
+
+/* ========================================
+   COLUMN WIDTHS
+======================================== */
+
+/* ID */
+table.customers-table th:nth-child(1),
+table.customers-table td:nth-child(1) {
+    width: 8%;
 }
 
-.emp-id {
+/* Customer */
+table.customers-table th:nth-child(2),
+table.customers-table td:nth-child(2) {
+    width: 16%;
+}
+
+/* Email */
+table.customers-table th:nth-child(3),
+table.customers-table td:nth-child(3) {
+    width: 17%;
+}
+
+/* Phone */
+table.customers-table th:nth-child(4),
+table.customers-table td:nth-child(4) {
+    width: 14%;
+}
+
+/* Total Spending */
+table.customers-table th:nth-child(5),
+table.customers-table td:nth-child(5) {
+    width: 14%;
+}
+
+/* Discount */
+table.customers-table th:nth-child(6),
+table.customers-table td:nth-child(6) {
+    width: 9%;
+}
+
+/* Membership */
+table.customers-table th:nth-child(7),
+table.customers-table td:nth-child(7) {
+    width: 10%;
+}
+
+/* Status */
+table.customers-table th:nth-child(8),
+table.customers-table td:nth-child(8) {
+    width: 8%;
+}
+
+/* Actions */
+table.customers-table th:nth-child(9),
+table.customers-table td:nth-child(9) {
+    width: 10%;
+}
+
+
+/* ========================================
+   ID
+======================================== */
+
+table.customers-table .emp-id {
     font-weight: 600;
     color: var(--bg-sidebar);
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
 }
+
+
+/* ========================================
+   CUSTOMER NAME
+======================================== */
 
 .emp-name-cell {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
-.emp-avatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background-color: var(--color-warm-beige);
-    color: var(--bg-sidebar);
-    display: flex;
+.emp-name-cell span {
+    white-space: nowrap;
+}
+
+
+/* ========================================
+   STATUS BADGE
+======================================== */
+
+.badge {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
-    font-size: 0.82rem;
-    border: 1px solid var(--border-color);
-}
 
-/* Status Badges */
-.badge {
-    display: inline-block;
-    padding: 4px 10px;
+    padding: 4px 9px;
+
     border-radius: 12px;
-    font-size: 0.75rem;
+
+    font-size: 0.7rem;
     font-weight: 500;
-    letter-spacing: 0.3px;
+
+    letter-spacing: 0.2px;
 }
 
 .badge-active {
@@ -385,22 +478,35 @@ table.customers-table tbody tr:last-child td {
     border: 1px solid #F5E1A4;
 }
 
+
+/* ========================================
+   ACTION BUTTONS
+======================================== */
+
 .action-buttons {
     display: flex;
-    gap: 8px;
+    align-items: center;
+    gap: 6px;
 }
 
 .btn-icon {
     background: transparent;
+
     border: 1px solid var(--border-color);
-    width: 32px;
-    height: 32px;
+
+    width: 30px;
+    height: 30px;
+
     border-radius: 4px;
+
     color: var(--text-muted);
+
     cursor: pointer;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     transition: all var(--transition-speed);
 }
 
