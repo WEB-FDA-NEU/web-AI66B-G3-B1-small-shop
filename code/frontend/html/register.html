@@ -45,18 +45,24 @@
                 <p>You Manage your Shop</p>
             </div>
 
-            <div class="login-title">
-            </div>
-
-            <form id="login-form">
+            <form class="login-form-regi">
 
                 <div class="form-group">
                     <input
                         type="text"
                         id="username"
                         name="username"
-                        placeholder="Enter your username">
+                        placeholder="Username">
                     <i class="fa-solid fa-user input-icon"></i>
+                </div>
+
+                <div class="form-group">
+                    <input 
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Email">
+                    <i class="fa-solid fa-envelope envelope"></i>
                 </div>
 
                 <div class="form-group">
@@ -64,27 +70,26 @@
                         type="password"
                         id="password"
                         name="password"
-                        placeholder="Enter your password">
+                        placeholder="Password">
                         <button class="password-toggle" id="password-toggle">
                             <i class="fa-solid fa-lock"></i>
                         </button>
                 </div>
 
-                <button type="submit" class="login-btn">
-                    Login
-                </button>
-
-                <p class="register"> Don't have a account ?
-                    <a href="#regiter">Register</a>
-                </p>
+                <div class="regi-login">
+                    <button type="submit" class="login-btn">
+                        Sign up
+                    </button>
+                    <p class="register"> Already have an account ?
+                        <a href="../html/index.html">Login</a>
+                    </p>
+            </div>
 
             </form>
 
+            
         </section>
-
     </main>
-
+     
     <script src="../js/login.js"></script>
-
 </body>
-</html>

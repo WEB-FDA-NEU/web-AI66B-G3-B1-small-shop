@@ -168,14 +168,20 @@ body {
     color: var(--text-muted);
 }
 
+.main-content.expand {
+    width: 100%;
+    left: 0;
+}
+
 /*main content*/
 .main-content {
     box-sizing: border-box;
-    width: calc(100% - 285px);
+    width: calc(100% - 260px);
     height: 100dvh;
-    margin-left: 285px;
+    margin-left: 260px;
     padding: 34px 38px;
     overflow: hidden;
+    transition: 0.25s;
 }
 
 /*page header*/

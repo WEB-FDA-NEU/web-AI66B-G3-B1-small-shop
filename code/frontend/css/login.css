@@ -31,8 +31,8 @@ body {
     min-height: 100vh;
     background-color: var(--bg-main);
     color: var(--text-dark);
-    font-family: "Montserrat", sans-serif;
-    overflow: hidden;
+    font-family: var(--font-content);
+    overflow-y: hidden;
 }
 
 
@@ -44,7 +44,6 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 0px;
 }
 
 
@@ -82,17 +81,28 @@ body {
 .login-card {
     width: 450px;
     height: 400px;
-    padding: 40px;
+    padding: 22px 40px 22px 40px;
     background-color: var(--bg-sidebar);
     border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
     border-radius: 8%;
     z-index: 1;
+}
+
+.login-form {
+    display: flex;
+    flex:1;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
 }
 
 /* BRAND*/
 
 .brand {
-    margin-bottom: 25px;
+    margin-top: 0px;
+    margin-bottom: 20px;
     text-align: center;
 }
 
@@ -112,39 +122,16 @@ body {
     text-transform: uppercase;
 }
 
-
-/*TITLE */
-
-.login-title {
-    margin-bottom: 28px;
-}
-
-.login-title h2 {
-    font-family: "Bodoni Moda", serif;
-
-    font-size: 28px;
-    font-weight: 500;
-
-    color: var(--text-dark);
-}
-
-.login-title p {
-    margin-top: 7px;
-
-    font-size: 13px;
-    color: var(--text-muted);
-}
-
-
 /*FORM*/
 .form-group {
     position: relative;
-    margin-bottom: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .form-group input {
     width: 100%;
-    padding: 12px 35px 12px 4px;
+    padding: 12px 35px 10px 4px;
     border: none;
     border-bottom: 2px solid var(--color-soft-blue);
     background-color: var(--bg-sidebar);
@@ -159,10 +146,26 @@ body {
     color: var(--color-soft-blue);
 }
 
+/*FORM IN REGISTER*/
+.login-form-regi {
+    position: relative;
+}
+
+
+
 .input-icon {
     position: absolute;
     right: 5px;
-    bottom: 12px;
+    bottom: 10px;
+    color: var(--color-soft-blue);
+    font-size: 1.1rem;
+    pointer-events: none;
+}
+
+.envelope {
+    position: absolute;
+    right: 5px;
+    bottom: 10px;
     color: var(--color-soft-blue);
     font-size: 1.1rem;
     pointer-events: none;
@@ -171,7 +174,7 @@ body {
 .password-toggle {
     position: absolute;
     right: 5px;
-    bottom: 12px;
+    bottom: 10px;
     color: var(--color-soft-blue);
     background-color: var(--bg-sidebar);
     font-size: 1.1rem;
@@ -180,26 +183,17 @@ body {
 
 }
 
-.register {
-    margin-top: 25px;
-    text-align: center;
-    font-size: 13px;
-    color: var(--color-soft-blue)
-}
 
-.register a {
-    color: var(--color-soft-blue);
-}
-
-.register a:hover {
-    color: var(--text-light);
-}
 
 /*LOGIN BUTTON */
 
+.regi-login {
+    margin-top: auto;
+}
+
 .login-btn {
     width: 100%;
-    margin-top: 8px;
+    margin-top: 20px;
     padding: 14px;
     border: none;
     background-color: var(--color-accent-red);
@@ -219,3 +213,18 @@ body {
     color: var(--text-dark);
 }
 
+.register {
+    margin-top: 10px;
+    margin-bottom: 0px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--color-soft-blue)
+}
+
+.register a {
+    color: var(--color-soft-blue);
+}
+
+.register a:hover {
+    color: var(--text-light);
+}
