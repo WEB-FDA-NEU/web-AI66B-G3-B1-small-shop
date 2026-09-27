@@ -7,3 +7,4 @@ menu_btn.addEventListener("click", function() {
     sidebar.classList.toggle("hidden");
     menu_btn.classList.toggle("update");
 })
+console.log("HOME JS LOADED");

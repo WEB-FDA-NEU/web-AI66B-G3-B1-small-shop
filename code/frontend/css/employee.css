@@ -630,6 +630,10 @@ table.employee-table tbody tr:last-child td {
     color: var(--text-muted);
 }
 
+.menu-btn:hover {
+    color: var(--color-warm-beige);
+}
+
 @media (max-width: 900px) {
 
     .customer-summary {
