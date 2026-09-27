@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUMS - Employee Management</title>
+    
+    <!-- Google Fonts: Bodoni Moda & Montserrat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/customers.css">
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-brand">
+                <h1>YUMS</h1>
+                <p>You Manage your Shop</p>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="#orders"><i class="fa-solid fa-receipt"></i> Orders</a>
+                </li>
+                <li class="active">
+                    <a href="/customers"><i class="fa-solid fa-users"></i> Customers</a>
+                </li>
+                <li>
+                    <a href="#inventory"><i class="fa-solid fa-utensils"></i> Inventory</a>
+                </li>
+                <li>
+                    <a href="/employee"><i class="fa-solid fa-id-badge"></i> Employees</a>
+                </li>
+                <li>
+                    <a href="#sales"><i class="fa-solid fa-chart-line"></i> Sales</a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-footer">
+            <p>&copy; 2026 YUMS v1.0</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <header class="top-header">
+            <div class="header-title">
+                <h2>Customers</h2>
+                <p>Customers list</p>
+            </div>
+
+            <div class="user-profile">
+                <div class="user-avatar">AD</div>
+                <div class="user-info">
+                    <div class="user-name">Store Manager</div>
+                    <div class="user-role">Administrator</div>
+                </div>
+            </div>
+        </header>
+        <!-- Summary Card -->
+
+        <div class="customer-summary">
+
+            <!-- Total Customers -->
+            <div class="summary-card">
+                <div class="summary-card-header">
+                    <span>Total customers</span>
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                </div>
+
+                <div class="summary-card-body">
+                    <h2 id="totalCustomers">0</h2>
+
+                    <span class="growth-badge positive">
+                        <i class="fa-solid fa-arrow-trend-up"></i>
+                        20%
+                    </span>
+                </div>
+            </div>
+
+
+            <!-- Members -->
+            <div class="summary-card">
+                <div class="summary-card-header">
+                    <span>Members</span>
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                </div>
+
+                <div class="summary-card-body">
+                    <h2 id="totalMembers">0</h2>
+
+                    <span class="growth-badge positive">
+                        <i class="fa-solid fa-arrow-trend-up"></i>
+                        15%
+                    </span>
+                </div>
+            </div>
+
+
+            <!-- Active Now -->
+            <div class="summary-card">
+                <div class="summary-card-header">
+                    <span>Active now</span>
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                </div>
+
+                <div class="summary-card-body">
+
+                    <h2 id="activeCustomers">0</h2>
+
+                    <div class="avatar-stack">
+                        <div class="mini-avatar">TM</div>
+                        <div class="mini-avatar">LM</div>
+                        <div class="mini-avatar">NB</div>
+                        <div class="mini-avatar">PT</div>
+                        <div class="mini-avatar">+</div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ========================================
+            FILTER BAR
+        ========================================= -->
+
+        <div class="customer-filter-bar">
+
+            <!-- Time Filter -->
+            <button class="filter-button active" id="timeFilterBtn">
+                <span>All time</span>
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+
+            <!-- Location Filter -->
+            <button class="filter-button" id="locationFilterBtn">
+                <span>US, AU, +4</span>
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+
+            <!-- More Filters -->
+            <button class="filter-button more-filter" id="moreFilterBtn">
+                <i class="fa-solid fa-sliders"></i>
+                <span>More filters</span>
+            </button>
+
+
+        </div>
+        
+        <section class="action-bar">
+            <div class="filter-group">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="searchInput" placeholder="Search by name, phone number or customer ID...">
+                </div>
+<!--
+                <div class="filter-select">
+                    <select id="roleFilter">
+                        <option value="">All Positions</option>
+                        <option value="Manager">Manager</option>
+                        <option value="Cashier">Cashier</option>
+                        <option value="Barista">Barista</option>
+                        <option value="Server">Server</option>
+                    </select>
+                </div>
+            </div>
+!-->
+            <button class="btn-add" id="openAddModalBtn">
+                <i class="fa-solid fa-user-plus"></i> Add Customers
+            </button>
+        </section>
+
+        <section class="table-wrapper">
+            <table class="customers-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Customer</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Total Spending</th>
+                        <th>Discount</th>
+                        <th>Membership</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="customersTableBody">
+                    <!-- Dynamic Rows populated via JS -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toastNotification">System Notification</div>
+
+    <!-- Custom Script -->
+    <script src="../js/customers.js"></script>
+</body>
+</html>
