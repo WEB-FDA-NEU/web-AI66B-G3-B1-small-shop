@@ -10,5 +10,10 @@ Here, we define the colour palette, the fonts, and the major aesthetic for our w
 - Title: bodoni moda
 - Contents: mont serrat
 
+```css
+<link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda&display=swap" rel="stylesheet">
+```
+
 ## Vision board
 **Pinterest link:** https://pin.it/7ILksLs4t
