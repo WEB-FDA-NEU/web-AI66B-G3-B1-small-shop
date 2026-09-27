@@ -34,5 +34,5 @@ const loginForm = document.querySelector(".login-form");
 
 loginForm.addEventListener("submit", function(event) {
     event.preventDefault();
-    window.location.href = "../html/index.html";
+    window.location.href = "../html/home.html";
 });

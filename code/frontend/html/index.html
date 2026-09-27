@@ -1,67 +1,89 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YUMS - You Manage your Shop</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda&display=swap" rel="stylesheet">
 
-    <!-- FontAwesome Icons -->
+    <title>YUMS - Login</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/employee.css">
-    <link rel="stylesheet" href = "../css/index.css"></link>
     
+    <link rel="stylesheet" href="../css/login.css">
 </head>
+
 <body>
-    <div class="container">
 
-        <!--navigation bar at left side-->
-        <button class="menu-btn">☰</button>
+    <main class="login-page">
 
-        <aside class="sidebar">
+        <!-- Character -->
+        <div class="character">
 
-            <div class="sidebar-brand">
+            <img src="../img/image_login/body.png"
+                 class="character-body"
+                 alt="YUMS character">
+
+            <img src="../img/image_login/left_eye.png"
+                 class="character-eye left-eye"
+                 alt="">
+
+            <img src="../img/image_login/right_eye.png"
+                 class="character-eye right-eye"
+                 alt="">
+
+        </div>
+
+        <!-- Login form -->
+        <section class="login-card">
+
+            <div class="brand">
                 <h1>YUMS</h1>
                 <p>You Manage your Shop</p>
             </div>
 
-            <ul class="sidebar-menu">
-                <li>
-                    <a href="order_create_edit.html"><i class="fa-solid fa-receipt"></i> Orders</a>
-                </li>
-                <li>
-                    <a href="customers.html"><i class="fa-solid fa-users"></i> Customers</a>
-                </li>
-                <li>
-                    <a href="inventory.html"><i class="fa-solid fa-utensils"></i> Inventory</a>
-                </li>
-                <li>
-                    <a href="employees.html"><i class="fa-solid fa-id-badge"></i> Employees</a>
-                </li>
-                <li>
-                    <a href="sales.html"><i class="fa-solid fa-chart-line"></i> Sales</a>
-                </li>
-            </ul>
-                <!--khi nào ae code thêm html thì đổi tên href vào-->
+            <form class="login-form">
 
-            <div class="sidebar-footer">
-                <p>&copy; 2026 YUMS v1.0</p>
-            </div>
+                <div class="form-group">
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Username">
+                    <i class="fa-solid fa-user input-icon"></i>
+                </div>
 
-        </aside>
+                <div class="form-group">
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Password">
+                        <button class="password-toggle" id="password-toggle">
+                            <i class="fa-solid fa-lock"></i>
+                        </button>
+                </div>
 
+                    <div class="regi-login">
+                    <button type="submit" class="login-btn">
+                        Login
+                    </button>
 
-        <!--The main screen-->
-        <main class="main-content">
-            <div class="welcome">
-                <h1>Hello, Manager!</h1>
-                <p>Welcome to YUMS</p>
-            </div>
-        </main>
-    </div>
+                    <p class="register"> Don't have an account ?
+                    <a href="../html/register.html">Register</a>
+                    </p>
+                </div>
 
-    <script src="../js/index.js"></script>
+            </form>
+
+        </section>
+
+    </main>
+
+    <script src="../js/login.js"></script>
+
 </body>
 </html>
