@@ -65,6 +65,12 @@ body {
     text-align: center;
     border-bottom: 1px solid rgba(216, 186, 152, 0.25);
 }
+
+.sidebar-brand a {
+    text-decoration: none;
+    color: inherit;
+}
+
 .sidebar-brand h1 {
     margin: 0;
     font-family: var(--font-title);
