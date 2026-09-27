@@ -6,14 +6,13 @@
     <title>YUMS - Employee Management</title>
     
     <!-- Google Fonts: Bodoni Moda & Montserrat -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/employee.css">
     <link rel="stylesheet" href="../css/customers.css">
 </head>
 <body>
@@ -22,25 +21,27 @@
     <aside class="sidebar">
         <div>
             <div class="sidebar-brand">
-                <h1>YUMS</h1>
+                <a href="index.html">
+                    <h1>YUMS</h1>
+                </a>
                 <p>You Manage your Shop</p>
             </div>
             
             <ul class="sidebar-menu">
                 <li>
-                    <a href="#orders"><i class="fa-solid fa-receipt"></i> Orders</a>
+                    <a href="order_create_edit.html"><i class="fa-solid fa-receipt"></i> Orders</a>
                 </li>
                 <li class="active">
-                    <a href="/customers"><i class="fa-solid fa-users"></i> Customers</a>
+                    <a href="customers.html"><i class="fa-solid fa-users"></i> Customers</a>
                 </li>
                 <li>
-                    <a href="#inventory"><i class="fa-solid fa-utensils"></i> Inventory</a>
+                    <a href="inventory.html"><i class="fa-solid fa-utensils"></i> Inventory</a>
                 </li>
                 <li>
-                    <a href="/employee"><i class="fa-solid fa-id-badge"></i> Employees</a>
+                    <a href="employees.html"><i class="fa-solid fa-id-badge"></i> Employees</a>
                 </li>
                 <li>
-                    <a href="#sales"><i class="fa-solid fa-chart-line"></i> Sales</a>
+                    <a href="sales.html"><i class="fa-solid fa-chart-line"></i> Sales</a>
                 </li>
             </ul>
         </div>
