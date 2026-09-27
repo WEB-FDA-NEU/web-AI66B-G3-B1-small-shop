@@ -1,0 +1,258 @@
+:root {
+    /* Core Art Direction Colors */
+    --bg-sidebar: #0F414A;
+    --bg-main: #EFE8DF;
+    --color-accent-red: #7F0303;
+    --color-soft-blue: #96C0CE;
+    --color-warm-beige: #D8BA98;
+
+    /* Extended Vintage Palette */
+    --text-dark: #2A2421;
+    --text-muted: #6B625B;
+    --text-light: #F7F4EF;
+    --border-color: #D2C7B8;
+    --card-bg: #FAF6F0;
+    --hover-beige: #E6DCCE;
+
+    /* Typography */
+    --font-title: 'Bodoni Moda', serif;
+    --font-content: 'Montserrat', sans-serif;
+}
+
+
+/* ==============================
+   RESET
+   ============================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    background-color: var(--bg-main);
+    color: var(--text-dark);
+    font-family: var(--font-content);
+}
+
+
+/* ==============================
+   PAGE
+   ============================== */
+
+.error-page {
+    position: relative;
+
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    overflow: hidden;
+}
+
+
+/* ==============================
+   CONTENT
+   ============================== */
+
+.error-content {
+    position: relative;
+    z-index: 2;
+
+    width: min(90%, 600px);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    text-align: center;
+}
+
+
+/* ==============================
+   BRAND
+   ============================== */
+
+.brand {
+    color: var(--bg-sidebar);
+
+    font-family: var(--font-title);
+    font-size: 20px;
+    font-weight: 600;
+
+    letter-spacing: 5px;
+
+    margin-bottom: 22px;
+}
+
+
+/* ==============================
+   DIVIDER
+   ============================== */
+
+.divider {
+    width: 45px;
+    height: 1px;
+
+    background-color: var(--color-accent-red);
+
+    margin-bottom: 28px;
+}
+
+
+/* ==============================
+   404
+   ============================== */
+
+h1 {
+    color: var(--color-accent-red);
+
+    font-family: var(--font-content);
+    font-size: clamp(120px, 20vw, 220px);
+    font-weight: 500;
+
+    line-height: 0.8;
+
+    letter-spacing: -8px;
+}
+
+
+/* ==============================
+   TITLE
+   ============================== */
+
+h2 {
+    margin-top: 32px;
+
+    color: var(--text-dark);
+
+    font-family: var(--font-title);
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 500;
+
+    letter-spacing: -0.5px;
+}
+
+
+/* ==============================
+   MESSAGE
+   ============================== */
+
+.error-message {
+    max-width: 420px;
+
+    margin-top: 16px;
+
+    color: var(--text-muted);
+
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+
+/* ==============================
+   HOME BUTTON
+   ============================== */
+
+.home-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-top: 30px;
+
+    min-width: 160px;
+    height: 48px;
+
+    padding: 0 28px;
+
+    background-color: var(--color-accent-red);
+    color: var(--text-light);
+
+    border: 1px solid var(--bg-sidebar);
+
+    font-family: var(--font-content);
+    font-size: 12px;
+    font-weight: 600;
+
+    letter-spacing: 1px;
+    text-decoration: none;
+    border-radius: 20px;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.home-button:hover {
+    background-color: transparent;
+    color: var(--bg-sidebar);
+}
+
+
+/* ==============================
+   DECORATION
+   ============================== */
+
+.decor {
+    position: absolute;
+
+    width: 180px;
+    height: 180px;
+
+    border: 1px solid var(--border-color);
+
+    transform: rotate(45deg);
+
+    pointer-events: none;
+}
+
+.decor-left {
+    left: -110px;
+    bottom: -90px;
+}
+
+.decor-right {
+    right: -110px;
+    top: -90px;
+
+    border-color: var(--color-warm-beige);
+}
+
+
+/* ==============================
+   RESPONSIVE
+   ============================== */
+
+@media (max-width: 600px) {
+
+    .brand {
+        font-size: 17px;
+        letter-spacing: 4px;
+    }
+
+    h1 {
+        font-size: 120px;
+        letter-spacing: -5px;
+    }
+
+    h2 {
+        margin-top: 25px;
+        font-size: 30px;
+    }
+
+    .error-message {
+        padding: 0 20px;
+        font-size: 13px;
+    }
+
+    .decor {
+        width: 120px;
+        height: 120px;
+    }
+}

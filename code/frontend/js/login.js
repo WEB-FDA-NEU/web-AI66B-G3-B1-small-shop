@@ -30,7 +30,7 @@ document.addEventListener("mousemove", function(event) {
 });
 
 // LOGIN
-const loginForm = document.querySelector(".regi-login");
+const loginForm = document.querySelector(".login-form");
 
 loginForm.addEventListener("submit", function(event) {
     event.preventDefault();
