@@ -396,6 +396,12 @@ table.employee-table tbody tr:last-child td {
     border: 1px solid #F5E1A4;
 }
 
+.badge-inactive {
+    background-color: #F8D7DA;
+    color: #842029;
+    border: 1px solid #F5C2C7;
+}
+
 .action-buttons {
     display: flex;
     gap: 8px;

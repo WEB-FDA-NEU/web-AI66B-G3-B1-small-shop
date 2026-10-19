@@ -1,15 +1,7 @@
-// Prototype Initial Sample Data
-const initialEmployees = [
-  { id: "NV-001", name: "Trần Minh Hoàng", role: "Manager", shift: "Full-time", phone: "0905 123 456", joinDate: "15/01/2024", status: "Active" },
-  { id: "NV-002", name: "Lê Thị Mai", role: "Cashier", shift: "Morning Shift (07:00 - 15:00)", phone: "0914 987 654", joinDate: "01/03/2024", status: "Active" },
-  { id: "NV-003", name: "Nguyễn Quốc Bảo", role: "Barista", shift: "Evening Shift (15:00 - 23:00)", phone: "0932 555 789", joinDate: "10/05/2024", status: "On Leave" },
-  { id: "NV-004", name: "Phạm Thảo Nhi", role: "Server", shift: "Morning Shift (07:00 - 15:00)", phone: "0988 112 233", joinDate: "20/06/2024", status: "Active" },
-  { id: "NV-005", name: "Đỗ Anh Tuấn", role: "Barista", shift: "Morning Shift (07:00 - 15:00)", phone: "0977 445 566", joinDate: "12/08/2024", status: "Active" }
-];
+const API_URL = "http://127.0.0.1:8000/employees";
 
-let employees = [...initialEmployees];
+let employees = [];
 let isEditMode = false;
-let currentEditId = null;
 
 // DOM Elements
 const tableBody = document.getElementById('employeeTableBody');
@@ -17,16 +9,25 @@ const searchInput = document.getElementById('searchInput');
 const roleFilter = document.getElementById('roleFilter');
 
 // Modal & Form Elements
-const modal = document.getElementById('employeeModal'); // Single shared modal
-const modalTitle = document.getElementById('modalTitle'); // Heading inside modal
+const modal = document.getElementById('employeeModal');
+const modalTitle = document.getElementById('modalTitle');
 const employeeForm = document.getElementById('employeeForm');
 const openModalBtn = document.getElementById('openAddModalBtn');
 const closeModalBtn = document.getElementById('closeModalBtn');
 const cancelModalBtn = document.getElementById('cancelModalBtn');
 const toast = document.getElementById('toastNotification');
 
+// Form Input Elements
+const employeeIdInput = document.getElementById('employeeId');
+const fullNameInput = document.getElementById('fullName');
+const emailInput = document.getElementById('email');
+const phoneInput = document.getElementById('phone');
+const roleInput = document.getElementById('role');
+const statusInput = document.getElementById('status');
+
 // Helper to get initials for avatar
 function getInitials(name) {
+  if (!name) return "NV";
   const parts = name.trim().split(' ');
   if (parts.length >= 2) {
     return (parts[parts.length - 2][0] + parts[parts.length - 1][0]).toUpperCase();
@@ -34,65 +35,19 @@ function getInitials(name) {
   return name.slice(0, 2).toUpperCase();
 }
 
-// Render Table Rows
-function renderTable(data) {
-  tableBody.innerHTML = '';
-  if (data.length === 0) {
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">
-          No matching employees found.
-        </td>
-      </tr>
-    `;
-    return;
+// Format Date string safely (e.g., "2026-10-04" -> "04/10/2026")
+function formatDate(dateStr) {
+  if (!dateStr) return 'N/A';
+  
+  const cleanDateStr = String(dateStr).split('T')[0];
+  const parts = cleanDateStr.split('-');
+  
+  if (parts.length === 3) {
+    const [year, month, day] = parts;
+    return `${day}/${month}/${year}`;
   }
-
-  data.forEach(emp => {
-    const tr = document.createElement('tr');
-    const badgeClass = emp.status === 'Active' ? 'badge-active' : 'badge-leave';
-    
-    tr.innerHTML = `
-      <td class="emp-id">${emp.id}</td>
-      <td>
-        <div class="emp-name-cell">
-          <div class="emp-avatar">${getInitials(emp.name)}</div>
-          <span style="font-weight: 500;">${emp.name}</span>
-        </div>
-      </td>
-      <td>${emp.role}</td>
-      <td>${emp.shift}</td>
-      <td>${emp.phone}</td>
-      <td>${emp.joinDate}</td>
-      <td><span class="badge ${badgeClass}">${emp.status}</span></td>
-      <td>
-        <div class="action-buttons" style="justify-content: flex-end;">
-          <button class="btn-icon" title="Edit Employee" onclick="openEditEmployeeModal('${emp.id}')">
-            <i class="fa-solid fa-pen-to-square"></i>
-          </button>
-          <button class="btn-icon delete" title="Delete Employee" onclick="deleteEmployee('${emp.id}')">
-            <i class="fa-solid fa-trash-can"></i>
-          </button>
-        </div>
-      </td>
-    `;
-    tableBody.appendChild(tr);
-  });
-}
-
-// Filter and Search Logic
-function filterData() {
-  const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
-  const selectedRole = roleFilter ? roleFilter.value : '';
-
-  const filtered = employees.filter(emp => {
-    const matchesSearch = emp.name.toLowerCase().includes(searchTerm) || 
-                          emp.id.toLowerCase().includes(searchTerm);
-    const matchesRole = selectedRole === "" || emp.role === selectedRole;
-    return matchesSearch && matchesRole;
-  });
-
-  renderTable(filtered);
+  
+  return dateStr;
 }
 
 // Show Toast Notification
@@ -105,36 +60,150 @@ function showToast(message) {
   }, 3000);
 }
 
+// Fetch employees from API
+async function fetchEmployees() {
+  try {
+    const response = await fetch(API_URL);
+    if (!response.ok) throw new Error("Failed to load employees from server.");
+    
+    employees = await response.json();
+    filterData();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+// Delete Employee Handler
+async function deleteEmployee(employeeId, employeeName) {
+  const confirmDelete = confirm(`Are you sure you want to delete employee "${employeeName}" (NV-${String(employeeId).padStart(3, '0')})?`);
+  if (!confirmDelete) return;
+
+  try {
+    const response = await fetch(`${API_URL}/${employeeId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      showToast(data.detail || 'Failed to delete employee.');
+      return;
+    }
+
+    showToast(data.message || 'Employee deleted successfully!');
+    
+    // Refresh employee table data
+    fetchEmployees();
+
+  } catch (error) {
+    console.error('Delete Error:', error);
+    showToast('Server connection error while deleting employee.');
+  }
+}
+
+// Render Table Rows matching database schema
+function renderTable(data) {
+  tableBody.innerHTML = '';
+  
+  if (!data || data.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">
+          No matching employees found.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  data.forEach(emp => {
+    const tr = document.createElement('tr');
+    const idDisplay = `NV-${String(emp.employee_id).padStart(3, '0')}`;
+    const statusClassMap = {
+    'Active': 'badge-active',
+    'On Leave': 'badge-leave',
+    'Inactive': 'badge-inactive'
+    };
+    const badgeClass = statusClassMap[emp.status] || 'badge-inactive';
+    
+    const safeName = (emp.name || '').replace(/'/g, "\\'");
+
+    tr.innerHTML = `
+      <td class="emp-id">${idDisplay}</td>
+      <td>
+        <div class="emp-name-cell">
+          <div class="emp-avatar">${getInitials(emp.name)}</div>
+          <div>
+            <div style="font-weight: 500;">${emp.name}</div>
+            <div style="font-size: 0.8rem; color: #777;">${emp.email || 'N/A'}</div>
+          </div>
+        </div>
+      </td>
+      <td>${emp.role}</td>
+      <td>${emp.phone || 'N/A'}</td>
+      <td><span class="badge ${badgeClass}">${emp.status}</span></td>
+      <td>${formatDate(emp.created_at)}</td>
+      <td>
+        <div class="action-buttons" style="justify-content: flex-end; display: flex; gap: 8px;">
+          <button class="btn-icon" title="Edit Employee" onclick="openEditEmployeeModal(${emp.employee_id})">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </button>
+          <button class="btn-icon btn-delete" title="Delete Employee" onclick="deleteEmployee(${emp.employee_id}, '${safeName}')">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+      </td>
+    `;
+    tableBody.appendChild(tr);
+  });
+}
+
+// Search and Filter Logic
+function filterData() {
+  const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+  const selectedRole = roleFilter ? roleFilter.value : '';
+
+  const filtered = employees.filter(emp => {
+    const empIdFormatted = `nv-${String(emp.employee_id).padStart(3, '0')}`;
+    const matchesSearch = (emp.name && emp.name.toLowerCase().includes(searchTerm)) || 
+                          empIdFormatted.includes(searchTerm);
+    const matchesRole = selectedRole === "" || emp.role === selectedRole;
+    
+    return matchesSearch && matchesRole;
+  });
+
+  renderTable(filtered);
+}
+
 // Open Modal in ADD Mode
 function openAddEmployeeModal() {
   isEditMode = false;
-  currentEditId = null;
-  
   if (modalTitle) modalTitle.textContent = "Add New Employee";
   if (employeeForm) employeeForm.reset();
-  
+  if (employeeIdInput) employeeIdInput.value = '';
   modal.classList.add('active');
 }
 
 // Open Modal in EDIT Mode
-window.openEditEmployeeModal = function(id) {
-  const emp = employees.find(e => e.id === id);
+function openEditEmployeeModal(id) {
+  const emp = employees.find(e => e.employee_id === id);
   if (!emp) return;
 
   isEditMode = true;
-  currentEditId = id;
-
   if (modalTitle) modalTitle.textContent = "Edit Employee";
 
-  // Fill form fields with employee data
-  if (document.getElementById('fullName')) document.getElementById('fullName').value = emp.name;
-  if (document.getElementById('role')) document.getElementById('role').value = emp.role;
-  if (document.getElementById('shift')) document.getElementById('shift').value = emp.shift;
-  if (document.getElementById('phone')) document.getElementById('phone').value = emp.phone;
-  if (document.getElementById('status')) document.getElementById('status').value = emp.status;
+  if (employeeIdInput) employeeIdInput.value = emp.employee_id;
+  if (fullNameInput) fullNameInput.value = emp.name;
+  if (emailInput) emailInput.value = emp.email || '';
+  if (phoneInput) phoneInput.value = emp.phone || '';
+  if (roleInput) roleInput.value = emp.role;
+  if (statusInput) statusInput.value = emp.status;
 
   modal.classList.add('active');
-};
+}
 
 // Close Modal
 function closeModal() {
@@ -143,64 +212,48 @@ function closeModal() {
 }
 
 // Form Submit Handler (Handles both ADD and EDIT)
-function handleFormSubmit(e) {
+async function handleFormSubmit(e) {
   e.preventDefault();
 
-  const fullName = document.getElementById('fullName').value.trim();
-  const role = document.getElementById('role').value;
-  const shift = document.getElementById('shift').value;
-  const phone = document.getElementById('phone').value.trim();
-  const status = document.getElementById('status') ? document.getElementById('status').value : 'Active';
+  const payload = {
+    name: fullNameInput.value.trim(),
+    email: emailInput.value.trim() || null,
+    phone: phoneInput.value.trim() || null,
+    role: roleInput.value,
+    status: statusInput.value
+  };
 
-  if (!fullName || !phone) {
-    showToast("Please complete all required fields!");
-    return;
-  }
-
-  if (isEditMode) {
-    // EDIT LOGIC
-    const index = employees.findIndex(e => e.id === currentEditId);
-    if (index !== -1) {
-      employees[index].name = fullName;
-      employees[index].role = role;
-      employees[index].shift = shift;
-      employees[index].phone = phone;
-      employees[index].status = status;
-
-      showToast(`Updated employee ${fullName} successfully`);
+  try {
+    let response;
+    
+    if (isEditMode) {
+      const id = employeeIdInput.value;
+      response = await fetch(`${API_URL}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } else {
+      response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
     }
-  } else {
-    // ADD LOGIC
-    const newId = `NV-00${employees.length + 1}`;
-    const today = new Date().toLocaleDateString('en-GB');
 
-    const newEmp = {
-      id: newId,
-      name: fullName,
-      role: role,
-      shift: shift,
-      phone: phone,
-      joinDate: today,
-      status: status
-    };
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.detail || "Action failed.");
+    }
 
-    employees.unshift(newEmp);
-    showToast(`Added new employee ${fullName} successfully`);
+    showToast(isEditMode ? "Updated employee successfully!" : "Added new employee successfully!");
+    closeModal();
+    fetchEmployees();
+
+  } catch (error) {
+    showToast(error.message);
   }
-
-  filterData();
-  closeModal();
 }
-
-// Delete Employee Handler
-window.deleteEmployee = function(id) {
-  const emp = employees.find(e => e.id === id);
-  if (emp) {
-    employees = employees.filter(e => e.id !== id);
-    filterData();
-    showToast(`Deleted employee ${emp.name}`);
-  }
-};
 
 // Event Listeners Setup
 document.addEventListener('DOMContentLoaded', () => {
@@ -219,6 +272,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Initial render
-  renderTable(employees);
+  // Initial data load
+  fetchEmployees();
 });
+
+window.deleteEmployee = deleteEmployee;
+window.openEditEmployeeModal = openEditEmployeeModal;

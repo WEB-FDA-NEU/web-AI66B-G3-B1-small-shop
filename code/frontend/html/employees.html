@@ -82,8 +82,7 @@
                         <option value="">All Positions</option>
                         <option value="Manager">Manager</option>
                         <option value="Cashier">Cashier</option>
-                        <option value="Barista">Barista</option>
-                        <option value="Server">Server</option>
+                        <option value="Staff">Staff</option>
                     </select>
                 </div>
             </div>
@@ -98,23 +97,22 @@
                 <thead>
                     <tr>
                         <th>Employee ID</th>
-                        <th>Name</th>
+                        <th>Name & Email</th>
                         <th>Position</th>
-                        <th>Shift</th>
                         <th>Phone Number</th>
-                        <th>Hire Date</th>
                         <th>Status</th>
+                        <th>Created Date</th>
                         <th style="text-align: right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="employeeTableBody">
-                    <!-- Dynamic Rows populated via JS -->
+                    <!-- Dynamic Rows populated via API -->
                 </tbody>
             </table>
         </section>
     </main>
 
-    <!-- Add Employee Modal -->
+    <!-- Unified Add / Edit Employee Modal -->
     <div class="modal-overlay" id="employeeModal">
         <div class="modal-container">
             <div class="modal-header">
@@ -123,37 +121,37 @@
             </div>
             <div class="modal-body">
                 <form id="employeeForm">
+                    <input type="hidden" id="employeeId">
+
                     <div class="form-grid">
                         <div class="form-group full-width">
-                            <label for="fullName">Name *</label>
-                            <input type="text" id="fullName" placeholder="e.g., John Doe" required>
+                            <label for="fullName">Full Name *</label>
+                            <input type="text" id="fullName" placeholder="e.g., Nguyễn Văn A" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" placeholder="example@domain.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" placeholder="090x xxx xxx" 
+                            maxlength="10" inputmode="numeric" pattern="[0-9]*"
+                            title="Numbers only (0-9)." >
                         </div>
                         <div class="form-group">
                             <label for="role">Position *</label>
                             <select id="role" required>
-                                <option value="Server">Server</option>
-                                <option value="Barista">Barista</option>
+                                <option value="Staff">Staff</option>
                                 <option value="Cashier">Cashier</option>
                                 <option value="Manager">Manager</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="shift">Shift *</label>
-                            <select id="shift" required>
-                                <option value="Morning (07:00 - 15:00)">Morning (07:00 - 15:00)</option>
-                                <option value="Afternoon (15:00 - 23:00)">Afternoon (15:00 - 23:00)</option>
-                                <option value="Full-time">Full-time</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="phone">Phone Number *</label>
-                            <input type="tel" id="phone" placeholder="090x xxx xxx" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="status">Status</label>
-                            <select id="status">
+                            <label for="status">Status *</label>
+                            <select id="status" required>
                                 <option value="Active">Active</option>
                                 <option value="On Leave">On Leave</option>
+                                <option value="Inactive">Inactive</option>
                             </select>
                         </div>
                     </div>
@@ -162,65 +160,6 @@
             <div class="modal-footer">
                 <button type="button" class="btn-secondary" id="cancelModalBtn">Cancel</button>
                 <button type="submit" form="employeeForm" class="btn-primary" id="saveEmployeeBtn">Save Information</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Employee Modal -->
-    <div class="modal-overlay" id="editEmployeeModal">
-        <div class="modal-container">
-            <div class="modal-header">
-                <h3 class="modal-title">Edit Employee</h3>
-                <button type="button" class="modal-close" id="closeEditModalBtn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="editEmployeeForm">
-                    <!-- Hidden input to track which employee is being edited -->
-                    <input type="hidden" id="editEmployeeId">
-
-                    <div class="form-grid">
-                        <div class="form-group full-width">
-                            <label for="editFullName">Full Name *</label>
-                            <input type="text" id="editFullName" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="editRole">Position *</label>
-                            <select id="editRole" required>
-                                <option value="Server">Server</option>
-                                <option value="Barista">Barista</option>
-                                <option value="Cashier">Cashier</option>
-                                <option value="Manager">Manager</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="editShift">Shift *</label>
-                            <select id="editShift" required>
-                                <option value="Morning (07:00 - 15:00)">Morning (07:00 - 15:00)</option>
-                                <option value="Afternoon (15:00 - 23:00)">Afternoon (15:00 - 23:00)</option>
-                                <option value="Full-time">Full-time</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="editPhone">Phone Number *</label>
-                            <input type="tel" id="editPhone" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="editStatus">Status</label>
-                            <select id="editStatus">
-                                <option value="Active">Active</option>
-                                <option value="On Leave">On Leave</option>
-                            </select>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-secondary" id="cancelEditBtn">Cancel</button>
-                <button type="submit" form="editEmployeeForm" class="btn-primary">Save Changes</button>
             </div>
         </div>
     </div>

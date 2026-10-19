@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YUMS - Employee Management</title>
+    <title>YUMS - Customer Management</title>
     
     <!-- Google Fonts: Bodoni Moda & Montserrat -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda&display=swap" rel="stylesheet">
+    
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -17,10 +18,11 @@
 </head>
 <body>
 
-    <!-- Sidebar Navigation -->
+    <!-- Toggle Sidebar Mobile Button -->
     <button type="button" class="menu-btn" id="menuBtn">☰</button>
 
-    <aside class="sidebar">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
         <div>
             <div class="sidebar-brand">
                 <a href="home.html">
@@ -54,11 +56,11 @@
     </aside>
 
     <!-- Main Content Area -->
-    <main class="main-content">
+    <main class="main-content" id="mainContent">
         <header class="top-header">
             <div class="header-title">
                 <h2>Customers</h2>
-                <p>Customers list</p>
+                <p>Customers list & overview</p>
             </div>
 
             <div class="user-profile">
@@ -69,27 +71,22 @@
                 </div>
             </div>
         </header>
-        <!-- Summary Card -->
 
+        <!-- Summary Cards -->
         <div class="customer-summary">
-
             <!-- Total Customers -->
             <div class="summary-card">
                 <div class="summary-card-header">
                     <span>Total customers</span>
                     <i class="fa-solid fa-ellipsis-vertical"></i>
                 </div>
-
                 <div class="summary-card-body">
                     <h2 id="totalCustomers">0</h2>
-
                     <span class="growth-badge positive">
-                        <i class="fa-solid fa-arrow-trend-up"></i>
-                        20%
+                        <i class="fa-solid fa-arrow-trend-up"></i> 20%
                     </span>
                 </div>
             </div>
-
 
             <!-- Members -->
             <div class="summary-card">
@@ -97,17 +94,13 @@
                     <span>Members</span>
                     <i class="fa-solid fa-ellipsis-vertical"></i>
                 </div>
-
                 <div class="summary-card-body">
                     <h2 id="totalMembers">0</h2>
-
                     <span class="growth-badge positive">
-                        <i class="fa-solid fa-arrow-trend-up"></i>
-                        15%
+                        <i class="fa-solid fa-arrow-trend-up"></i> 15%
                     </span>
                 </div>
             </div>
-
 
             <!-- Active Now -->
             <div class="summary-card">
@@ -115,11 +108,8 @@
                     <span>Active now</span>
                     <i class="fa-solid fa-ellipsis-vertical"></i>
                 </div>
-
                 <div class="summary-card-body">
-
                     <h2 id="activeCustomers">0</h2>
-
                     <div class="avatar-stack">
                         <div class="mini-avatar">TM</div>
                         <div class="mini-avatar">LM</div>
@@ -127,77 +117,45 @@
                         <div class="mini-avatar">PT</div>
                         <div class="mini-avatar">+</div>
                     </div>
-
                 </div>
             </div>
-
         </div>
 
-
-        <!-- ========================================
-            FILTER BAR
-        ========================================= -->
-
-        <div class="customer-filter-bar">
-
-            <!-- Time Filter -->
-            <button class="filter-button active" id="timeFilterBtn">
-                <span>All time</span>
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-
-            <!-- Location Filter -->
-            <button class="filter-button" id="locationFilterBtn">
-                <span>US, AU, +4</span>
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-
-            <!-- More Filters -->
-            <button class="filter-button more-filter" id="moreFilterBtn">
-                <i class="fa-solid fa-sliders"></i>
-                <span>More filters</span>
-            </button>
-
-
-        </div>
-        
+        <!-- Filter & Search Bar -->
         <section class="action-bar">
             <div class="filter-group">
                 <div class="search-box">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="searchInput" placeholder="Search by name, phone number or customer ID...">
+                    <input type="text" id="searchInput" placeholder="Search by name, phone or customer ID...">
                 </div>
-<!--
+
                 <div class="filter-select">
                     <select id="roleFilter">
-                        <option value="">All Positions</option>
-                        <option value="Manager">Manager</option>
-                        <option value="Cashier">Cashier</option>
-                        <option value="Barista">Barista</option>
-                        <option value="Server">Server</option>
+                        <option value="">All Tiers</option>
+                        <option value="Gold">Gold</option>
+                        <option value="Silver">Silver</option>
+                        <option value="Bronze">Bronze</option>
                     </select>
                 </div>
             </div>
-!-->
+            
             <button class="btn-add" id="openAddModalBtn">
-                <i class="fa-solid fa-user-plus"></i> Add Customers
+                <i class="fa-solid fa-user-plus"></i> Add Customer
             </button>
         </section>
 
+        <!-- Table View -->
         <section class="table-wrapper">
             <table class="customers-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Customer</th>
-                        <th>Email</th>
+                        <th>Customer ID</th>
+                        <th>Name</th>
                         <th>Phone</th>
+                        <th>Email</th>
                         <th>Total Spending</th>
-                        <th>Discount</th>
                         <th>Membership</th>
-                        <th>Status</th>
+                        <th>Created At</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -206,13 +164,78 @@
                 </tbody>
             </table>
         </section>
+
+        <!-- Add Customer Modal -->
+        <div class="modal-overlay" id="customerModal">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h3>Add New Customer</h3>
+                    <button type="button" class="modal-close" id="closeAddModalBtn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="customerForm">
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="fullName">Full Name *</label>
+                                <input type="text" id="fullName" placeholder="e.g., John Doe" required>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="email">Email *</label>
+                                <input type="email" id="email" placeholder="john@example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone Number *</label>
+                                <input type="tel" id="phone" placeholder="090x xxx xxx" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="cancelAddModalBtn">Cancel</button>
+                    <button type="submit" form="customerForm" class="btn-primary">Save Information</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Customer Modal -->
+        <div class="modal-overlay" id="editCustomerModal">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h3 class="modal-title">Edit Customer</h3>
+                    <button type="button" class="modal-close" id="closeEditModalBtn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="editCustomerForm">
+                        <input type="hidden" id="editCustomerId">
+
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="editFullName">Full Name *</label>
+                                <input type="text" id="editFullName" required>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="editEmail">Email *</label>
+                                <input type="email" id="editEmail" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editPhone">Phone Number *</label>
+                                <input type="tel" id="editPhone" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="cancelEditModalBtn">Cancel</button>
+                    <button type="submit" form="editCustomerForm" class="btn-primary">Save Changes</button>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- Toast Notification -->
-    <div class="toast" id="toastNotification">System Notification</div>
+    <div class="toast" id="toastNotification">Notification Message</div>
 
-    <!-- Custom Script -->
+    <!-- Script File -->
     <script src="../js/customers.js"></script>
-    <script src="../js/home.js"></script>
 </body>
 </html>
