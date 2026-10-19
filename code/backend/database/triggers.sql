@@ -1,4 +1,5 @@
 
+
 -- ==========================================
 -- 2. STORED PROCEDURE HỖ TRỢ XỬ LÝ KHÁCH HÀNG
 -- ==========================================
@@ -37,7 +38,6 @@ END //
 
 DELIMITER ;
 
-
 -- ==========================================
 -- 3. TRIGGERS QUẢN LÝ KHO (INVENTORY & PRODUCTS)
 -- ==========================================
@@ -57,8 +57,10 @@ BEGIN
         SET NEW.status = 'Expired';
     ELSEIF NEW.expiry_date <= DATE_ADD(CURRENT_DATE, INTERVAL 1 DAY) THEN
         SET NEW.status = 'Near Expiration';
-    ELSEIF NEW.quantity <= 5 THEN
+    ELSEIF NEW.quantity <= 5 AND NEW.quantity > 0 THEN
         SET NEW.status = 'Low Stock';
+	ELSEIF NEW.quantity = 0 THEN
+		SET NEW.status = 'Sold out';
     ELSE
         SET NEW.status = 'Available';
     END IF;
@@ -74,8 +76,10 @@ BEGIN
         SET NEW.status = 'Expired';
     ELSEIF NEW.expiry_date <= DATE_ADD(CURRENT_DATE, INTERVAL 1 DAY) THEN
         SET NEW.status = 'Near Expiration';
-    ELSEIF NEW.quantity <= 5 THEN
+    ELSEIF NEW.quantity <= 5 AND NEW.quantity > 0 THEN
         SET NEW.status = 'Low Stock';
+	ELSEIF NEW.quantity = 0 THEN
+		SET NEW.status = 'Sold out';
     ELSE
         SET NEW.status = 'Available';
     END IF;
