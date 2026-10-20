@@ -50,26 +50,24 @@ function formatDate(dateStr) {
   return dateStr;
 }
 
-// Show Toast Notification
-function showToast(message) {
-  if (!toast) return;
-  toast.textContent = message;
-  toast.classList.add('show');
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, 3000);
-}
+
 
 // Fetch employees from API
 async function fetchEmployees() {
+  showLoading();
   try {
     const response = await fetch(API_URL);
-    if (!response.ok) throw new Error("Failed to load employees from server.");
-    
+    if (!response.ok) {
+      const message = await getApiErrorMessage(response);
+      showToast(message, "error");
+      return;
+    }
     employees = await response.json();
     filterData();
   } catch (error) {
-    showToast(error.message);
+    showNetworkError();
+  } finally {
+        hideLoading();
   }
 }
 
@@ -86,21 +84,26 @@ async function deleteEmployee(employeeId, employeeName) {
       }
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
-      showToast(data.detail || 'Failed to delete employee.');
+      const message = await getApiErrorMessage(response);
+      showToast(message, "error");
       return;
     }
-
+    let data = {};
+    try {
+      data = await response.json();
+    } catch {
+      // The response may not contain JSON.
+    }
     showToast(data.message || 'Employee deleted successfully!');
     
     // Refresh employee table data
     fetchEmployees();
-
   } catch (error) {
     console.error('Delete Error:', error);
-    showToast('Server connection error while deleting employee.');
+    showNetworkError();
+  } finally {
+        hideLoading();
   }
 }
 
@@ -242,16 +245,19 @@ async function handleFormSubmit(e) {
     }
 
     if (!response.ok) {
-      const errData = await response.json();
-      throw new Error(errData.detail || "Action failed.");
+      const message = await getApiErrorMessage(response);
+      showToast(message, "error");
+      return;
     }
 
-    showToast(isEditMode ? "Updated employee successfully!" : "Added new employee successfully!");
+    showToast(isEditMode ? "Updated employee successfully!" : "Added new employee successfully!", "success");
     closeModal();
     fetchEmployees();
 
   } catch (error) {
-    showToast(error.message);
+    showNetworkError();;
+  } finally {
+        hideLoading();
   }
 }
 
