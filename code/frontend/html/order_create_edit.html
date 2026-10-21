@@ -117,6 +117,7 @@
                         </div>
                     </div>
                 </aside>
+                <!--mini popup for order confirm-->
                 <div class="order-confirm-overlay" id="orderConfirmOverlay">
                     <div class="order-confirm-modal">
                         <div class="confirm-header">
@@ -126,19 +127,24 @@
                             </div>
                             <button type="button" class="confirm-close" id="confirmClose">×</button>
                         </div>
+                        
                         <div class="confirm-customer">
-                            <label for="customerNameInput">Customer name</label>
-                            <input type="text" id="customerNameInput" name="customerName" autocomplete="name" placeholder="Enter customer name...">
+                            <label for="customerPhoneInput">Phone number</label>
+                            <input type="tel" id="customerPhoneInput" name="customerPhone" autocomplete="tel" placeholder="Enter customer phone number...">
+                            <div class="customer-options">
+                                <button type="button" class="customer-option-btn" id="addCustomerBtn">Add customer</button>
+                                <button type="button" class="customer-option-btn" id="guestCustomerBtn">Guest customer</button>
+                            </div>
                         </div>
                         <div class="confirm-items" id="confirmItems"></div>
                         <div class="confirm-total">
                             <span>Total</span>
                             <strong id="confirmTotal">0VND</strong>
                         </div>
+                        
                         <div class="confirm-actions">
                             <button type="button" class="confirm-btn cancel" id="cancelOrderBtn">Cancel</button>
-                            <button type="button" class="confirm-btn pay-later" id="payLaterBtn">Pay later</button>
-                            <button type="button" class="confirm-btn pay-now" id="payNowBtn">Pay now</button>
+                            <button type="button" class="confirm-btn pay-now" id="confirmOrderBtn">Confirm</button>
                         </div>
                     </div>
                 </div>

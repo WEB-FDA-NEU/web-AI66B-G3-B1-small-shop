@@ -122,13 +122,14 @@ function searchDishes() {
 }
 dishSearch.addEventListener("input", searchDishes);
 const orderConfirmOverlay = document.querySelector("#orderConfirmOverlay");
-const customerNameInput = document.querySelector("#customerNameInput");
+const customerPhoneInput = document.querySelector("#customerPhoneInput");
 const confirmItems = document.querySelector("#confirmItems");
 const confirmTotal = document.querySelector("#confirmTotal");
 const confirmClose = document.querySelector("#confirmClose");
 const cancelOrderBtn = document.querySelector("#cancelOrderBtn");
-const payNowBtn = document.querySelector("#payNowBtn");
-const payLaterBtn = document.querySelector("#payLaterBtn");
+const confirmOrderBtn = document.querySelector("#confirmOrderBtn");
+const addCustomerBtn = document.querySelector("#addCustomerBtn");
+const guestCustomerBtn = document.querySelector("#guestCustomerBtn");
 
 function getNextOrderId() {
     const savedOrders = JSON.parse(localStorage.getItem("yumsOrders") || "[]");
@@ -158,25 +159,31 @@ function openConfirmDialog() {
     if (selectedDishes.length === 0) {
         return;
     }
-    customerNameInput.value = "";
+
+    customerPhoneInput.value = "";
+    customerPhoneInput.style.borderColor = "#96C0CE";
+
     renderConfirmItems();
     orderConfirmOverlay.classList.add("show");
-    customerNameInput.focus();
+    customerPhoneInput.focus();
 }
 function closeConfirmDialog() {
     orderConfirmOverlay.classList.remove("show");
 
 }
-function saveNewOrder(status) {
-    const customerName = customerNameInput.value.trim();
-    if (customerName === "") {
-        customerNameInput.focus();
-        customerNameInput.style.borderColor = "#7F0303";
+function saveNewOrder(status, isGuest = false) {
+    const customerPhone = customerPhoneInput.value.trim();
+
+    if (!isGuest && customerPhone === "") {
+        customerPhoneInput.focus();
+        customerPhoneInput.style.borderColor = "#7F0303";
         return;
     }
+
     const newOrder = {
         id: getNextOrderId(),
-        customer: customerName,
+        customerPhone: isGuest ? null : customerPhone,
+        customer: isGuest ? "Guest customer" : customerPhone,
         status: status,
         items: selectedDishes.map(dish => ({
             id: dish.id,
@@ -185,31 +192,55 @@ function saveNewOrder(status) {
             quantity: dish.quantity
         }))
     };
-    const savedOrders = JSON.parse(localStorage.getItem("yumsOrders") || "[]");
+
+    const savedOrders = JSON.parse(
+        localStorage.getItem("yumsOrders") || "[]"
+    );
+
     savedOrders.push(newOrder);
     localStorage.setItem("yumsOrders", JSON.stringify(savedOrders));
+
     orderConfirmOverlay.classList.remove("show");
     selectedDishes = [];
     renderBill();
+
     window.location.href = "order_check.html";
 }
 
 sumBtn.addEventListener("click", openConfirmDialog);
+
 confirmClose.addEventListener("click", closeConfirmDialog);
 cancelOrderBtn.addEventListener("click", closeConfirmDialog);
-payNowBtn.addEventListener("click", () => {
+
+confirmOrderBtn.addEventListener("click", () => {
     saveNewOrder("Success");
 });
-payLaterBtn.addEventListener("click", () => {
-    saveNewOrder("Pending");
+
+addCustomerBtn.addEventListener("click", () => {
+    const customerPhone = customerPhoneInput.value.trim();
+
+    if (customerPhone === "") {
+        customerPhoneInput.focus();
+        customerPhoneInput.style.borderColor = "#7F0303";
+        return;
+    }
+
+    saveNewOrder("Success");
 });
+
+guestCustomerBtn.addEventListener("click", () => {
+    saveNewOrder("Success", true);
+});
+
 orderConfirmOverlay.addEventListener("click", event => {
     if (event.target === orderConfirmOverlay) {
         closeConfirmDialog();
     }
 });
-customerNameInput.addEventListener("input", () => {
-    customerNameInput.style.borderColor = "#96C0CE";
+
+customerPhoneInput.addEventListener("input", () => {
+    customerPhoneInput.style.borderColor = "#96C0CE";
 });
+
 renderDishes(dishesData);
 renderBill();
