@@ -10,6 +10,27 @@ const billTotal = document.querySelector("#billTotal");
 const dishSearch = document.querySelector("#dishSearch");
 const sumBtn = document.querySelector("#sumBtn");
 
+const productImages = {
+    1: "../img/espresso.jpg",
+    2: "../img/americano.jpg",
+    3: "../img/cappuccino.jpg",
+    4: "../img/latte.jpg",
+    5: "../img/green_tea.jpg",
+    6: "../img/peach_tea.jpg",
+    7: "../img/lemon_tea.jpg",
+    8: "../img/classic_milk_tea.jpg",
+    9: "../img/brown_sugar_milk_tea.jpg",
+    10: "../img/matcha_milk_tea.jpg",
+    11: "../img/croissant.jpg",
+    12: "../img/chocolate_muffin.jpg",
+    13: "../img/butter_cookie.jpg",
+    14: "../img/chicken_sandwich.jpg",
+    15: "../img/beef_sandwich.jpg",
+    16: "../img/cheesecake.jpg",
+    17: "../img/tiramisu.jpg",
+    18: "../img/ice_cream.jpg",
+};
+
 async function loadDishes() {
     try {
         const response = await fetch(`${API_BASE_URL}/products`);
@@ -26,7 +47,8 @@ async function loadDishes() {
                 id: Number(product.product_id),
                 name: product.name,
                 price: Number(product.unit_price),
-                image: "../img/tiramisu.jpg" //choose tiramisu as default image for now, its not important anw and i like tiramisu
+                image: productImages[Number(product.product_id)]
+                    || "../img/tiramisu.jpg"
             }));
 
         renderDishes(availableDishes);
