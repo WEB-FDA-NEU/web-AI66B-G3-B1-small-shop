@@ -100,14 +100,6 @@ api_router = APIRouter(prefix="/api")
 def get_products_endpoint():
     return get_products()
 
-@api_router.get("/customers/search", tags=["Customers"])
-def search_customers_endpoint(phone: str = ""):
-    return search_customers(phone)
-
-@api_router.post("/customers", tags=["Customers"], status_code=status.HTTP_201_CREATED)
-def create_customer_endpoint(payload: CustomerCreate):
-    return create_customer(payload)
-
 @api_router.post("/orders", tags=["Orders"], status_code=status.HTTP_201_CREATED)
 def create_order_endpoint(payload: OrderCreate):
     return create_order(payload)
@@ -126,6 +118,15 @@ def get_order_endpoint(order_id: int):
 @api_router.patch("/orders/{order_id}/deliver", response_model=DeliveryResponse, tags=["Orders"])
 def deliver_order_endpoint(order_id: int):
     return mark_order_delivered(order_id)
+
+#2 customer endpoints since maitran need them for the create ord screen
+@api_router.get("/customers/search", tags=["Customers"])
+def search_customers_endpoint(phone: str = ""):
+    return search_customers(phone)
+
+@api_router.post("/customers", tags=["Customers"], status_code=status.HTTP_201_CREATED)
+def create_customer_endpoint(payload: CustomerCreate):
+    return create_customer(payload)
 
 app.include_router(api_router)
 
