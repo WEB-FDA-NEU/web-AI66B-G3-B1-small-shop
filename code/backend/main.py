@@ -8,6 +8,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 
 from schema.employee import EmployeeCreate, EmployeeUpdate, EmployeeResponse
 from services.employee import add_employee, update_employee, get_all_employees, delete_employee, get_employee_by_id
+from schema.order import OrderCreate, CustomerCreate, DeliveryResponse
+from services.order import get_products, search_customers, create_customer, create_order, get_orders, get_order_by_id, mark_order_delivered
+
 from config.api import settings
 
 app = FastAPI(title="YUMS")
@@ -89,6 +92,44 @@ def delete_employee_endpoint(employee_id: int):
     return delete_employee(employee_id=employee_id)
 
 app.include_router(emp_router)
+
+#all routers for order screns of maitran
+api_router = APIRouter(prefix="/api")
+
+@api_router.get("/products", tags=["Products"])
+def get_products_endpoint():
+    return get_products()
+
+@api_router.post("/orders", tags=["Orders"], status_code=status.HTTP_201_CREATED)
+def create_order_endpoint(payload: OrderCreate):
+    return create_order(payload)
+
+@api_router.get("/orders", tags=["Orders"])
+def get_orders_endpoint():
+    return get_orders()
+
+@api_router.get("/orders/{order_id}", tags=["Orders"])
+def get_order_endpoint(order_id: int):
+    order = get_order_by_id(order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found.")
+    return order
+
+@api_router.patch("/orders/{order_id}/deliver", response_model=DeliveryResponse, tags=["Orders"])
+def deliver_order_endpoint(order_id: int):
+    return mark_order_delivered(order_id)
+
+#2 customer endpoints since maitran need them for the create ord screen
+@api_router.get("/customers/search", tags=["Customers"])
+def search_customers_endpoint(phone: str = ""):
+    return search_customers(phone)
+
+@api_router.post("/customers", tags=["Customers"], status_code=status.HTTP_201_CREATED)
+def create_customer_endpoint(payload: CustomerCreate):
+    return create_customer(payload)
+
+app.include_router(api_router)
+
 
 if __name__ == "__main__":
     import uvicorn

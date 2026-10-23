@@ -715,6 +715,28 @@ body {
 .confirm-customer input:focus {
     border-color: #7F0303;
 }
+
+.customer-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 8px;
+}
+.customer-option-btn {
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid #96C0CE;
+    background-color: #F8F4ED;
+    color: #0F414A;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.customer-option-btn:hover {
+    opacity: 0.85;
+}
+
 .confirm-items {
     min-height: 0;
     flex: 1;
@@ -779,7 +801,7 @@ body {
 }
 .confirm-actions {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
     padding: 0 22px 18px;
     flex-shrink: 0;
@@ -794,10 +816,6 @@ body {
 }
 .confirm-btn.cancel {
     background-color: #D8BA98;
-    color: #0F414A;
-}
-.confirm-btn.pay-later {
-    background-color: #96C0CE;
     color: #0F414A;
 }
 .confirm-btn.pay-now {

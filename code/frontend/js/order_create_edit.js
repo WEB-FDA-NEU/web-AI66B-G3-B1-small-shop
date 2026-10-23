@@ -1,12 +1,71 @@
+const API_BASE_URL = "http://127.0.0.1:8000/api";
+
+let availableDishes = [];
+let selectedCustomerId = null;
+let isCreatingOrder = false;
 let selectedDishes = [];
 const dishGrid = document.querySelector("#dishGrid");
 const billItems = document.querySelector("#billItems");
 const billTotal = document.querySelector("#billTotal");
 const dishSearch = document.querySelector("#dishSearch");
 const sumBtn = document.querySelector("#sumBtn");
+
+const productImages = {
+    1: "../img/espresso.jpg",
+    2: "../img/americano.jpg",
+    3: "../img/cappuccino.jpg",
+    4: "../img/latte.jpg",
+    5: "../img/green_tea.jpg",
+    6: "../img/peach_tea.jpg",
+    7: "../img/lemon_tea.jpg",
+    8: "../img/classic_milk_tea.jpg",
+    9: "../img/brown_sugar_milk_tea.jpg",
+    10: "../img/matcha_milk_tea.jpg",
+    11: "../img/croissant.jpg",
+    12: "../img/chocolate_muffin.jpg",
+    13: "../img/butter_cookie.jpg",
+    14: "../img/chicken_sandwich.jpg",
+    15: "../img/beef_sandwich.jpg",
+    16: "../img/cheesecake.jpg",
+    17: "../img/tiramisu.jpg",
+    18: "../img/ice_cream.jpg",
+};
+
+async function loadDishes() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/products`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const products = await response.json();
+
+        availableDishes = products
+            .filter(product => product.is_available)
+            .map(product => ({
+                id: Number(product.product_id),
+                name: product.name,
+                price: Number(product.unit_price),
+                image: productImages[Number(product.product_id)]
+                    || "../img/tiramisu.jpg"
+            }));
+
+        renderDishes(availableDishes);
+    } catch (error) {
+        console.error("Load products failed:", error);
+        dishGrid.innerHTML = `
+            <div class="no-dishes">
+                Unable to load products. Please try again.
+            </div>
+        `;
+    }
+}
+
 function formatCurrency(amount) {
     return amount.toLocaleString("vi-VN") + "VND";
 }
+
 function renderDishes(data) {
     dishGrid.innerHTML = "";
     if (data.length === 0) {
@@ -36,12 +95,13 @@ function renderDishes(data) {
         dishGrid.appendChild(card);
     });
 }
+
 function addDishToBill(dishId) {
     const existingDish = selectedDishes.find(item => item.id === dishId);
     if (existingDish) {
         existingDish.quantity += 1;
     } else {
-        const dish = dishesData.find(item => item.id === dishId);
+        const dish = availableDishes.find(item => item.id === dishId);
         if (!dish) {
             return;
         }
@@ -54,6 +114,7 @@ function addDishToBill(dishId) {
     }
     renderBill();
 }
+
 function increaseQuantity(dishId) {
     const dish = selectedDishes.find(item => item.id === dishId);
     if (!dish) {
@@ -62,6 +123,7 @@ function increaseQuantity(dishId) {
     dish.quantity += 1;
     renderBill();
 }
+
 function decreaseQuantity(dishId) {
     const dish = selectedDishes.find(item => item.id === dishId);
     if (!dish) {
@@ -73,11 +135,13 @@ function decreaseQuantity(dishId) {
     }
     renderBill();
 }
+
 function calculateTotal() {
     return selectedDishes.reduce((total, dish) => {
         return total + (dish.price * dish.quantity);
     }, 0);
 }
+
 function renderBill() {
     billItems.innerHTML = "";
     if (selectedDishes.length === 0) {
@@ -113,22 +177,27 @@ function renderBill() {
     });
     billTotal.textContent = formatCurrency(calculateTotal());
 }
+
 function searchDishes() {
     const searchTerm = dishSearch.value.toLowerCase().trim();
-    const filteredDishes = dishesData.filter(dish => {
-        return dish.name.toLowerCase().includes(searchTerm);
-    });
+
+    const filteredDishes = availableDishes.filter(dish =>
+        dish.name.toLowerCase().includes(searchTerm)
+    );
+
     renderDishes(filteredDishes);
 }
+
 dishSearch.addEventListener("input", searchDishes);
 const orderConfirmOverlay = document.querySelector("#orderConfirmOverlay");
-const customerNameInput = document.querySelector("#customerNameInput");
+const customerPhoneInput = document.querySelector("#customerPhoneInput");
 const confirmItems = document.querySelector("#confirmItems");
 const confirmTotal = document.querySelector("#confirmTotal");
 const confirmClose = document.querySelector("#confirmClose");
 const cancelOrderBtn = document.querySelector("#cancelOrderBtn");
-const payNowBtn = document.querySelector("#payNowBtn");
-const payLaterBtn = document.querySelector("#payLaterBtn");
+const confirmOrderBtn = document.querySelector("#confirmOrderBtn");
+const addCustomerBtn = document.querySelector("#addCustomerBtn");
+const guestCustomerBtn = document.querySelector("#guestCustomerBtn");
 
 function getNextOrderId() {
     const savedOrders = JSON.parse(localStorage.getItem("yumsOrders") || "[]");
@@ -138,6 +207,20 @@ function getNextOrderId() {
     });
     const nextNumber = Math.max(...allIds, 0) + 1;
     return `ORD-${String(nextNumber).padStart(3, "0")}`;
+}
+
+async function findCustomerByPhone(phone) {
+    const response = await fetch(
+        `${API_BASE_URL}/customers/search?phone=${encodeURIComponent(phone)}`
+    );
+
+    if (!response.ok) {
+        throw new Error(`Customer search failed: HTTP ${response.status}`);
+    }
+
+    const customers = await response.json();
+
+    return customers.find(customer => customer.phone === phone) || null;
 }
 
 function renderConfirmItems() {
@@ -158,58 +241,140 @@ function openConfirmDialog() {
     if (selectedDishes.length === 0) {
         return;
     }
-    customerNameInput.value = "";
+
+    customerPhoneInput.value = "";
+    customerPhoneInput.style.borderColor = "#96C0CE";
+
     renderConfirmItems();
     orderConfirmOverlay.classList.add("show");
-    customerNameInput.focus();
+    customerPhoneInput.focus();
 }
 function closeConfirmDialog() {
     orderConfirmOverlay.classList.remove("show");
 
 }
-function saveNewOrder(status) {
-    const customerName = customerNameInput.value.trim();
-    if (customerName === "") {
-        customerNameInput.focus();
-        customerNameInput.style.borderColor = "#7F0303";
+
+async function saveNewOrder(isGuest = false) {
+    if (isCreatingOrder || selectedDishes.length === 0) {
         return;
     }
-    const newOrder = {
-        id: getNextOrderId(),
-        customer: customerName,
-        status: status,
+
+    let customerId = null;
+
+    if (!isGuest) {
+        const phone = customerPhoneInput.value.trim();
+
+        if (!phone) {
+            customerPhoneInput.focus();
+            customerPhoneInput.style.borderColor = "#7F0303";
+            return;
+        }
+
+        try {
+            const customer = await findCustomerByPhone(phone);
+
+            if (!customer) {
+                alert(
+                    "Customer not found. Please check the phone number."
+                );
+                return;
+            }
+
+            customerId = customer.customer_id;
+        } catch (error) {
+            console.error("Customer lookup failed:", error);
+            alert("Unable to search for the customer. Please try again.");
+            return;
+        }
+    }
+
+    const payload = {
+        employee_id: 1, //i'll change into "now logged in employee" instead of emp. no1 like this later
+        customer_id: customerId,
         items: selectedDishes.map(dish => ({
-            id: dish.id,
-            name: dish.name,
-            price: dish.price,
+            product_id: Number(dish.id),
             quantity: dish.quantity
         }))
     };
-    const savedOrders = JSON.parse(localStorage.getItem("yumsOrders") || "[]");
-    savedOrders.push(newOrder);
-    localStorage.setItem("yumsOrders", JSON.stringify(savedOrders));
-    orderConfirmOverlay.classList.remove("show");
-    selectedDishes = [];
-    renderBill();
-    window.location.href = "order_check.html";
+
+    isCreatingOrder = true;
+    confirmOrderBtn.disabled = true;
+    guestCustomerBtn.disabled = true;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/orders`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json().catch(() => null);
+
+        if (!response.ok) {
+            console.error("Create order failed:", result);
+
+            alert(
+                result?.detail
+                    ? JSON.stringify(result.detail)
+                    : "Unable to create order. Please try again."
+            );
+            return;
+        }
+
+        selectedDishes = [];
+        renderBill();
+        closeConfirmDialog();
+
+        //go straight to check order to see the new order
+        window.location.href =
+            `order_check.html?order_id=${encodeURIComponent(result.order_id)}`;
+
+    } catch (error) {
+        console.error("Create order request failed:", error);
+        alert("Cannot connect to the server. Please try again.");
+    } finally {
+        isCreatingOrder = false;
+        confirmOrderBtn.disabled = false;
+        guestCustomerBtn.disabled = false;
+    }
 }
 
 sumBtn.addEventListener("click", openConfirmDialog);
+
 confirmClose.addEventListener("click", closeConfirmDialog);
 cancelOrderBtn.addEventListener("click", closeConfirmDialog);
-payNowBtn.addEventListener("click", () => {
-    saveNewOrder("Success");
+
+confirmOrderBtn.addEventListener("click", () => {
+    saveNewOrder(false);
 });
-payLaterBtn.addEventListener("click", () => {
-    saveNewOrder("Pending");
+
+//addCustomerBtn.addEventListener("click", () => {
+//    const customerPhone = customerPhoneInput.value.trim();
+//
+//    if (customerPhone === "") {
+//        customerPhoneInput.focus();
+//        customerPhoneInput.style.borderColor = "#7F0303";
+//        return;
+//    }
+//
+//    saveNewOrder("Success");
+//});
+
+guestCustomerBtn.addEventListener("click", () => {
+    saveNewOrder(true);
 });
+
 orderConfirmOverlay.addEventListener("click", event => {
     if (event.target === orderConfirmOverlay) {
         closeConfirmDialog();
     }
 });
-customerNameInput.addEventListener("input", () => {
-    customerNameInput.style.borderColor = "#96C0CE";
+
+customerPhoneInput.addEventListener("input", () => {
+    customerPhoneInput.style.borderColor = "#96C0CE";
 });
-renderDishes(dishesData);
+
+loadDishes();
 renderBill();
