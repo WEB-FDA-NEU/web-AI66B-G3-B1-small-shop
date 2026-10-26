@@ -15,6 +15,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="../css/employee.css">
     <link rel="stylesheet" href="../css/customers.css">
+    <link rel="stylesheet" href="../css/sales.css">
 </head>
 <body>
 
@@ -73,41 +74,26 @@
         </header>
 
         <!-- Summary Cards -->
-        <div class="customer-summary">
+        <div class="customer-summary kpi-grid">
             <!-- Total Customers -->
-            <div class="summary-card">
-                <div class="summary-card-header">
-                    <span>Total customers</span>
-                    <i class="fa-solid fa-ellipsis-vertical"></i>
-                </div>
-                <div class="summary-card-body">
-                    <h2 id="totalCustomers">0</h2>
-                    <span class="growth-badge positive">Registered customers</span>
-                </div>
+            <div class="kpi-card">
+                <span class="kpi-title">Total customers</span>
+                <span class="kpi-value" id="totalCustomers">0</span>
+                <span class="kpi-subtext">Registered customers</span>
             </div>
 
             <!-- Members -->
-            <div class="summary-card">
-                <div class="summary-card-header">
-                    <span>Members</span>
-                    <i class="fa-solid fa-ellipsis-vertical"></i>
-                </div>
-                <div class="summary-card-body">
-                    <h2 id="totalMembers">0</h2>
-                    <span class="growth-badge positive" id="membersTierLabel">All tiers</span>
-                </div>
+            <div class="kpi-card">
+                <span class="kpi-title">Members</span>
+                <span class="kpi-value" id="totalMembers">0</span>
+                <span class="kpi-subtext" id="membersTierLabel">All tiers</span>
             </div>
 
-            <!-- Active Now -->
-            <div class="summary-card">
-                <div class="summary-card-header">
-                    <span>Total spending</span>
-                    <i class="fa-solid fa-ellipsis-vertical"></i>
-                </div>
-                <div class="summary-card-body">
-                    <h2 id="activeCustomers">0</h2>
-                    <span class="growth-badge positive">All customers</span>
-                </div>
+            <!-- Total Spending -->
+            <div class="kpi-card">
+                <span class="kpi-title">Total spending</span>
+                <span class="kpi-value" id="activeCustomers">0</span>
+                <span class="kpi-subtext">All customers</span>
             </div>
         </div>
 
