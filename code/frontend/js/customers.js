@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainContent = document.getElementById('mainContent');
     const totalCustomersEl = document.getElementById('totalCustomers');
     const totalMembersEl = document.getElementById('totalMembers');
+    const membersTierLabel = document.getElementById('membersTierLabel');
     const totalSpendingEl = document.getElementById('activeCustomers');
     const addModal = document.getElementById('customerModal');
     const editModal = document.getElementById('editCustomerModal');
@@ -50,8 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateSummary() {
+        const selectedTier = roleFilter.value;
         const members = customers.filter(customer =>
-            ['Gold', 'Silver'].includes(customer.type_name)
+            !selectedTier || customer.type_name === selectedTier
         ).length;
         const totalSpending = customers.reduce(
             (sum, customer) => sum + (Number(customer.total_spent) || 0),
@@ -60,6 +62,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         totalCustomersEl.textContent = customers.length;
         totalMembersEl.textContent = members;
+        membersTierLabel.textContent = selectedTier
+            ? `${selectedTier} members`
+            : 'All tiers';
         totalSpendingEl.textContent = formatVND(totalSpending);
     }
 
