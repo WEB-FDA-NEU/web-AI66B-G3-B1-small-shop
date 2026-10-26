@@ -7,7 +7,7 @@ from fastapi import HTTPException, status
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from backend.database.connect_db import get_connection
-from backend.schema.order import OrderCreate, CustomerCreate
+from backend.schema.order import OrderCreate
 
 #get all products from the products db table
 def get_products() -> List[Dict[str, Any]]:
@@ -21,65 +21,6 @@ def get_products() -> List[Dict[str, Any]]:
                 ORDER BY product_id
             """)
             return cursor.fetchall()
-    finally:
-        connection.close()
-
-#get the customer w that phone num
-def search_customers(phone: str) -> List[Dict[str, Any]]:
-    phone = phone.strip()
-    if not phone:
-        return []
-    connection = get_connection()
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT customer_id, name, phone, email, customer_type_id
-                FROM customers
-                WHERE phone LIKE %s
-                ORDER BY customer_id DESC
-                LIMIT 20
-            """, (f"%{phone}%",))
-            return cursor.fetchall()
-    finally:
-        connection.close()
-
-#create new customer as they like to
-def create_customer(data: CustomerCreate) -> Dict[str, Any]:
-    connection = get_connection()
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT customer_id FROM customers WHERE phone = %s LIMIT 1",
-                (data.phone.strip(),)
-            )
-            if cursor.fetchone():
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="A customer with this phone number already exists."
-                )
-            cursor.execute("""
-                INSERT INTO customers (name, phone, email, customer_type_id)
-                VALUES (%s, %s, %s, %s)
-            """, (
-                data.name.strip(),
-                data.phone.strip(),
-                data.email,
-                data.customer_type_id
-            ))
-            customer_id = cursor.lastrowid
-            connection.commit()
-            cursor.execute("""
-                SELECT customer_id, name, phone, email, customer_type_id
-                FROM customers
-                WHERE customer_id = %s
-            """, (customer_id,))
-            return cursor.fetchone()
-    except HTTPException:
-        connection.rollback()
-        raise
-    except Exception as e:
-        connection.rollback()
-        raise HTTPException(status_code=500, detail=f"Failed to create customer: {str(e)}")
     finally:
         connection.close()
 
