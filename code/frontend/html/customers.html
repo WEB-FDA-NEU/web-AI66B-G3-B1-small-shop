@@ -168,7 +168,16 @@
                             </div>
                             <div class="form-group full-width">
                                 <label for="email">Email</label>
-                                <input type="email" id="email" name="email" placeholder="john@example.com">
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    placeholder="john@gmail.com"
+                                    pattern="[^@\s]+@gmail\.com"
+                                    title="Enter a valid email address ending with @gmail.com."
+                                    aria-describedby="emailError"
+                                >
+                                <span class="form-error" id="emailError" aria-live="polite"></span>
                             </div>
                             <div class="form-group">
                                 <label for="phone">Phone Number *</label>
@@ -217,7 +226,15 @@
                             </div>
                             <div class="form-group full-width">
                                 <label for="editEmail">Email</label>
-                                <input type="email" id="editEmail" name="email">
+                                <input
+                                    type="email"
+                                    id="editEmail"
+                                    name="email"
+                                    pattern="[^@\s]+@gmail\.com"
+                                    title="Enter a valid email address ending with @gmail.com."
+                                    aria-describedby="editEmailError"
+                                >
+                                <span class="form-error" id="editEmailError" aria-live="polite"></span>
                             </div>
                             <div class="form-group">
                                 <label for="editPhone">Phone Number *</label>
@@ -246,12 +263,42 @@
                 </div>
             </div>
         </div>
+
+        <div
+            class="modal-overlay delete-confirmation-overlay"
+            id="deleteCustomerModal"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="deleteCustomerTitle"
+            aria-describedby="deleteCustomerMessage"
+            tabindex="-1"
+        >
+            <div class="modal-container delete-confirmation">
+                <div class="delete-confirmation-icon" aria-hidden="true">
+                    <i class="fa-solid fa-trash-can"></i>
+                </div>
+                <div class="delete-confirmation-content">
+                    <h3 id="deleteCustomerTitle">Delete customer?</h3>
+                    <p id="deleteCustomerMessage">
+                        Are you sure you want to delete <strong id="deleteCustomerName"></strong>?
+                        This action cannot be undone.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="cancelDeleteCustomerBtn">Keep customer</button>
+                    <button type="button" class="btn-delete-confirm" id="confirmDeleteCustomerBtn">
+                        <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                        Delete customer
+                    </button>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- Toast Notification -->
     <div class="toast" id="toastNotification">Notification Message</div>
 
     <!-- Script File -->
-    <script src="../js/customers.js?v=2"></script>
+    <script src="../js/customers.js?v=5"></script>
 </body>
 </html>

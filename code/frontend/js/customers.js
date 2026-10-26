@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalSpendingEl = document.getElementById('activeCustomers');
     const addModal = document.getElementById('customerModal');
     const editModal = document.getElementById('editCustomerModal');
+    const deleteModal = document.getElementById('deleteCustomerModal');
+    const deleteCustomerName = document.getElementById('deleteCustomerName');
+    const confirmDeleteButton = document.getElementById('confirmDeleteCustomerBtn');
     const addForm = document.getElementById('customerForm');
     const editForm = document.getElementById('editCustomerForm');
     const addTypeSelect = document.getElementById('membershipTier');
@@ -30,7 +33,19 @@ document.addEventListener('DOMContentLoaded', () => {
             error: document.getElementById('editPhoneError')
         }
     ];
+    const emailInputs = [
+        {
+            input: document.getElementById('email'),
+            error: document.getElementById('emailError')
+        },
+        {
+            input: document.getElementById('editEmail'),
+            error: document.getElementById('editEmailError')
+        }
+    ];
     let sortAscending = true;
+    let pendingDeleteId = null;
+    let deleteTrigger = null;
 
     function customerLabel(id) {
         return `CUS-${String(id).padStart(3, '0')}`;
@@ -205,6 +220,41 @@ document.addEventListener('DOMContentLoaded', () => {
         modal?.classList.remove('active');
     }
 
+    function openDeleteConfirmation(customer, trigger) {
+        pendingDeleteId = customer.customer_id;
+        deleteTrigger = trigger;
+        deleteCustomerName.textContent = `${customerLabel(customer.customer_id)} — ${customer.name}`;
+        openModal(deleteModal);
+        confirmDeleteButton.focus();
+    }
+
+    function closeDeleteConfirmation() {
+        closeModal(deleteModal);
+        pendingDeleteId = null;
+        confirmDeleteButton.disabled = false;
+        confirmDeleteButton.innerHTML = '<i class="fa-solid fa-trash-can" aria-hidden="true"></i> Delete customer';
+        deleteTrigger?.focus();
+        deleteTrigger = null;
+    }
+
+    async function deletePendingCustomer() {
+        if (pendingDeleteId === null) return;
+
+        const id = pendingDeleteId;
+        confirmDeleteButton.disabled = true;
+        confirmDeleteButton.textContent = 'Deleting...';
+        try {
+            await request(`/customers/${id}`, { method: 'DELETE' });
+            closeDeleteConfirmation();
+            await loadCustomers();
+            showToast(`Deleted customer ${customerLabel(id)}`);
+        } catch (error) {
+            confirmDeleteButton.disabled = false;
+            confirmDeleteButton.innerHTML = '<i class="fa-solid fa-trash-can" aria-hidden="true"></i> Delete customer';
+            showToast(`Could not delete customer: ${error.message}`);
+        }
+    }
+
     function customerPayload(form, typeSelect) {
         const formData = new FormData(form);
         return {
@@ -227,6 +277,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return isValid;
     }
 
+    function validateEmail(input, errorElement) {
+        input.value = input.value.trim();
+        const isValid = !input.value ||
+            (!input.validity.typeMismatch && /^[^@\s]+@gmail\.com$/i.test(input.value));
+        const message = isValid ? '' : 'Enter a valid email address ending with @gmail.com.';
+
+        input.setCustomValidity(message);
+        errorElement.textContent = message;
+        return isValid;
+    }
+
     phoneInputs.forEach(({ input, error }) => {
         input.addEventListener('input', () => validatePhone(input, error));
         input.addEventListener('blur', () => {
@@ -234,19 +295,37 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    emailInputs.forEach(({ input, error }) => {
+        input.addEventListener('input', () => validateEmail(input, error));
+        input.addEventListener('blur', () => validateEmail(input, error));
+    });
+
     document.getElementById('openAddModalBtn')?.addEventListener('click', () => openModal(addModal));
     document.getElementById('closeAddModalBtn')?.addEventListener('click', () => closeModal(addModal));
     document.getElementById('cancelAddModalBtn')?.addEventListener('click', () => closeModal(addModal));
     document.getElementById('closeEditModalBtn')?.addEventListener('click', () => closeModal(editModal));
     document.getElementById('cancelEditModalBtn')?.addEventListener('click', () => closeModal(editModal));
+    document.getElementById('cancelDeleteCustomerBtn')?.addEventListener('click', closeDeleteConfirmation);
+    confirmDeleteButton.addEventListener('click', deletePendingCustomer);
 
     window.addEventListener('click', event => {
         if (event.target === addModal) closeModal(addModal);
         if (event.target === editModal) closeModal(editModal);
+        if (event.target === deleteModal) closeDeleteConfirmation();
+    });
+
+    window.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && deleteModal.classList.contains('active')) {
+            closeDeleteConfirmation();
+        }
     });
 
     addForm.addEventListener('submit', async event => {
         event.preventDefault();
+        if (!validateEmail(emailInputs[0].input, emailInputs[0].error)) {
+            emailInputs[0].input.reportValidity();
+            return;
+        }
         if (!validatePhone(phoneInputs[0].input, phoneInputs[0].error)) {
             phoneInputs[0].input.reportValidity();
             return;
@@ -277,6 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('editCustomerId').value = customer.customer_id;
             document.getElementById('editFullName').value = customer.name;
             document.getElementById('editEmail').value = customer.email || '';
+            validateEmail(emailInputs[1].input, emailInputs[1].error);
             document.getElementById('editPhone').value = customer.phone;
             editTypeSelect.value = String(customer.customer_type_id);
             openModal(editModal);
@@ -284,19 +364,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (deleteButton) {
             const id = Number(deleteButton.dataset.id);
-            if (!confirm(`Are you sure you want to delete customer ${customerLabel(id)}?`)) return;
-            try {
-                await request(`/customers/${id}`, { method: 'DELETE' });
-                await loadCustomers();
-                showToast(`Deleted customer ${customerLabel(id)}`);
-            } catch (error) {
-                showToast(`Could not delete customer: ${error.message}`);
-            }
+            const customer = customers.find(item => item.customer_id === id);
+            if (customer) openDeleteConfirmation(customer, deleteButton);
         }
     });
 
     editForm.addEventListener('submit', async event => {
         event.preventDefault();
+        if (!validateEmail(emailInputs[1].input, emailInputs[1].error)) {
+            emailInputs[1].input.reportValidity();
+            return;
+        }
         if (!validatePhone(phoneInputs[1].input, phoneInputs[1].error)) {
             phoneInputs[1].input.reportValidity();
             return;

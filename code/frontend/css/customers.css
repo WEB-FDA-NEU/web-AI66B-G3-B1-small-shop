@@ -219,6 +219,82 @@ table.customers-table tbody tr:last-child td {
     font-size: 0.78rem;
 }
 
+.delete-confirmation-overlay {
+    z-index: 1100;
+}
+
+.modal-container.delete-confirmation {
+    max-width: 440px;
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    align-items: start;
+    column-gap: 16px;
+    padding: 28px;
+}
+
+.delete-confirmation-icon {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border: 1px solid #E3C1AA;
+    border-radius: 50%;
+    background-color: #F8E5D8;
+    color: #8A4B20;
+    font-size: 1.1rem;
+}
+
+.delete-confirmation-content h3 {
+    margin: 2px 0 8px;
+    color: var(--text-dark);
+    font-family: var(--font-title);
+    font-size: 1.25rem;
+}
+
+.delete-confirmation-content p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.delete-confirmation-content strong {
+    color: var(--text-dark);
+}
+
+.delete-confirmation .modal-footer {
+    grid-column: 1 / -1;
+    margin: 24px -28px -28px;
+    padding: 16px 28px;
+}
+
+.btn-delete-confirm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 18px;
+    border: 1px solid #8A4B20;
+    border-radius: 4px;
+    background-color: #8A4B20;
+    color: #fff;
+    font-family: var(--font-content);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.btn-delete-confirm:hover:not(:disabled) {
+    border-color: #713B18;
+    background-color: #713B18;
+}
+
+.btn-delete-confirm:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
 /* Avatar Stack */
 .avatar-stack {
     display: flex;
@@ -249,6 +325,24 @@ table.customers-table tbody tr:last-child td {
     .action-bar .filter-group {
         flex-direction: column;
         align-items: stretch;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-container.delete-confirmation {
+        grid-template-columns: 40px 1fr;
+        column-gap: 12px;
+        padding: 22px;
+    }
+
+    .delete-confirmation-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .delete-confirmation .modal-footer {
+        margin: 20px -22px -22px;
+        padding: 14px 22px;
     }
 }
 
