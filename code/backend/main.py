@@ -10,7 +10,7 @@ from schema.employee import EmployeeCreate, EmployeeUpdate, EmployeeResponse
 from services.employee import add_employee, update_employee, get_all_employees, delete_employee, get_employee_by_id
 from schema.order import OrderCreate, DeliveryResponse
 from schema.customer import CustomerCreate, CustomerUpdate
-from services.customer import search_customers, get_customers, get_customer_types, create_customer, update_customer, delete_customer
+from services.customer import search_customers, get_customers, get_customer_details, get_customer_types, create_customer, update_customer, delete_customer
 from services.order import get_products, create_order, get_orders, get_order_by_id, mark_order_delivered
 
 from config.api import settings
@@ -136,6 +136,18 @@ def get_customers_endpoint():
 def get_customer_types_endpoint():
     try:
         return get_customer_types()
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Customer database is unavailable. Check the MySQL settings in backend/.env.",
+        ) from e
+
+@api_router.get("/customers/{customer_id}/details", tags=["Customers"])
+def get_customer_details_endpoint(customer_id: int):
+    try:
+        return get_customer_details(customer_id)
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,

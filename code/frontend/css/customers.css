@@ -190,9 +190,15 @@ table.customers-table tbody tr:last-child td {
 }
 
 .badge-tier.silver {
-    background-color: #E8ECEF;
-    color: #495057;
-    border: 1px solid #CED4DA;
+    background-color: #DDE2E6;
+    color: #39424A;
+    border: 1px solid #BCC4CB;
+}
+
+.badge-tier.rock {
+    background-color: #F7F8F9;
+    color: #65717B;
+    border: 1px solid #E4E7EA;
 }
 
 .badge-tier.bronze {

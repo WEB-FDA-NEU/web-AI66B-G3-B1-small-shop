@@ -105,6 +105,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button class="btn-icon btn-edit" data-id="${customer.customer_id}" title="Edit">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </button>
+                        <a class="btn-icon" href="customers_detail.html?id=${encodeURIComponent(customer.customer_id)}" title="View customer details" aria-label="View details for ${customerLabel(customer.customer_id)}">
+                            <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                        </a>
                         <button class="btn-icon btn-delete delete" data-id="${customer.customer_id}" title="Delete">
                             <i class="fa-solid fa-trash"></i>
                         </button>
