@@ -134,18 +134,6 @@ Keep this terminal window running while testing the application. Your terminal s
 
 ---
 
-## 7. Open the Customer Management Page
-
-In a second terminal, from the `code` directory, serve the frontend:
-
-```powershell
-python -m http.server 5500 --directory frontend
-```
-
-Open `http://127.0.0.1:5500/html/customers.html`. The customer list and membership tiers are loaded from the backend API and saved to MySQL.
-
----
-
 ## 7. Open the Frontend
 
 Open the following file in your web browser:
