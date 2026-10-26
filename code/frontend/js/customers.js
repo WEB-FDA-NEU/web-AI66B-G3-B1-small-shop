@@ -20,6 +20,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const editForm = document.getElementById('editCustomerForm');
     const addTypeSelect = document.getElementById('membershipTier');
     const editTypeSelect = document.getElementById('editMembershipTier');
+    const phoneInputs = [
+        {
+            input: document.getElementById('phone'),
+            error: document.getElementById('phoneError')
+        },
+        {
+            input: document.getElementById('editPhone'),
+            error: document.getElementById('editPhoneError')
+        }
+    ];
     let sortAscending = true;
 
     function customerLabel(id) {
@@ -205,6 +215,25 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    function validatePhone(input, errorElement) {
+        const phone = input.value.trim();
+        const isValid = /^0[0-9]{9}$/.test(phone);
+        const message = isValid
+            ? ''
+            : 'Phone number must be exactly 10 digits and start with 0.';
+
+        input.setCustomValidity(message);
+        errorElement.textContent = message;
+        return isValid;
+    }
+
+    phoneInputs.forEach(({ input, error }) => {
+        input.addEventListener('input', () => validatePhone(input, error));
+        input.addEventListener('blur', () => {
+            if (input.value) validatePhone(input, error);
+        });
+    });
+
     document.getElementById('openAddModalBtn')?.addEventListener('click', () => openModal(addModal));
     document.getElementById('closeAddModalBtn')?.addEventListener('click', () => closeModal(addModal));
     document.getElementById('cancelAddModalBtn')?.addEventListener('click', () => closeModal(addModal));
@@ -218,6 +247,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     addForm.addEventListener('submit', async event => {
         event.preventDefault();
+        if (!validatePhone(phoneInputs[0].input, phoneInputs[0].error)) {
+            phoneInputs[0].input.reportValidity();
+            return;
+        }
         try {
             await request('/customers', {
                 method: 'POST',
@@ -264,6 +297,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     editForm.addEventListener('submit', async event => {
         event.preventDefault();
+        if (!validatePhone(phoneInputs[1].input, phoneInputs[1].error)) {
+            phoneInputs[1].input.reportValidity();
+            return;
+        }
         const id = Number(document.getElementById('editCustomerId').value);
         try {
             await request(`/customers/${id}`, {

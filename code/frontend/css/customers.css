@@ -211,6 +211,14 @@ table.customers-table tbody tr:last-child td {
     cursor: default;
 }
 
+.form-error {
+    display: block;
+    min-height: 1.1em;
+    margin-top: 5px;
+    color: #b42318;
+    font-size: 0.78rem;
+}
+
 /* Avatar Stack */
 .avatar-stack {
     display: flex;

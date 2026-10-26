@@ -172,7 +172,18 @@
                             </div>
                             <div class="form-group">
                                 <label for="phone">Phone Number *</label>
-                                <input type="tel" id="phone" name="phone" placeholder="090x xxx xxx" required>
+                                <input
+                                    type="tel"
+                                    id="phone"
+                                    name="phone"
+                                    placeholder="0901234567"
+                                    inputmode="numeric"
+                                    pattern="0[0-9]{9}"
+                                    title="Enter exactly 10 digits starting with 0."
+                                    aria-describedby="phoneError"
+                                    required
+                                >
+                                <span class="form-error" id="phoneError" aria-live="polite"></span>
                             </div>
                             <div class="form-group">
                                 <label for="membershipTier">Membership</label>
@@ -210,7 +221,17 @@
                             </div>
                             <div class="form-group">
                                 <label for="editPhone">Phone Number *</label>
-                                <input type="tel" id="editPhone" name="phone" required>
+                                <input
+                                    type="tel"
+                                    id="editPhone"
+                                    name="phone"
+                                    inputmode="numeric"
+                                    pattern="0[0-9]{9}"
+                                    title="Enter exactly 10 digits starting with 0."
+                                    aria-describedby="editPhoneError"
+                                    required
+                                >
+                                <span class="form-error" id="editPhoneError" aria-live="polite"></span>
                             </div>
                             <div class="form-group">
                                 <label for="editMembershipTier">Membership</label>
@@ -231,6 +252,6 @@
     <div class="toast" id="toastNotification">Notification Message</div>
 
     <!-- Script File -->
-    <script src="../js/customers.js"></script>
+    <script src="../js/customers.js?v=2"></script>
 </body>
 </html>
