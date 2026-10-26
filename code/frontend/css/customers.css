@@ -84,6 +84,34 @@ table.customers-table tbody tr:last-child td {
     font-size: 0.75rem;
 }
 
+.customer-sort-toggle {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--card-bg);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all var(--transition-speed);
+}
+
+.customer-sort-toggle:hover,
+.customer-sort-toggle:focus-visible {
+    background-color: var(--bg-sidebar);
+    border-color: var(--bg-sidebar);
+    color: var(--text-light);
+}
+
+.customer-sort-toggle:focus-visible {
+    outline: 2px solid var(--bg-sidebar);
+    outline-offset: 2px;
+}
+
 /* Customer ID Specific Styling */
 .cus-id {
     font-weight: 600;

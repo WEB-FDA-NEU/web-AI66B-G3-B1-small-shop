@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableBody = document.getElementById('customersTableBody');
     const searchInput = document.getElementById('searchInput');
     const roleFilter = document.getElementById('roleFilter');
+    const sortToggle = document.getElementById('customerSortToggle');
     const menuBtn = document.getElementById('menuBtn');
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.getElementById('mainContent');
@@ -19,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editForm = document.getElementById('editCustomerForm');
     const addTypeSelect = document.getElementById('membershipTier');
     const editTypeSelect = document.getElementById('editMembershipTier');
+    let sortAscending = true;
 
     function customerLabel(id) {
         return `CUS-${String(id).padStart(3, '0')}`;
@@ -72,7 +74,11 @@ document.addEventListener('DOMContentLoaded', () => {
         tableBody.innerHTML = '';
         updateSummary();
 
-        if (data.length === 0) {
+        const sortedData = [...data].sort((a, b) =>
+            (Number(a.customer_id) - Number(b.customer_id)) * (sortAscending ? 1 : -1)
+        );
+
+        if (sortedData.length === 0) {
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 24px;">
@@ -82,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        data.forEach(customer => {
+        sortedData.forEach(customer => {
             const row = document.createElement('tr');
             const tier = customer.type_name || 'Unknown';
             const tierClass = escapeHTML(tier.toLowerCase());
@@ -271,6 +277,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     searchInput.addEventListener('input', filterCustomers);
     roleFilter.addEventListener('change', filterCustomers);
+    sortToggle.addEventListener('click', () => {
+        sortAscending = !sortAscending;
+        const direction = sortAscending ? 'ascending' : 'descending';
+        sortToggle.setAttribute('aria-label', `Sort Customer ID ${direction}`);
+        sortToggle.title = `Sort Customer ID ${direction}`;
+        sortToggle.innerHTML = `
+            <i class="fa-solid ${sortAscending ? 'fa-arrow-down-1-9' : 'fa-arrow-down-9-1'}" aria-hidden="true"></i>
+        `;
+        filterCustomers();
+    });
     menuBtn?.addEventListener('click', () => {
         sidebar?.classList.toggle('hidden');
         mainContent?.classList.toggle('expand');
