@@ -39,7 +39,7 @@ CREATE TABLE `customers` (
   `email` varchar(100),
   `total_spent` decimal(12,2) NOT NULL DEFAULT 0,
   `customer_type_id` int DEFAULT 1,
-  `created_at` date 
+  `created_at` date NOT NULL DEFAULT (CURRENT_DATE)
 );
 
 CREATE TABLE `categories` (
@@ -92,5 +92,4 @@ ALTER TABLE `order_items` ADD FOREIGN KEY (`order_id`) REFERENCES `orders` (`ord
 ALTER TABLE `order_items` ADD FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`);
 ALTER TABLE `customers` ADD FOREIGN KEY (`customer_type_id`) REFERENCES `customer_types` (`customer_type_id`);
 ALTER TABLE `products` ADD FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`);
-
 

@@ -1,63 +1,109 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Initial mock data if localStorage is empty
-    const initialCustomers = [
-        { id: 'CUS-001', name: 'Nguyễn Văn An', email: 'an.nguyen@gmail.com', phone: '0901234567', spending: 15500000, tier: 'Gold', status: 'Active' },
-        { id: 'CUS-002', name: 'Trần Thị Bích', email: 'bich.tran@yahoo.com', phone: '0912345678', spending: 4200000, tier: 'Silver', status: 'Active' },
-        { id: 'CUS-003', name: 'Lê Minh Cường', email: 'cuong.le@hotmail.com', phone: '0987654321', spending: 800000, tier: 'Bronze', status: 'Inactive' },
-        { id: 'CUS-004', name: 'Pham Hoàng Dũng', email: 'dung.pham@gmail.com', phone: '0933445566', spending: 21000000, tier: 'Gold', status: 'Active' }
-    ];
+    const API_BASE_URL = 'http://127.0.0.1:8000/api';
+    let customers = [];
+    let customerTypes = [];
 
-    // State management
-    let customers = JSON.parse(localStorage.getItem('yums_customers')) || initialCustomers;
-
-    // DOM Elements
     const tableBody = document.getElementById('customersTableBody');
     const searchInput = document.getElementById('searchInput');
     const roleFilter = document.getElementById('roleFilter');
+    const sortToggle = document.getElementById('customerSortToggle');
     const menuBtn = document.getElementById('menuBtn');
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.getElementById('mainContent');
-
-    // Summary Elements
     const totalCustomersEl = document.getElementById('totalCustomers');
     const totalMembersEl = document.getElementById('totalMembers');
-    const activeCustomersEl = document.getElementById('activeCustomers');
-
-    // Modals
+    const membersTierLabel = document.getElementById('membersTierLabel');
+    const totalSpendingEl = document.getElementById('activeCustomers');
     const addModal = document.getElementById('customerModal');
     const editModal = document.getElementById('editCustomerModal');
-
-    // Forms
+    const deleteModal = document.getElementById('deleteCustomerModal');
+    const deleteCustomerName = document.getElementById('deleteCustomerName');
+    const confirmDeleteButton = document.getElementById('confirmDeleteCustomerBtn');
     const addForm = document.getElementById('customerForm');
     const editForm = document.getElementById('editCustomerForm');
+    const addTypeSelect = document.getElementById('membershipTier');
+    const editTypeSelect = document.getElementById('editMembershipTier');
+    const phoneInputs = [
+        {
+            input: document.getElementById('phone'),
+            error: document.getElementById('phoneError')
+        },
+        {
+            input: document.getElementById('editPhone'),
+            error: document.getElementById('editPhoneError')
+        }
+    ];
+    const emailInputs = [
+        {
+            input: document.getElementById('email'),
+            error: document.getElementById('emailError')
+        },
+        {
+            input: document.getElementById('editEmail'),
+            error: document.getElementById('editEmailError')
+        }
+    ];
+    let sortAscending = true;
+    let pendingDeleteId = null;
+    let deleteTrigger = null;
 
-    // Save customers to localStorage
-    function saveCustomers() {
-        localStorage.setItem('yums_customers', JSON.stringify(customers));
+    function customerLabel(id) {
+        return `CUS-${String(id).padStart(3, '0')}`;
     }
 
-    // Format currency to VND
+    function escapeHTML(value) {
+        return String(value ?? '').replace(/[&<>"']/g, character => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        })[character]);
+    }
+
     function formatVND(amount) {
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+            maximumFractionDigits: 0
+        }).format(Number(amount) || 0);
     }
 
-    // Update Summary Dashboard Cards
+    function formatDate(date) {
+        if (!date) return '—';
+        const parsedDate = new Date(date);
+        return Number.isNaN(parsedDate.getTime())
+            ? '—'
+            : new Intl.DateTimeFormat('vi-VN').format(parsedDate);
+    }
+
     function updateSummary() {
-        const total = customers.length;
-        const members = customers.filter(c => c.tier === 'Gold' || c.tier === 'Silver').length;
-        const active = customers.filter(c => c.status === 'Active').length;
+        const selectedTier = roleFilter.value;
+        const members = customers.filter(customer =>
+            !selectedTier || customer.type_name === selectedTier
+        ).length;
+        const totalSpending = customers.reduce(
+            (sum, customer) => sum + (Number(customer.total_spent) || 0),
+            0
+        );
 
-        if (totalCustomersEl) totalCustomersEl.textContent = total;
-        if (totalMembersEl) totalMembersEl.textContent = members;
-        if (activeCustomersEl) activeCustomersEl.textContent = active;
+        totalCustomersEl.textContent = customers.length;
+        totalMembersEl.textContent = members;
+        membersTierLabel.textContent = selectedTier
+            ? `${selectedTier} members`
+            : 'All tiers';
+        totalSpendingEl.textContent = formatVND(totalSpending);
     }
 
-    // Render Table Rows
     function renderTable(data = customers) {
-        if (!tableBody) return;
         tableBody.innerHTML = '';
+        updateSummary();
 
-        if (data.length === 0) {
+        const sortedData = [...data].sort((a, b) =>
+            (Number(a.customer_id) - Number(b.customer_id)) * (sortAscending ? 1 : -1)
+        );
+
+        if (sortedData.length === 0) {
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 24px;">
@@ -67,59 +113,52 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        data.forEach(customer => {
-            const tr = document.createElement('tr');
-
-            const tierClass = (customer.tier || 'bronze').toLowerCase();
-            const statusClass = customer.status === 'Active' ? 'badge-active' : 'badge-inactive';
-
-            tr.innerHTML = `
-                <td><strong class="cus-id">${customer.id}</strong></td>
-                <td>${customer.name}</td>
-                <td>${customer.email}</td>
-                <td>${customer.phone}</td>
-                <td style="text-align: right;">${formatVND(customer.spending || 0)}</td>
-                <td style="text-align: center;"><span class="badge badge-tier ${tierClass}">${customer.tier}</span></td>
-                <td style="text-align: center;"><span class="badge ${statusClass}">${customer.status}</span></td>
+        sortedData.forEach(customer => {
+            const row = document.createElement('tr');
+            const tier = customer.type_name || 'Unknown';
+            const tierClass = escapeHTML(tier.toLowerCase());
+            row.innerHTML = `
+                <td><strong class="cus-id">${customerLabel(customer.customer_id)}</strong></td>
+                <td>${escapeHTML(customer.name)}</td>
+                <td>${escapeHTML(customer.phone)}</td>
+                <td>${escapeHTML(customer.email || '—')}</td>
+                <td style="text-align: right;">${formatVND(customer.total_spent)}</td>
+                <td style="text-align: center;"><span class="badge badge-tier ${tierClass}">${escapeHTML(tier)}</span></td>
+                <td style="text-align: center;">${formatDate(customer.created_at)}</td>
                 <td style="text-align: center;">
                     <div class="action-buttons">
-                        <button class="btn-icon btn-edit" data-id="${customer.id}" title="Edit">
+                        <button class="btn-icon btn-edit" data-id="${customer.customer_id}" title="Edit">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </button>
-                        <button class="btn-icon btn-delete delete" data-id="${customer.id}" title="Delete">
+                        <a class="btn-icon" href="customers_detail.html?id=${encodeURIComponent(customer.customer_id)}" title="View customer details" aria-label="View details for ${customerLabel(customer.customer_id)}">
+                            <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                        </a>
+                        <button class="btn-icon btn-delete delete" data-id="${customer.customer_id}" title="Delete">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </div>
-                </td>
-            `;
-
-            tableBody.appendChild(tr);
+                </td>`;
+            tableBody.appendChild(row);
         });
-
-        updateSummary();
     }
 
-    // Filter & Search Function
     function filterCustomers() {
-        if (!searchInput || !roleFilter) return;
         const query = searchInput.value.toLowerCase().trim();
         const selectedTier = roleFilter.value;
-
-        const filtered = customers.filter(c => {
-            const matchesSearch = c.name.toLowerCase().includes(query) ||
-                                  c.phone.includes(query) ||
-                                  c.id.toLowerCase().includes(query) ||
-                                  c.email.toLowerCase().includes(query);
-
-            const matchesTier = selectedTier === '' || c.tier === selectedTier;
-
-            return matchesSearch && matchesTier;
+        const filtered = customers.filter(customer => {
+            const searchable = [
+                customer.name,
+                customer.phone,
+                customer.email,
+                customerLabel(customer.customer_id),
+                customer.customer_id
+            ].join(' ').toLowerCase();
+            return searchable.includes(query) &&
+                (!selectedTier || customer.type_name === selectedTier);
         });
-
         renderTable(filtered);
     }
 
-    // Toast Notification helper
     function showToast(message) {
         const toast = document.getElementById('toastNotification');
         if (!toast) return;
@@ -128,132 +167,255 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    // Generate Next ID (e.g. CUS-005)
-    function generateCustomerId() {
-        if (customers.length === 0) return 'CUS-001';
-        const lastId = customers[customers.length - 1].id;
-        const num = parseInt(lastId.replace('CUS-', ''), 10) + 1;
-        return `CUS-${String(num).padStart(3, '0')}`;
+    async function request(path, options = {}) {
+        const response = await fetch(`${API_BASE_URL}${path}`, {
+            ...options,
+            headers: {
+                ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+                ...options.headers
+            }
+        });
+        if (!response.ok) {
+            let message = `Request failed (${response.status})`;
+            try {
+                const body = await response.json();
+                message = body.detail || message;
+            } catch {
+                // Keep the HTTP status message when the response is not JSON.
+            }
+            throw new Error(message);
+        }
+        return response.status === 204 ? null : response.json();
     }
 
-    /* ==========================================
-       MODAL CONTROL HANDLERS (FIXED WITH .active CLASS)
-       ========================================== */
-    function openModal(modal) { 
-        if (modal) modal.classList.add('active'); 
-    }
-    
-    function closeModal(modal) { 
-        if (modal) modal.classList.remove('active'); 
+    async function loadCustomers() {
+        try {
+            customers = await request('/customers');
+            renderTable();
+        } catch (error) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align: center; color: #b42318; padding: 24px;">
+                        Unable to load customers: ${escapeHTML(error.message)}
+                    </td>
+                </tr>`;
+            showToast(`Could not load customers: ${error.message}`);
+        }
     }
 
-    // Event Listeners for Add Modal
-    const openAddBtn = document.getElementById('openAddModalBtn') || document.querySelector('.btn-add');
-    openAddBtn?.addEventListener('click', () => openModal(addModal));
-    
+    async function loadCustomerTypes() {
+        customerTypes = await request('/customer-types');
+        [addTypeSelect, editTypeSelect].forEach(select => {
+            select.innerHTML = customerTypes.map(type =>
+                `<option value="${type.customer_type_id}">${escapeHTML(type.type_name)}</option>`
+            ).join('');
+        });
+    }
+
+    function openModal(modal) {
+        modal?.classList.add('active');
+    }
+
+    function closeModal(modal) {
+        modal?.classList.remove('active');
+    }
+
+    function openDeleteConfirmation(customer, trigger) {
+        pendingDeleteId = customer.customer_id;
+        deleteTrigger = trigger;
+        deleteCustomerName.textContent = `${customerLabel(customer.customer_id)} — ${customer.name}`;
+        openModal(deleteModal);
+        confirmDeleteButton.focus();
+    }
+
+    function closeDeleteConfirmation() {
+        closeModal(deleteModal);
+        pendingDeleteId = null;
+        confirmDeleteButton.disabled = false;
+        confirmDeleteButton.innerHTML = '<i class="fa-solid fa-trash-can" aria-hidden="true"></i> Delete customer';
+        deleteTrigger?.focus();
+        deleteTrigger = null;
+    }
+
+    async function deletePendingCustomer() {
+        if (pendingDeleteId === null) return;
+
+        const id = pendingDeleteId;
+        confirmDeleteButton.disabled = true;
+        confirmDeleteButton.textContent = 'Deleting...';
+        try {
+            await request(`/customers/${id}`, { method: 'DELETE' });
+            closeDeleteConfirmation();
+            await loadCustomers();
+            showToast(`Deleted customer ${customerLabel(id)}`);
+        } catch (error) {
+            confirmDeleteButton.disabled = false;
+            confirmDeleteButton.innerHTML = '<i class="fa-solid fa-trash-can" aria-hidden="true"></i> Delete customer';
+            showToast(`Could not delete customer: ${error.message}`);
+        }
+    }
+
+    function customerPayload(form, typeSelect) {
+        const formData = new FormData(form);
+        return {
+            name: formData.get('name').trim(),
+            phone: formData.get('phone').trim(),
+            email: formData.get('email').trim() || null,
+            customer_type_id: Number(typeSelect.value)
+        };
+    }
+
+    function validatePhone(input, errorElement) {
+        const phone = input.value.trim();
+        const isValid = /^0[0-9]{9}$/.test(phone);
+        const message = isValid
+            ? ''
+            : 'Phone number must be exactly 10 digits and start with 0.';
+
+        input.setCustomValidity(message);
+        errorElement.textContent = message;
+        return isValid;
+    }
+
+    function validateEmail(input, errorElement) {
+        input.value = input.value.trim();
+        const isValid = !input.value ||
+            (!input.validity.typeMismatch && /^[^@\s]+@gmail\.com$/i.test(input.value));
+        const message = isValid ? '' : 'Enter a valid email address ending with @gmail.com.';
+
+        input.setCustomValidity(message);
+        errorElement.textContent = message;
+        return isValid;
+    }
+
+    phoneInputs.forEach(({ input, error }) => {
+        input.addEventListener('input', () => validatePhone(input, error));
+        input.addEventListener('blur', () => {
+            if (input.value) validatePhone(input, error);
+        });
+    });
+
+    emailInputs.forEach(({ input, error }) => {
+        input.addEventListener('input', () => validateEmail(input, error));
+        input.addEventListener('blur', () => validateEmail(input, error));
+    });
+
+    document.getElementById('openAddModalBtn')?.addEventListener('click', () => openModal(addModal));
     document.getElementById('closeAddModalBtn')?.addEventListener('click', () => closeModal(addModal));
     document.getElementById('cancelAddModalBtn')?.addEventListener('click', () => closeModal(addModal));
-
-    // Close Modal on click outside container
-    window.addEventListener('click', (e) => {
-        if (e.target === addModal) closeModal(addModal);
-        if (e.target === editModal) closeModal(editModal);
-    });
-
-    // Add Customer Form Submit
-    addForm?.addEventListener('submit', (e) => {
-        e.preventDefault();
-
-        const newCustomer = {
-            id: generateCustomerId(),
-            name: document.getElementById('fullName').value.trim(),
-            email: document.getElementById('email').value.trim(),
-            phone: document.getElementById('phone').value.trim(),
-            spending: Number(document.getElementById('spending').value) || 0,
-            tier: document.getElementById('membershipTier').value,
-            status: document.getElementById('status').value
-        };
-
-        customers.push(newCustomer);
-        saveCustomers();
-        renderTable();
-        closeModal(addModal);
-        addForm.reset();
-        showToast('Added customer successfully!');
-    });
-
-    // Event Listeners for Edit Modal
     document.getElementById('closeEditModalBtn')?.addEventListener('click', () => closeModal(editModal));
     document.getElementById('cancelEditModalBtn')?.addEventListener('click', () => closeModal(editModal));
+    document.getElementById('cancelDeleteCustomerBtn')?.addEventListener('click', closeDeleteConfirmation);
+    confirmDeleteButton.addEventListener('click', deletePendingCustomer);
 
-    // Handle Table Buttons (Edit & Delete via Event Delegation)
-    tableBody?.addEventListener('click', (e) => {
-        const editBtn = e.target.closest('.btn-edit');
-        const deleteBtn = e.target.closest('.btn-delete');
+    window.addEventListener('click', event => {
+        if (event.target === addModal) closeModal(addModal);
+        if (event.target === editModal) closeModal(editModal);
+        if (event.target === deleteModal) closeDeleteConfirmation();
+    });
 
-        if (editBtn) {
-            const id = editBtn.dataset.id;
-            const customer = customers.find(c => c.id === id);
-
-            if (customer) {
-                if (document.getElementById('editCustomerId')) document.getElementById('editCustomerId').value = customer.id;
-                if (document.getElementById('editFullName')) document.getElementById('editFullName').value = customer.name;
-                if (document.getElementById('editEmail')) document.getElementById('editEmail').value = customer.email;
-                if (document.getElementById('editPhone')) document.getElementById('editPhone').value = customer.phone;
-                if (document.getElementById('editSpending')) document.getElementById('editSpending').value = customer.spending;
-                if (document.getElementById('editMembershipTier')) document.getElementById('editMembershipTier').value = customer.tier;
-                if (document.getElementById('editStatus')) document.getElementById('editStatus').value = customer.status;
-
-                openModal(editModal);
-            }
-        }
-
-        if (deleteBtn) {
-            const id = deleteBtn.dataset.id;
-            if (confirm(`Are you sure you want to delete customer ${id}?`)) {
-                customers = customers.filter(c => c.id !== id);
-                saveCustomers();
-                renderTable();
-                showToast(`Deleted customer ${id}`);
-            }
+    window.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && deleteModal.classList.contains('active')) {
+            closeDeleteConfirmation();
         }
     });
 
-    // Edit Customer Form Submit
-    editForm?.addEventListener('submit', (e) => {
-        e.preventDefault();
+    addForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!validateEmail(emailInputs[0].input, emailInputs[0].error)) {
+            emailInputs[0].input.reportValidity();
+            return;
+        }
+        if (!validatePhone(phoneInputs[0].input, phoneInputs[0].error)) {
+            phoneInputs[0].input.reportValidity();
+            return;
+        }
+        try {
+            await request('/customers', {
+                method: 'POST',
+                body: JSON.stringify(customerPayload(addForm, addTypeSelect))
+            });
+            closeModal(addModal);
+            addForm.reset();
+            await loadCustomers();
+            showToast('Added customer successfully!');
+        } catch (error) {
+            showToast(`Could not add customer: ${error.message}`);
+        }
+    });
 
-        const id = document.getElementById('editCustomerId').value;
-        const index = customers.findIndex(c => c.id === id);
+    tableBody.addEventListener('click', async event => {
+        const editButton = event.target.closest('.btn-edit');
+        const deleteButton = event.target.closest('.btn-delete');
 
-        if (index !== -1) {
-            customers[index] = {
-                id: id,
-                name: document.getElementById('editFullName').value.trim(),
-                email: document.getElementById('editEmail').value.trim(),
-                phone: document.getElementById('editPhone').value.trim(),
-                spending: Number(document.getElementById('editSpending').value) || 0,
-                tier: document.getElementById('editMembershipTier').value,
-                status: document.getElementById('editStatus').value
-            };
+        if (editButton) {
+            const customer = customers.find(item =>
+                item.customer_id === Number(editButton.dataset.id)
+            );
+            if (!customer) return;
+            document.getElementById('editCustomerId').value = customer.customer_id;
+            document.getElementById('editFullName').value = customer.name;
+            document.getElementById('editEmail').value = customer.email || '';
+            validateEmail(emailInputs[1].input, emailInputs[1].error);
+            document.getElementById('editPhone').value = customer.phone;
+            editTypeSelect.value = String(customer.customer_type_id);
+            openModal(editModal);
+        }
 
-            saveCustomers();
-            renderTable();
+        if (deleteButton) {
+            const id = Number(deleteButton.dataset.id);
+            const customer = customers.find(item => item.customer_id === id);
+            if (customer) openDeleteConfirmation(customer, deleteButton);
+        }
+    });
+
+    editForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!validateEmail(emailInputs[1].input, emailInputs[1].error)) {
+            emailInputs[1].input.reportValidity();
+            return;
+        }
+        if (!validatePhone(phoneInputs[1].input, phoneInputs[1].error)) {
+            phoneInputs[1].input.reportValidity();
+            return;
+        }
+        const id = Number(document.getElementById('editCustomerId').value);
+        try {
+            await request(`/customers/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(customerPayload(editForm, editTypeSelect))
+            });
             closeModal(editModal);
+            await loadCustomers();
             showToast('Updated customer successfully!');
+        } catch (error) {
+            showToast(`Could not update customer: ${error.message}`);
         }
     });
 
-    // Filter and Search Events
-    searchInput?.addEventListener('input', filterCustomers);
-    roleFilter?.addEventListener('change', filterCustomers);
-
-    // Sidebar Mobile Toggle Logic
+    searchInput.addEventListener('input', filterCustomers);
+    roleFilter.addEventListener('change', filterCustomers);
+    sortToggle.addEventListener('click', () => {
+        sortAscending = !sortAscending;
+        const direction = sortAscending ? 'ascending' : 'descending';
+        sortToggle.setAttribute('aria-label', `Sort Customer ID ${direction}`);
+        sortToggle.title = `Sort Customer ID ${direction}`;
+        sortToggle.innerHTML = `
+            <i class="fa-solid ${sortAscending ? 'fa-arrow-down-1-9' : 'fa-arrow-down-9-1'}" aria-hidden="true"></i>
+        `;
+        filterCustomers();
+    });
     menuBtn?.addEventListener('click', () => {
-        if (sidebar) sidebar.classList.toggle('hidden');
-        if (mainContent) mainContent.classList.toggle('expand');
+        sidebar?.classList.toggle('hidden');
+        mainContent?.classList.toggle('expand');
     });
 
-    // Initial Render
-    renderTable();
+    (async () => {
+        try {
+            await loadCustomerTypes();
+        } catch (error) {
+            showToast(`Could not load membership types: ${error.message}`);
+        }
+        await loadCustomers();
+    })();
 });

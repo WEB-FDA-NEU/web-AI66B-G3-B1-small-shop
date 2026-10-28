@@ -16,6 +16,7 @@
 /* 2. Customer Table Styling */
 table.customers-table {
     width: 100%;
+    min-width: 1120px;
     border-collapse: collapse;
     text-align: left;
     table-layout: fixed;
@@ -26,15 +27,16 @@ table.customers-table th {
     color: var(--text-dark);
     font-family: var(--font-content);
     font-weight: 600;
-    font-size: 0.8rem;
+    font-size: 0.72rem;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 16px 20px;
+    letter-spacing: 0.5px;
+    padding: 14px 12px;
+    white-space: nowrap;
     border-bottom: 2px solid var(--border-color);
 }
 
 table.customers-table td {
-    padding: 16px 20px;
+    padding: 14px 12px;
     font-size: 0.88rem;
     color: var(--text-dark);
     border-bottom: 1px solid var(--border-color);
@@ -57,17 +59,57 @@ table.customers-table tbody tr:last-child td {
 }
 
 /* 3. Column Widths & Alignments */
-.customers-table th:nth-child(1), .customers-table td:nth-child(1) { width: 11%; } /* Customer ID */
-.customers-table th:nth-child(2), .customers-table td:nth-child(2) { width: 16%; } /* Name */
-.customers-table th:nth-child(3), .customers-table td:nth-child(3) { width: 22%; } /* Email */
-.customers-table th:nth-child(4), .customers-table td:nth-child(4) { width: 13%; } /* Phone */
-.customers-table th:nth-child(5), .customers-table td:nth-child(5) { width: 14%; text-align: right; } /* Spending */
-.customers-table th:nth-child(6), .customers-table td:nth-child(6) { width: 10%; text-align: center; } /* Membership */
-.customers-table th:nth-child(7), .customers-table td:nth-child(7) { width: 8%;  text-align: center; } /* Status */
-.customers-table th:nth-child(8), .customers-table td:nth-child(8) { 
-    width: 100px; 
+.customers-table th:nth-child(1), .customers-table td:nth-child(1) { width: 105px; } /* Customer ID */
+.customers-table th:nth-child(2), .customers-table td:nth-child(2) { width: 150px; } /* Name */
+.customers-table th:nth-child(3), .customers-table td:nth-child(3) { width: 130px; } /* Phone */
+.customers-table th:nth-child(4), .customers-table td:nth-child(4) { width: 205px; } /* Email */
+.customers-table th:nth-child(5), .customers-table td:nth-child(5) { width: 155px; text-align: right; } /* Spending */
+.customers-table th:nth-child(6), .customers-table td:nth-child(6) { width: 130px; text-align: center; } /* Membership */
+.customers-table th:nth-child(7), .customers-table td:nth-child(7) { width: 125px; text-align: center; } /* Created at */
+.customers-table th:nth-child(8), .customers-table td:nth-child(8) {
+    width: 120px;
     text-align: center; 
     overflow: visible; /* Đảm bảo nút bấm không bị che/ẩn */
+}
+
+.customers-table-region:focus-visible {
+    outline: 2px solid var(--bg-sidebar);
+    outline-offset: 3px;
+}
+
+.table-scroll-hint {
+    display: none;
+    margin: -12px 0 10px;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.customer-sort-toggle {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--card-bg);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all var(--transition-speed);
+}
+
+.customer-sort-toggle:hover,
+.customer-sort-toggle:focus-visible {
+    background-color: var(--bg-sidebar);
+    border-color: var(--bg-sidebar);
+    color: var(--text-light);
+}
+
+.customer-sort-toggle:focus-visible {
+    outline: 2px solid var(--bg-sidebar);
+    outline-offset: 2px;
 }
 
 /* Customer ID Specific Styling */
@@ -148,9 +190,15 @@ table.customers-table tbody tr:last-child td {
 }
 
 .badge-tier.silver {
-    background-color: #E8ECEF;
-    color: #495057;
-    border: 1px solid #CED4DA;
+    background-color: #DDE2E6;
+    color: #39424A;
+    border: 1px solid #BCC4CB;
+}
+
+.badge-tier.rock {
+    background-color: #F7F8F9;
+    color: #65717B;
+    border: 1px solid #E4E7EA;
 }
 
 .badge-tier.bronze {
@@ -159,59 +207,92 @@ table.customers-table tbody tr:last-child td {
     border: 1px solid #E3C1AA;
 }
 
-/* 6. Summary Cards Grid */
-.customer-summary {
+.customer-summary .kpi-card {
+    cursor: default;
+}
+
+.form-error {
+    display: block;
+    min-height: 1.1em;
+    margin-top: 5px;
+    color: #b42318;
+    font-size: 0.78rem;
+}
+
+.delete-confirmation-overlay {
+    z-index: 1100;
+}
+
+.modal-container.delete-confirmation {
+    max-width: 440px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-    margin-bottom: 28px;
+    grid-template-columns: 52px 1fr;
+    align-items: start;
+    column-gap: 16px;
+    padding: 28px;
 }
 
-.summary-card {
-    background-color: var(--card-bg);
-    padding: 20px;
-    border-radius: 6px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-    border: 1px solid var(--border-color);
+.delete-confirmation-icon {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border: 1px solid #E3C1AA;
+    border-radius: 50%;
+    background-color: #F8E5D8;
+    color: #8A4B20;
+    font-size: 1.1rem;
 }
 
-.summary-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    margin-bottom: 12px;
-    font-weight: 500;
-}
-
-.summary-card-body {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.summary-card-body h2 {
-    font-size: 1.8rem;
+.delete-confirmation-content h3 {
+    margin: 2px 0 8px;
+    color: var(--text-dark);
     font-family: var(--font-title);
+    font-size: 1.25rem;
+}
+
+.delete-confirmation-content p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.delete-confirmation-content strong {
     color: var(--text-dark);
 }
 
-/* Growth Badge */
-.growth-badge {
-    font-size: 0.75rem;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
+.delete-confirmation .modal-footer {
+    grid-column: 1 / -1;
+    margin: 24px -28px -28px;
+    padding: 16px 28px;
 }
 
-.growth-badge.positive {
-    background-color: #E2EFCB;
-    color: #2E5A1C;
-    border: 1px solid #C4E197;
+.btn-delete-confirm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 18px;
+    border: 1px solid #8A4B20;
+    border-radius: 4px;
+    background-color: #8A4B20;
+    color: #fff;
+    font-family: var(--font-content);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.btn-delete-confirm:hover:not(:disabled) {
+    border-color: #713B18;
+    background-color: #713B18;
+}
+
+.btn-delete-confirm:disabled {
+    cursor: wait;
+    opacity: 0.65;
 }
 
 /* Avatar Stack */
@@ -241,12 +322,32 @@ table.customers-table tbody tr:last-child td {
 
 /* 7. Responsive Breakdown */
 @media (max-width: 900px) {
-    .customer-summary {
-        grid-template-columns: 1fr;
-    }
-
     .action-bar .filter-group {
         flex-direction: column;
         align-items: stretch;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-container.delete-confirmation {
+        grid-template-columns: 40px 1fr;
+        column-gap: 12px;
+        padding: 22px;
+    }
+
+    .delete-confirmation-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .delete-confirmation .modal-footer {
+        margin: 20px -22px -22px;
+        padding: 14px 22px;
+    }
+}
+
+@media (max-width: 1280px) {
+    .table-scroll-hint {
+        display: block;
     }
 }

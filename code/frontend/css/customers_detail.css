@@ -24,29 +24,31 @@
 /* Back */
 
 .btn-secondary {
-    align-self: flex-end;
-
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     background-color: transparent;
-
     border: 1px solid var(--border-color);
-
     color: var(--text-dark);
-
     padding: 9px 18px;
-
     border-radius: 4px;
-
     font-family: var(--font-content);
-
     font-size: 0.85rem;
-
+    font-weight: 500;
+    text-decoration: none;
     cursor: pointer;
-
     transition: all var(--transition-speed);
 }
 
 .btn-secondary:hover {
     background-color: var(--hover-beige);
+    border-color: var(--color-warm-beige);
+    color: var(--bg-sidebar);
+}
+
+.btn-secondary:focus-visible {
+    outline: 2px solid var(--bg-sidebar);
+    outline-offset: 2px;
 }
 
 
@@ -199,6 +201,24 @@
     border: 1px solid #E8D49E;
 }
 
+.membership-badge.silver {
+    background-color: #DDE2E6;
+    color: #39424A;
+    border: 1px solid #BCC4CB;
+}
+
+.membership-badge.bronze {
+    background-color: #F8E5D8;
+    color: #8A4B20;
+    border: 1px solid #E3C1AA;
+}
+
+.membership-badge.rock {
+    background-color: #F7F8F9;
+    color: #65717B;
+    border: 1px solid #E4E7EA;
+}
+
 
 /* =========================================================
    CUSTOMER INFORMATION
@@ -249,15 +269,6 @@
 }
 
 
-/* Status */
-
-.info-item:nth-child(5) p {
-    color: #2F7D45;
-
-    font-weight: 600;
-}
-
-
 /* =========================================================
    CUSTOMER STATISTICS
 ========================================================= */
@@ -269,9 +280,15 @@
 
     gap: 16px;
 
-    margin-bottom: 22px;
+    margin-bottom: 8px;
 }
 
+.stats-note {
+    margin-bottom: 22px;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    line-height: 1.5;
+}
 
 /* Statistic card */
 
@@ -470,10 +487,28 @@
    ORDER STATUS
 ========================================================= */
 
-.orders-table td:last-child {
-    color: #2F7D45;
-
+.order-status {
+    display: inline-block;
+    padding: 4px 9px;
+    border-radius: 12px;
+    font-size: 0.72rem;
     font-weight: 500;
+}
+
+.order-status.delivered {
+    background-color: #E2EFCB;
+    color: #2E5A1C;
+}
+
+.order-status.pending {
+    background-color: #FDF3D6;
+    color: #7A5B0B;
+}
+
+.table-message {
+    text-align: center;
+    color: var(--text-muted) !important;
+    padding: 24px !important;
 }
 
 

@@ -15,6 +15,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="../css/employee.css">
     <link rel="stylesheet" href="../css/customers.css">
+    <link rel="stylesheet" href="../css/sales.css">
 </head>
 <body>
 
@@ -73,51 +74,26 @@
         </header>
 
         <!-- Summary Cards -->
-        <div class="customer-summary">
+        <div class="customer-summary kpi-grid">
             <!-- Total Customers -->
-            <div class="summary-card">
-                <div class="summary-card-header">
-                    <span>Total customers</span>
-                    <i class="fa-solid fa-ellipsis-vertical"></i>
-                </div>
-                <div class="summary-card-body">
-                    <h2 id="totalCustomers">0</h2>
-                    <span class="growth-badge positive">
-                        <i class="fa-solid fa-arrow-trend-up"></i> 20%
-                    </span>
-                </div>
+            <div class="kpi-card">
+                <span class="kpi-title">Total customers</span>
+                <span class="kpi-value" id="totalCustomers">0</span>
+                <span class="kpi-subtext">Registered customers</span>
             </div>
 
             <!-- Members -->
-            <div class="summary-card">
-                <div class="summary-card-header">
-                    <span>Members</span>
-                    <i class="fa-solid fa-ellipsis-vertical"></i>
-                </div>
-                <div class="summary-card-body">
-                    <h2 id="totalMembers">0</h2>
-                    <span class="growth-badge positive">
-                        <i class="fa-solid fa-arrow-trend-up"></i> 15%
-                    </span>
-                </div>
+            <div class="kpi-card">
+                <span class="kpi-title">Members</span>
+                <span class="kpi-value" id="totalMembers">0</span>
+                <span class="kpi-subtext" id="membersTierLabel">All tiers</span>
             </div>
 
-            <!-- Active Now -->
-            <div class="summary-card">
-                <div class="summary-card-header">
-                    <span>Active now</span>
-                    <i class="fa-solid fa-ellipsis-vertical"></i>
-                </div>
-                <div class="summary-card-body">
-                    <h2 id="activeCustomers">0</h2>
-                    <div class="avatar-stack">
-                        <div class="mini-avatar">TM</div>
-                        <div class="mini-avatar">LM</div>
-                        <div class="mini-avatar">NB</div>
-                        <div class="mini-avatar">PT</div>
-                        <div class="mini-avatar">+</div>
-                    </div>
-                </div>
+            <!-- Total Spending -->
+            <div class="kpi-card">
+                <span class="kpi-title">Total spending</span>
+                <span class="kpi-value" id="activeCustomers">0</span>
+                <span class="kpi-subtext">All customers</span>
             </div>
         </div>
 
@@ -135,8 +111,18 @@
                         <option value="Gold">Gold</option>
                         <option value="Silver">Silver</option>
                         <option value="Bronze">Bronze</option>
+                        <option value="Rock">Rock</option>
                     </select>
                 </div>
+                <button
+                    type="button"
+                    class="customer-sort-toggle"
+                    id="customerSortToggle"
+                    aria-label="Sort Customer ID ascending"
+                    title="Sort Customer ID ascending"
+                >
+                    <i class="fa-solid fa-arrow-down-1-9" aria-hidden="true"></i>
+                </button>
             </div>
             
             <button class="btn-add" id="openAddModalBtn">
@@ -145,18 +131,19 @@
         </section>
 
         <!-- Table View -->
-        <section class="table-wrapper">
+        <p class="table-scroll-hint">Scroll horizontally to view all customer details.</p>
+        <section class="table-wrapper customers-table-region" tabindex="0" aria-label="Customer list. Scroll horizontally to view all columns.">
             <table class="customers-table">
                 <thead>
                     <tr>
-                        <th>Customer ID</th>
-                        <th>Name</th>
-                        <th>Phone</th>
-                        <th>Email</th>
-                        <th>Total Spending</th>
-                        <th>Membership</th>
-                        <th>Created At</th>
-                        <th>Actions</th>
+                        <th scope="col">Customer ID</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Phone</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Total Spending</th>
+                        <th scope="col">Membership</th>
+                        <th scope="col">Created At</th>
+                        <th scope="col">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="customersTableBody">
@@ -177,15 +164,39 @@
                         <div class="form-grid">
                             <div class="form-group full-width">
                                 <label for="fullName">Full Name *</label>
-                                <input type="text" id="fullName" placeholder="e.g., John Doe" required>
+                                <input type="text" id="fullName" name="name" placeholder="e.g., John Doe" required>
                             </div>
                             <div class="form-group full-width">
-                                <label for="email">Email *</label>
-                                <input type="email" id="email" placeholder="john@example.com" required>
+                                <label for="email">Email</label>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    placeholder="john@gmail.com"
+                                    pattern="[^@\s]+@gmail\.com"
+                                    title="Enter a valid email address ending with @gmail.com."
+                                    aria-describedby="emailError"
+                                >
+                                <span class="form-error" id="emailError" aria-live="polite"></span>
                             </div>
                             <div class="form-group">
                                 <label for="phone">Phone Number *</label>
-                                <input type="tel" id="phone" placeholder="090x xxx xxx" required>
+                                <input
+                                    type="tel"
+                                    id="phone"
+                                    name="phone"
+                                    placeholder="0901234567"
+                                    inputmode="numeric"
+                                    pattern="0[0-9]{9}"
+                                    title="Enter exactly 10 digits starting with 0."
+                                    aria-describedby="phoneError"
+                                    required
+                                >
+                                <span class="form-error" id="phoneError" aria-live="polite"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="membershipTier">Membership</label>
+                                <select id="membershipTier" required></select>
                             </div>
                         </div>
                     </form>
@@ -211,15 +222,37 @@
                         <div class="form-grid">
                             <div class="form-group full-width">
                                 <label for="editFullName">Full Name *</label>
-                                <input type="text" id="editFullName" required>
+                                <input type="text" id="editFullName" name="name" required>
                             </div>
                             <div class="form-group full-width">
-                                <label for="editEmail">Email *</label>
-                                <input type="email" id="editEmail" required>
+                                <label for="editEmail">Email</label>
+                                <input
+                                    type="email"
+                                    id="editEmail"
+                                    name="email"
+                                    pattern="[^@\s]+@gmail\.com"
+                                    title="Enter a valid email address ending with @gmail.com."
+                                    aria-describedby="editEmailError"
+                                >
+                                <span class="form-error" id="editEmailError" aria-live="polite"></span>
                             </div>
                             <div class="form-group">
                                 <label for="editPhone">Phone Number *</label>
-                                <input type="tel" id="editPhone" required>
+                                <input
+                                    type="tel"
+                                    id="editPhone"
+                                    name="phone"
+                                    inputmode="numeric"
+                                    pattern="0[0-9]{9}"
+                                    title="Enter exactly 10 digits starting with 0."
+                                    aria-describedby="editPhoneError"
+                                    required
+                                >
+                                <span class="form-error" id="editPhoneError" aria-live="polite"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="editMembershipTier">Membership</label>
+                                <select id="editMembershipTier" required></select>
                             </div>
                         </div>
                     </form>
@@ -230,12 +263,42 @@
                 </div>
             </div>
         </div>
+
+        <div
+            class="modal-overlay delete-confirmation-overlay"
+            id="deleteCustomerModal"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="deleteCustomerTitle"
+            aria-describedby="deleteCustomerMessage"
+            tabindex="-1"
+        >
+            <div class="modal-container delete-confirmation">
+                <div class="delete-confirmation-icon" aria-hidden="true">
+                    <i class="fa-solid fa-trash-can"></i>
+                </div>
+                <div class="delete-confirmation-content">
+                    <h3 id="deleteCustomerTitle">Delete customer?</h3>
+                    <p id="deleteCustomerMessage">
+                        Are you sure you want to delete <strong id="deleteCustomerName"></strong>?
+                        This action cannot be undone.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="cancelDeleteCustomerBtn">Keep customer</button>
+                    <button type="button" class="btn-delete-confirm" id="confirmDeleteCustomerBtn">
+                        <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                        Delete customer
+                    </button>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- Toast Notification -->
     <div class="toast" id="toastNotification">Notification Message</div>
 
     <!-- Script File -->
-    <script src="../js/customers.js"></script>
+    <script src="../js/customers.js?v=5"></script>
 </body>
 </html>

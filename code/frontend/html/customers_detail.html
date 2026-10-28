@@ -17,7 +17,7 @@
 
     <!-- CSS -->
      <link rel="stylesheet" href="../css/employee.css">
-    <link rel="stylesheet" href="../css/customers_detail.css">
+    <link rel="stylesheet" href="../css/customers_detail.css?v=2">
 </head>
 
 <body>
@@ -74,15 +74,10 @@
 
             <div class="header-actions">
 
-                <button class="btn-secondary">
+                <a class="btn-secondary" href="customers.html">
                     <i class="fa-solid fa-arrow-left"></i>
-                    Back
-                </button>
-
-                <button class="btn-add">
-                    <i class="fa-solid fa-pen"></i>
-                    Edit Customer
-                </button>
+                    Back to Customers
+                </a>
 
             </div>
 
@@ -95,51 +90,45 @@
 
         <section class="customer-profile-card">
 
-            <div class="customer-avatar-section">
+            <div class="customer-avatar-section" id="customerProfile">
 
-                <div class="customer-avatar">
-                    TM
+                <div class="customer-avatar" id="customerAvatar">
+                    …
                 </div>
 
-                <h3>Trần Minh Hoàng</h3>
+                <h3 id="customerName">Loading customer...</h3>
 
-                <span class="membership-badge gold">
-                    Gold Member
+                <span class="membership-badge" id="customerTier">
+                    Loading...
                 </span>
 
             </div>
 
-
-            <div class="customer-info-grid">
+            <div class="customer-info-grid" id="customerInfo">
 
                 <div class="info-item">
                     <label>Customer ID</label>
-                    <p>KH-001</p>
+                    <p id="customerId">—</p>
                 </div>
 
                 <div class="info-item">
                     <label>Email</label>
-                    <p>123@gmail.com</p>
+                    <p id="customerEmail">—</p>
                 </div>
 
                 <div class="info-item">
                     <label>Phone</label>
-                    <p>0905 123 456</p>
+                    <p id="customerPhone">—</p>
                 </div>
 
                 <div class="info-item">
-                    <label>Join Date</label>
-                    <p>15/01/2026</p>
+                    <label>Created At</label>
+                    <p id="customerCreatedAt">—</p>
                 </div>
 
                 <div class="info-item">
-                    <label>Status</label>
-                    <p>Active</p>
-                </div>
-
-                <div class="info-item">
-                    <label>Discount</label>
-                    <p>10%</p>
+                    <label>Membership Discount</label>
+                    <p id="customerDiscount">—</p>
                 </div>
 
             </div>
@@ -155,25 +144,28 @@
 
             <div class="stat-card">
                 <h4>Total Orders</h4>
-                <h2>15</h2>
+                <h2 id="totalOrders">0</h2>
             </div>
 
             <div class="stat-card">
-                <h4>Total Spending</h4>
-                <h2>5,200,000 VND</h2>
+                <h4>Recorded Spending</h4>
+                <h2 id="totalSpending">0 ₫</h2>
             </div>
 
             <div class="stat-card">
-                <h4>Average Order</h4>
-                <h2>346,000 VND</h2>
+                <h4>Avg. Delivered Order</h4>
+                <h2 id="averageOrder">0 ₫</h2>
             </div>
 
             <div class="stat-card">
-                <h4>Total Discount</h4>
-                <h2>420,000 VND</h2>
+                <h4>Order Discounts</h4>
+                <h2 id="totalDiscount">0 ₫</h2>
             </div>
 
         </section>
+        <p class="stats-note">
+            Recorded spending matches the customer profile. Average order uses delivered orders; order discounts include all orders.
+        </p>
 
 
         <!-- =========================
@@ -199,26 +191,10 @@
                     </tr>
                 </thead>
 
-                <tbody>
-
+                <tbody id="recentOrdersBody">
                     <tr>
-                        <td>ORD-001</td>
-                        <td>20/09/2026</td>
-                        <td>Latte, Cake</td>
-                        <td>120,000 VND</td>
-                        <td>10%</td>
-                        <td>Completed</td>
+                        <td colspan="6" class="table-message">Loading orders...</td>
                     </tr>
-
-                    <tr>
-                        <td>ORD-002</td>
-                        <td>15/09/2026</td>
-                        <td>Tea, Bread</td>
-                        <td>90,000 VND</td>
-                        <td>5%</td>
-                        <td>Completed</td>
-                    </tr>
-
                 </tbody>
 
             </table>
@@ -226,20 +202,9 @@
         </section>
 
 
-        <!-- =========================
-             NOTES
-        ========================== -->
-
-        <section class="customer-notes">
-
-            <h3>Notes</h3>
-
-            <textarea placeholder="Add customer notes..."></textarea>
-
-        </section>
-
     </main>
 
     <script src="../js/home.js"></script>
+    <script src="../js/customers_detail.js?v=2"></script>
 </body>
 </html>
