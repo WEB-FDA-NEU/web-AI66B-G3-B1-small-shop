@@ -121,7 +121,7 @@ def get_order_endpoint(order_id: int):
 def deliver_order_endpoint(order_id: int):
     return mark_order_delivered(order_id)
 
-#2 customer endpoints since maitran need them for the create ord screen
+#customer endpoints since maitran need them for the create ord screen
 @api_router.get("/customers", tags=["Customers"])
 def get_customers_endpoint():
     try:

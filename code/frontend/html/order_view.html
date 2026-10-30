@@ -2,14 +2,13 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>View Order</title>
+    <title>View Order's Detail</title>
     <link rel="stylesheet" href="../css/order_view.css">
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="../js/orders_data.js" defer></script>
     <script src="../js/order_view.js" defer></script>
 </head>
 <body>
@@ -109,10 +108,14 @@
                     </table>
                 </div>
                 <div class="view-actions">
-                    <div class="pending-actions" id="pendingActions">
-                        <button type="button" class="order-action-btn cancel-order-btn" id="cancelOrderBtn">Cancel</button>
-                        <button type="button" class="order-action-btn confirm-payment-btn" id="confirmPaymentBtn">Confirm payment</button>
-                    </div>
+                    <button
+                        type="button"
+                        class="order-action-btn confirm-delivery-btn"
+                        id="confirmDeliveryBtn"
+                        hidden>
+                        Confirm delivery
+                    </button>
+
                     <a href="order_check.html" class="back-btn">Back</a>
                 </div>
             </section>
@@ -120,17 +123,39 @@
     </div>
     <div class="status-confirm-overlay" id="statusConfirmOverlay">
         <div class="status-confirm-modal">
+
             <div class="status-confirm-header">
-                <h2 id="statusConfirmTitle">Confirm action</h2>
-                <button type="button" class="status-confirm-close" id="statusConfirmClose">×</button>
+                <h2 id="statusConfirmTitle">Confirm Delivery Status</h2>
+                <button
+                    type="button"
+                    class="status-confirm-close"
+                    id="statusConfirmClose">
+                    ×
+                </button>
             </div>
+
             <div class="status-confirm-content">
-                <p id="statusConfirmMessage">Are you sure?</p>
+                <p id="statusConfirmMessage">
+                    Do you want to confirm this order as Delivered?
+                </p>
             </div>
+
             <div class="status-confirm-actions">
-                <button type="button" class="status-confirm-btn no-btn" id="statusConfirmNo">No</button>
-                <button type="button" class="status-confirm-btn yes-btn" id="statusConfirmYes">Yes</button>
+                <button
+                    type="button"
+                    class="status-confirm-btn no-btn"
+                    id="statusConfirmNo">
+                    No
+                </button>
+
+                <button
+                    type="button"
+                    class="status-confirm-btn yes-btn"
+                    id="statusConfirmYes">
+                    Yes
+                </button>
             </div>
+
         </div>
     </div>
 
