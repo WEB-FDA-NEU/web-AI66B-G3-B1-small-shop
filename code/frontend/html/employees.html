@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="../css/employee.css">
     <link rel="stylesheet" href="../css/error_mess.css">
     <link rel="stylesheet" href="../css/sales.css">
+    <link rel="stylesheet" href="../css/customers.css"
 
 </head>
 <body>
@@ -139,7 +140,6 @@
         </section>
     </main>
 
-    <!-- Unified Add / Edit Employee Modal -->
     <div class="modal-overlay" id="employeeModal">
         <div class="modal-container">
             <div class="modal-header">
@@ -190,6 +190,36 @@
             </div>
         </div>
     </div>
+
+    <div
+        class="modal-overlay delete-confirmation-overlay"
+        id="deleteEmplohyeeModal"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="deleteEmployeeTitle"
+        aria-describedby="deleteEmployeeMessage"
+        tabindex="-1"
+        >
+            <div class="modal-container delete-confirmation">
+                <div class="delete-confirmation-icon" aria-hidden="true">
+                    <i class="fa-solid fa-trash-can"></i>
+                </div>
+                <div class="delete-confirmation-content">
+                    <h3 id="deleteEmployeeTitle">Delete employee?</h3>
+                    <p id="deleteEmployeeMessage">
+                        Are you sure you want to delete <strong id="deleteEmployeeName"></strong>?
+                        This action cannot be undone.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="cancelDeleteEmployeeBtn">Keep employee</button>
+                    <button type="button" class="btn-delete-confirm" id="confirmDeleteEmployeeBtn">
+                        <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                        Delete employee
+                    </button>
+                </div>
+            </div>
+        </div>
 
     <!-- Toast Notification -->
     <div class="toast" id="toastNotification">System Notification</div>
