@@ -31,6 +31,7 @@ def get_order_by_id(order_id: int) -> Optional[Dict[str, Any]]:
             cursor.execute("""
                 SELECT o.order_id, o.employee_id, o.customer_id,
                        o.deliver_status, o.total_amount, o.discount_amount,
+                       o.note,
                        o.created_at,
                        c.name AS customer_name, c.phone AS customer_phone,
                        e.name AS employee_name
@@ -126,9 +127,14 @@ def create_order(data: OrderCreate) -> Dict[str, Any]:
 
             cursor.execute("""
                 INSERT INTO orders
-                    (employee_id, customer_id, deliver_status, total_amount, discount_amount)
-                VALUES (%s, %s, 'not_deliver', %s, 0)
-            """, (data.employee_id, data.customer_id, total))
+                    (employee_id, customer_id, note, deliver_status, total_amount, discount_amount)
+                VALUES (%s, %s, %s, 'not_deliver', %s, 0)
+            """, (
+                data.employee_id,
+                data.customer_id,
+                data.note.strip() or None if data.note is not None else None,
+                total
+            ))
             order_id = cursor.lastrowid
 
             for item in prepared_items:

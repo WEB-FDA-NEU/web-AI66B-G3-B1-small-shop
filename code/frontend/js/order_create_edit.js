@@ -191,6 +191,7 @@ function searchDishes() {
 dishSearch.addEventListener("input", searchDishes);
 const orderConfirmOverlay = document.querySelector("#orderConfirmOverlay");
 const customerPhoneInput = document.querySelector("#customerPhoneInput");
+const orderNoteInput = document.querySelector("#orderNoteInput");
 const confirmItems = document.querySelector("#confirmItems");
 const confirmTotal = document.querySelector("#confirmTotal");
 const confirmClose = document.querySelector("#confirmClose");
@@ -241,10 +242,10 @@ function openConfirmDialog() {
     if (selectedDishes.length === 0) {
         return;
     }
-
     customerPhoneInput.value = "";
+    orderNoteInput.value = "";
     customerPhoneInput.style.borderColor = "#96C0CE";
-
+    orderNoteInput.style.borderColor = "#96C0CE";
     renderConfirmItems();
     orderConfirmOverlay.classList.add("show");
     customerPhoneInput.focus();
@@ -291,6 +292,7 @@ async function saveNewOrder(isGuest = false) {
     const payload = {
         employee_id: 1, //i'll change into "now logged in employee" instead of emp. no1 like this later
         customer_id: customerId,
+        note: orderNoteInput.value.trim() || null,
         items: selectedDishes.map(dish => ({
             product_id: Number(dish.id),
             quantity: dish.quantity
