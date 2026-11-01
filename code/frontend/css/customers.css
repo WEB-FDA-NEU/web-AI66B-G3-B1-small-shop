@@ -140,7 +140,6 @@ table.customers-table tbody tr:last-child td {
     justify-content: center;
     transition: all var(--transition-speed);
     text-decoration: none;
-    font-size: 0.9rem;
 }
 
 .btn-icon:hover,
