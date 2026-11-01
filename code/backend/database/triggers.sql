@@ -18,11 +18,11 @@ BEGIN
         WHERE `customer_id` = p_customer_id AND `deliver_status` = 'delivered';
 
         -- 2. Xác định hạng dựa trên tổng chi tiêu
-        IF v_total_spent >= 10000000.00 THEN
+        IF v_total_spent >= 1000000.00 THEN
             SELECT customer_type_id INTO v_new_type_id FROM customer_types WHERE type_name = 'Gold' LIMIT 1;
-        ELSEIF v_total_spent >= 5000000.00 THEN
+        ELSEIF v_total_spent >= 500000.00 THEN
             SELECT customer_type_id INTO v_new_type_id FROM customer_types WHERE type_name = 'Silver' LIMIT 1;
-        ELSEIF v_total_spent >= 2000000.00 THEN
+        ELSEIF v_total_spent >= 100000.00 THEN
             SELECT customer_type_id INTO v_new_type_id FROM customer_types WHERE type_name = 'Bronze' LIMIT 1;
         ELSE
             SELECT customer_type_id INTO v_new_type_id FROM customer_types WHERE type_name = 'Rock' LIMIT 1;
