@@ -643,7 +643,8 @@ body {
 }
 .order-confirm-modal {
     width: min(760px, 90vw);
-    max-height: 430px;
+    height: auto;
+    max-height: min(700px, 85vh);
     background-color: #EFE8DF;
     border: 1px solid #D8BA98;
     box-shadow: 0 10px 30px rgba(15, 65, 74, 0.25);
@@ -689,8 +690,9 @@ body {
     color: #7F0303;
 }
 .confirm-customer {
-    padding: 12px 22px;
+    padding: 8px 22px 12px;
     flex-shrink: 0;
+    margin-top: 0;
 }
 .confirm-customer label {
     display: block;
@@ -715,12 +717,15 @@ body {
 .confirm-customer input:focus {
     border-color: #7F0303;
 }
-
 .customer-options {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     margin-top: 8px;
+}
+.confirm-note {
+    margin-top: 0;
+    padding-top: 14px;
 }
 .customer-option-btn {
     height: 32px;
@@ -774,6 +779,7 @@ body {
     font-size: 12px;
     font-weight: 600;
 }
+/* cái này là price lẻ của món á*/
 .confirm-item-amount {
     flex-shrink: 0;
     min-width: 90px;
@@ -781,6 +787,7 @@ body {
     font-family: 'Montserrat', sans-serif;
     font-size: 12px;
     text-align: right;
+    font-weight: 600;
 }
 .confirm-total {
     display: flex;
