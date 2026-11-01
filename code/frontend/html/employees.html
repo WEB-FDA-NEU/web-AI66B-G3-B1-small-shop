@@ -15,6 +15,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="../css/employee.css">
     <link rel="stylesheet" href="../css/error_mess.css">
+    <link rel="stylesheet" href="../css/sales.css">
 
 </head>
 <body>
@@ -71,6 +72,30 @@
                 </div>
             </div>
         </header>
+
+        <!-- Summary Cards -->
+        <div class="customer-summary kpi-grid">
+            <!-- Total Customers -->
+            <div class="kpi-card">
+                <span class="kpi-title">Total Employees</span>
+                <span class="kpi-value" id="totalEmployees">0</span>
+                <span class="kpi-subtext">All employees</span>
+            </div>
+
+            <!-- Members -->
+            <div class="kpi-card">
+                <span class="kpi-title">Active Employees</span>
+                <span class="kpi-value" id="activeEmployees">0</span>
+                <span class="kpi-subtext" id="membersTierLabel">All active employees</span>
+            </div>
+
+            <!-- Total Spending -->
+            <div class="kpi-card">
+                <span class="kpi-title">On Leave</span>
+                <span class="kpi-value" id="onLeaveEmployees">0</span>
+                <span class="kpi-subtext">Permitted absent</span>
+            </div>
+        </div>
 
         <section class="action-bar">
             <div class="filter-group">

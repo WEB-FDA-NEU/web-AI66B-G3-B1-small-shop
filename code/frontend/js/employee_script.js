@@ -50,7 +50,20 @@ function formatDate(dateStr) {
   return dateStr;
 }
 
+// Update Summary Dashboard Cards
+function updateSummary() {
+  const total = employees.length;
+  const active = employees.filter(e => e.status && e.status.trim().toLowerCase() === 'active').length;
+  const onLeave = employees.filter(e => e.status && e.status.trim().toLowerCase() === 'on leave').length;
 
+  const totalEl = document.getElementById('totalEmployees');
+  const activeEl = document.getElementById('activeEmployees');
+  const onLeaveEl = document.getElementById('onLeaveEmployees');
+
+  if (totalEl) totalEl.textContent = total;
+  if (activeEl) activeEl.textContent = active;
+  if (onLeaveEl) onLeaveEl.textContent = onLeave;
+}
 
 // Fetch employees from API
 async function fetchEmployees() {
@@ -119,6 +132,7 @@ function renderTable(data) {
         </td>
       </tr>
     `;
+    updateSummary();
     return;
   }
 
@@ -162,6 +176,7 @@ function renderTable(data) {
     `;
     tableBody.appendChild(tr);
   });
+  updateSummary();
 }
 
 // Search and Filter Logic
@@ -280,6 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initial data load
   fetchEmployees();
+  updateSummary();
 });
 
 window.deleteEmployee = deleteEmployee;
