@@ -50,7 +50,20 @@ function formatDate(dateStr) {
   return dateStr;
 }
 
+// Update Summary Dashboard Cards
+function updateSummary() {
+  const total = employees.length;
+  const active = employees.filter(e => e.status && e.status.trim().toLowerCase() === 'active').length;
+  const onLeave = employees.filter(e => e.status && e.status.trim().toLowerCase() === 'on leave').length;
 
+  const totalEl = document.getElementById('totalEmployees');
+  const activeEl = document.getElementById('activeEmployees');
+  const onLeaveEl = document.getElementById('onLeaveEmployees');
+
+  if (totalEl) totalEl.textContent = total;
+  if (activeEl) activeEl.textContent = active;
+  if (onLeaveEl) onLeaveEl.textContent = onLeave;
+}
 
 // Fetch employees from API
 async function fetchEmployees() {
@@ -71,10 +84,29 @@ async function fetchEmployees() {
   }
 }
 
-// Delete Employee Handler
-async function deleteEmployee(employeeId, employeeName) {
-  const confirmDelete = confirm(`Are you sure you want to delete employee "${employeeName}" (NV-${String(employeeId).padStart(3, '0')})?`);
-  if (!confirmDelete) return;
+let currentDeleteId = null;
+
+function deleteEmployee(employeeId, employeeName) {
+  currentDeleteId = employeeId;
+  
+  const nameEl = document.getElementById('deleteEmployeeName');
+  if (nameEl) {
+    nameEl.textContent = `"${employeeName || 'N/A'}" (NV-${String(employeeId).padStart(3, '0')})`;
+  }
+
+  const deleteModal = document.getElementById('deleteEmplohyeeModal');
+  if (deleteModal) {
+    deleteModal.classList.add('active');
+  }
+}
+
+async function executeDeleteEmployee() {
+  if (!currentDeleteId) return;
+
+  const employeeId = currentDeleteId;
+  closeDeleteModal();
+
+  if (typeof showLoading === 'function') showLoading();
 
   try {
     const response = await fetch(`${API_URL}/${employeeId}`, {
@@ -85,26 +117,38 @@ async function deleteEmployee(employeeId, employeeName) {
     });
 
     if (!response.ok) {
-      const message = await getApiErrorMessage(response);
-      showToast(message, "error");
+      const message = typeof getApiErrorMessage === 'function' ? await getApiErrorMessage(response) : "Failed to delete employee";
+      if (typeof showToast === 'function') showToast(message, "error");
       return;
     }
+    
     let data = {};
     try {
       data = await response.json();
     } catch {
-      // The response may not contain JSON.
+      // Handle case where response is not valid JSON
     }
-    showToast(data.message || 'Employee deleted successfully!');
     
-    // Refresh employee table data
+    if (typeof showToast === 'function') {
+      showToast(data.message || 'Employee deleted successfully!', 'success');
+    }
+    
     fetchEmployees();
   } catch (error) {
     console.error('Delete Error:', error);
-    showNetworkError();
+    if (typeof showNetworkError === 'function') showNetworkError();
   } finally {
-        hideLoading();
+    currentDeleteId = null;
+    if (typeof hideLoading === 'function') hideLoading();
   }
+}
+
+function closeDeleteModal() {
+  const deleteModal = document.getElementById('deleteEmplohyeeModal');
+  if (deleteModal) {
+    deleteModal.classList.remove('active');
+  }
+  currentDeleteId = null;
 }
 
 // Render Table Rows matching database schema
@@ -119,6 +163,7 @@ function renderTable(data) {
         </td>
       </tr>
     `;
+    updateSummary();
     return;
   }
 
@@ -162,6 +207,7 @@ function renderTable(data) {
     `;
     tableBody.appendChild(tr);
   });
+  updateSummary();
 }
 
 // Search and Filter Logic
@@ -278,8 +324,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const confirmBtn = document.getElementById('confirmDeleteEmployeeBtn');
+  if (confirmBtn) {
+    confirmBtn.addEventListener('click', executeDeleteEmployee);
+  }
+
+  const cancelBtn = document.getElementById('cancelDeleteEmployeeBtn');
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', closeDeleteModal);
+  }
+
+  const deleteModal = document.getElementById('deleteEmplohyeeModal');
+  if (deleteModal) {
+    deleteModal.addEventListener('click', (e) => {
+      if (e.target === deleteModal) {
+        closeDeleteModal();
+      }
+    });
+  }
+
   // Initial data load
   fetchEmployees();
+  updateSummary();
 });
 
 window.deleteEmployee = deleteEmployee;
