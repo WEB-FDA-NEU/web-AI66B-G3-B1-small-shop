@@ -71,6 +71,7 @@ CREATE TABLE `orders` (
   `deliver_status` varchar(30) NOT NULL DEFAULT 'not_deliver',
   `total_amount` decimal(12,2) NOT NULL DEFAULT 0,
   `discount_amount` decimal(12,2) NOT NULL DEFAULT 0,
+  `note` text NULL,
   `created_at` datetime NOT NULL DEFAULT NOW()
 );
 
