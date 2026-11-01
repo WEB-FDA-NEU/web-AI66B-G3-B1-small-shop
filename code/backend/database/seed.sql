@@ -102,12 +102,12 @@ VALUES
 (6, 10);
 
 -- 8 ORDERS
-INSERT INTO orders (employee_id, customer_id) 
-VALUES 
-(1, 1),
-(2, 2),
-(3, 5),
-(4, 3);
+INSERT INTO orders (employee_id, customer_id, note)
+VALUES
+    (1, 1, 'Customer requested extra sweet.'),
+    (2, 2, 'Please use non-lactose milk.'),
+    (3, 5, 'Customer prefers cool-served.'),
+    (4, 3, NULL);
 
 -- 9 ORDER ITEMS
 INSERT INTO order_items (`order_id`, `product_id`, `quantity`)
