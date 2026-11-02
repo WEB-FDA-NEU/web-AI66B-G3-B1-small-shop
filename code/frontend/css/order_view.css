@@ -410,12 +410,88 @@ body {
 .order-detail-table .total-row td:last-child {
     text-align: right;
 }
-
-.order-detail-footer {
+/*note*/
+/* Order Note row */
+.order-note-row td {
+    padding: 10px 14px;
+    background-color: #EFE8DF;
+    border-top: none;
+}
+.order-note {
     width: 100%;
+    min-height: 36px;
     display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
+    align-items: center;
+    gap: 12px;
+    color: #0F414A;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15px;
+}
+.order-note-label {
+    flex-shrink: 0;
+    font-weight: 700;
+}
+.order-note-display {
+    flex: 1;
+    min-width: 0;
+    min-height: 30px;
+    display: flex;
+    align-items: center;
+    overflow-wrap: anywhere;
+}
+
+.order-note-display.editable {
+    cursor: pointer;
+}
+.order-note-display.editable:hover {
+    background-color: #E5DCCE;
+}
+.order-note-edit {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.order-note-edit[hidden],
+.order-note-display[hidden] {
+    display: none !important;
+}
+.order-note-input {
+    flex: 1;
+    min-width: 0;
+    height: 34px;
+    padding: 5px 10px;
+    box-sizing: border-box;
+    border: 1px solid #96C0CE;
+    border-radius: 3px;
+    outline: none;
+    background-color: #FFFFFF;
+    color: #0F414A;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+}
+.order-note-input:focus {
+    border-color: #0F414A;
+}
+.save-note-btn {
+    flex-shrink: 0;
+    width: 36px;
+    height: 34px;
+    border: none;
+    border-radius: 3px;
+    background-color: #0F414A;
+    color: #EFE8DF;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.save-note-btn:hover {
+    background-color: #15515C;
+}
+.save-note-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /*nút back*/

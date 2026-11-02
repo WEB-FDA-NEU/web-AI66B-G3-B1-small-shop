@@ -18,8 +18,6 @@ const statusConfirmYes = document.querySelector("#statusConfirmYes");
 function formatCurrency(amount) {
     return Number(amount || 0).toLocaleString("vi-VN") + " VND";
 }
-
-
 function escapeHtml(value) {
     return String(value ?? "").replace(/[&<>"']/g, char => {
         const entities = {
@@ -34,7 +32,6 @@ function escapeHtml(value) {
     });
 }
 
-
 function getStatusLabel(status) {
     const labels = {
         delivered: "Delivered",
@@ -43,7 +40,6 @@ function getStatusLabel(status) {
 
     return labels[status] || status || "Unknown";
 }
-
 
 function getStatusClass(status) {
     if (status === "delivered") {
@@ -55,6 +51,145 @@ function getStatusClass(status) {
     }
 
     return "";
+}
+
+// Render Note row
+
+// Render Note row
+function renderOrderNote(order) {
+    const noteRow = document.createElement("tr");
+    noteRow.className = "order-note-row";
+
+    const noteCell = document.createElement("td");
+    noteCell.colSpan = 5;
+
+    const noteContainer = document.createElement("div");
+    noteContainer.className = "order-note";
+
+    const noteLabel = document.createElement("span");
+    noteLabel.className = "order-note-label";
+    noteLabel.textContent = "Note:";
+
+    const noteDisplay = document.createElement("div");
+    noteDisplay.className = "order-note-display";
+    noteDisplay.textContent = order.note || "";
+
+    const noteEdit = document.createElement("div");
+    noteEdit.className = "order-note-edit";
+    noteEdit.hidden = true;
+
+    const noteInput = document.createElement("input");
+    noteInput.type = "text";
+    noteInput.className = "order-note-input";
+    noteInput.maxLength = 500;
+    noteInput.placeholder = "Enter note...";
+    noteInput.value = order.note || "";
+
+    const saveButton = document.createElement("button");
+    saveButton.type = "button";
+    saveButton.className = "save-note-btn";
+    saveButton.textContent = "✓";
+    saveButton.title = "Save note";
+    saveButton.setAttribute("aria-label", "Save note");
+
+    noteEdit.append(noteInput, saveButton);
+    noteContainer.append(noteLabel, noteDisplay, noteEdit);
+    noteCell.appendChild(noteContainer);
+    noteRow.appendChild(noteCell);
+
+    // Only not_deliver orders can edit Note
+    if (order.deliver_status === "not_deliver") {
+        noteDisplay.classList.add("editable");
+
+        // Open editor
+        noteDisplay.addEventListener("click", () => {
+            noteDisplay.hidden = true;
+            noteEdit.hidden = false;
+            noteInput.value = order.note || "";
+            noteInput.focus();
+        });
+
+        // Close editor without saving
+        function cancelNoteEdit() {
+            noteInput.value = order.note || "";
+            noteEdit.hidden = true;
+            noteDisplay.hidden = false;
+        }
+
+        // Click outside Note row: cancel editing
+        document.addEventListener("click", (event) => {
+            if (
+                !noteEdit.hidden &&
+                !noteRow.contains(event.target)
+            ) {
+                cancelNoteEdit();
+            }
+        });
+
+        // Save Note
+        saveButton.addEventListener("click", () => {
+            saveOrderNote(noteInput, saveButton, noteDisplay, noteEdit);
+        });
+
+        // Enter key: save Note
+        noteInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                saveButton.click();
+            }
+
+            // Escape key: cancel editing
+            if (event.key === "Escape") {
+                cancelNoteEdit();
+            }
+        });
+    }
+
+    return noteRow;
+}
+
+//save note thru backend api
+async function saveOrderNote(input, button, display, editArea) {
+    if (!orderId) return;
+
+    const newNote = input.value.trim();
+
+    button.disabled = true;
+
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/orders/${encodeURIComponent(orderId)}/note`,
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    note: newNote || null
+                })
+            }
+        );
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || `HTTP ${response.status}`);
+        }
+
+        const updatedOrder = await response.json();
+        const savedNote = updatedOrder.note ?? newNote;
+
+        display.textContent = savedNote;
+        input.value = savedNote;
+
+        editArea.hidden = true;
+        display.hidden = false;
+
+    } catch (error) {
+        console.error("Failed to update order note:", error);
+        alert(`Unable to update Note: ${error.message}`);
+
+    } finally {
+        button.disabled = false;
+    }
 }
 
 //fetch from REAL data
@@ -124,6 +259,7 @@ function renderOrder(order) {
                 </td>
             </tr>
         `;
+        orderItems.appendChild(renderOrderNote(order));
     } else {
         items.forEach(item => {
             const row = document.createElement("tr");
@@ -140,6 +276,8 @@ function renderOrder(order) {
 
             orderItems.appendChild(row);
         });
+        // Note row: after dishes, before Discount and Total
+        orderItems.appendChild(renderOrderNote(order));
 
         //discount line (but only when discount exists)
         if (Number(order.discount_amount) > 0) {
