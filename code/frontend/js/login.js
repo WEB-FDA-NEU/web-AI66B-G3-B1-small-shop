@@ -20,7 +20,7 @@ if (character) {
             mouseX - characterX
         );
 
-        const distance = 5;
+        const distance = 3.8;
 
         const x = Math.cos(angle) * distance;
         const y = Math.sin(angle) * distance;
@@ -34,9 +34,45 @@ if (character) {
 const loginForm = document.querySelector(".login-form");
 
 if (loginForm) {
-    loginForm.addEventListener("submit", function(event) {
+    loginForm.addEventListener("submit", async function(event) {
         event.preventDefault();
-        window.location.href = "../html/home.html";
+
+        const submitButton = loginForm.querySelector('button[type="submit"]');
+        const message = loginForm.querySelector(".login-message");
+        const username = loginForm.elements.username.value;
+        const password = loginForm.elements.password.value;
+
+        if (message) {
+            message.textContent = "";
+        }
+        if (submitButton) {
+            submitButton.disabled = true;
+        }
+
+        try {
+            const response = await fetch("http://127.0.0.1:8000/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || "Unable to log in.");
+            }
+
+            const user = await response.json();
+            sessionStorage.setItem("authenticatedUser", JSON.stringify(user));
+            window.location.href = "../html/home.html";
+        } catch (error) {
+            if (message) {
+                message.textContent = error.message || "Unable to connect to the server.";
+            }
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+            }
+        }
     });
 }
 

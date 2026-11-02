@@ -53,7 +53,7 @@ body {
 
 .character {
     position: relative;
-    width: clamp(160px, min(22vw, 28vh), 250px);
+    width: clamp(200px, min(30vw, 35vh), 320px);
     aspect-ratio: 25 / 24;
     margin-bottom: clamp(-48px, -6vh, -30px);
     z-index: 2;
@@ -215,6 +215,14 @@ body {
     color: var(--text-dark);
 }
 
+.login-message {
+    min-height: 1em;
+    margin-top: 10px;
+    text-align: center;
+    font-size: 13px;
+    color: #ffb3b3;
+}
+
 .register {
     margin-top: 14px;
     text-align: center;
@@ -242,7 +250,7 @@ body {
     }
 
     .character {
-        width: clamp(150px, 44vw, 210px);
+        width: clamp(180px, 52vw, 260px);
         margin-bottom: -36px;
     }
 }
@@ -254,7 +262,7 @@ body {
     }
 
     .character {
-        width: clamp(120px, 22vh, 160px);
+        width: clamp(140px, 28vh, 190px);
         margin-bottom: -28px;
     }
 
