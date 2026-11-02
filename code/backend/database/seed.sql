@@ -22,11 +22,11 @@ VALUES
 -- 3 USER
 INSERT INTO users(username, password, role)
 VALUES
-('havy', 'mã_hoá', 'Admin'),
-('minhanh', 'mã_hoá', 'Employee'),
-('quanghuy', 'mã_hoá', 'Employee'),
-('thutrang', 'mã_hoá', 'Employee'),
-('ducanh', 'mã_hoá', 'Employee'),
+('havy', '$2b$12$GnRbPRHYkKdx.wTmol84f.zb205mUaGNWSvu50ZO0Y7MVu4gW.0lO', 'Admin'), -- 12345
+('minhanh', '$2b$12$5m7wkDaLLs9oH2ymLxRHp.Gw1rL7TVOnNM3V3D1lGS0zmWw.rxcSG', 'Employee'), -- minhanh
+('quanghuy', '$2b$12$Ys.i/f99eRkkji8Rs.bg/.xM6A.La4rSWRGpowlnZcIOEtDGw/vwS', 'Employee'), -- quanghuy
+('thutrang', '$2b$12$wd79ID6ttO/eb0yt/vI0lO8dZlAIaw0eAUTwuKsSt38hvhSumYh.a', 'Employee'),
+('ducanh', '$2b$12$QWelM1jh2v9qdLZalHn7du.ZermdBxMa3F42nbNGd/ZsevvRIqTz6', 'Employee'),	
 ('an_nv', 'mã_hoá', 'Manager'),
 ('binh_tt', 'mã_hoá', 'Employee'),
 ('cuong_lv', 'mã_hoá', 'Employee'),
