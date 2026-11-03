@@ -13,7 +13,10 @@ from services.auth import authenticate_user
 from schema.order import OrderCreate, DeliveryResponse
 from schema.customer import CustomerCreate, CustomerUpdate
 from services.customer import search_customers, get_customers, get_customer_details, get_customer_types, create_customer, update_customer, delete_customer
+from schema.order import OrderCreate, DeliveryResponse
 from services.order import get_products, create_order, get_orders, get_order_by_id, mark_order_delivered
+from backend.schema.order import OrderNoteUpdate
+from backend.services.order import update_order_note
 
 from config.api import settings
 
@@ -127,6 +130,13 @@ def get_order_endpoint(order_id: int):
 @api_router.patch("/orders/{order_id}/deliver", response_model=DeliveryResponse, tags=["Orders"])
 def deliver_order_endpoint(order_id: int):
     return mark_order_delivered(order_id)
+
+@app.patch("/api/orders/{order_id}/note", tags=["Orders"])
+def update_order_note_route(
+    order_id: int,
+    data: OrderNoteUpdate
+):
+    return update_order_note(order_id, data)
 
 #customer endpoints since maitran need them for the create ord screen
 @api_router.get("/customers", tags=["Customers"])

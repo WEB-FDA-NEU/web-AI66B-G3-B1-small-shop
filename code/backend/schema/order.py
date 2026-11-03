@@ -16,3 +16,6 @@ class DeliveryResponse(BaseModel):
     order_id: int
     created_at: datetime
     deliver_status: str
+
+class OrderNoteUpdate(BaseModel):
+    note: Optional[str] = None
