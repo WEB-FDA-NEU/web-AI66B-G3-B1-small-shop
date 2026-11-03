@@ -1,18 +1,7 @@
-// Synchronized Initial Data with Sales Page (sales_script.js)
-// BR-4 Rule: Items imported > 10 days ago automatically trigger Expired/Disposal status.
-const initialProducts = [
-  { sku: "P-001", name: "Oolong Milk Tea", category: "Beverage", price: 35000, stock: 15, minStock: 10, importDate: "20/03/2026" },
-  { sku: "P-002", name: "Salted Coffee", category: "Beverage", price: 29000, stock: 50, minStock: 10, importDate: "22/03/2026" },
-  { sku: "P-003", name: "Pork Skin Baguette", category: "Food", price: 20000, stock: 80, minStock: 15, importDate: "24/03/2026" },
-  { sku: "P-004", name: "Tropical Fruit Tea", category: "Beverage", price: 42000, stock: 8, minStock: 10, importDate: "18/03/2026" },
-  { sku: "P-005", name: "Tiramisu Cake", category: "Dessert", price: 45000, stock: 5, minStock: 10, importDate: "10/03/2026" }, // > 10 days => Expired
-  { sku: "P-006", name: "Hand-Pounded Lemon Tea", category: "Beverage", price: 25000, stock: 30, minStock: 10, importDate: "21/03/2026" },
-  { sku: "P-007", name: "Butter Croissant", category: "Food", price: 35000, stock: 12, minStock: 10, importDate: "23/03/2026" }
-];
+const API_URL = "http://127.0.0.1:8000/products";
 
-let products = [...initialProducts];
+let products = [];
 let isEditMode = false;
-let currentEditSku = null;
 
 // DOM Elements
 const tableBody = document.getElementById('inventoryTableBody');
@@ -29,38 +18,50 @@ const closeModalBtn = document.getElementById('closeModalBtn');
 const cancelModalBtn = document.getElementById('cancelModalBtn');
 const toast = document.getElementById('toastNotification');
 
-// Helper: Calculate dynamic status based on BR-2, BR-4
-function calculateStatus(item) {
-  // BR-4: Parse date (DD/MM/YYYY) & check if imported > 10 days
-  const parts = item.importDate.split('/');
-  if (parts.length === 3) {
-    const importDateObj = new Date(parts[2], parts[1] - 1, parts[0]);
-    const today = new Date();
-    const diffTime = Math.abs(today - importDateObj);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+// Form Input Elements
+const productIdInput = document.createElement('input');
+productIdInput.type = 'hidden';
+productIdInput.id = 'productId';
+if (productForm) productForm.appendChild(productIdInput);
 
-    if (diffDays > 10) {
-      return { text: "Expired / Disposal", badgeClass: "badge-expired" };
-    }
-  }
-
-  // Stock Status Check
-  if (item.stock <= item.minStock) {
-    return { text: "Low Stock", badgeClass: "badge-lowstock" };
-  }
-
-  return { text: "In Stock", badgeClass: "badge-instock" };
-}
+const productNameInput = document.getElementById('productName');
+const categoryInput = document.getElementById('category');
+const priceInput = document.getElementById('price');
+const stockInput = document.getElementById('stock');
 
 // Format Currency VND
 function formatVND(amount) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 }
 
-// Render Table Rows (Without Icons in Name column)
+// Show Toast Notification (Giống hệt trang Employee)
+function showToast(message) {
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
+// Fetch products from API
+async function fetchProducts() {
+  try {
+    const response = await fetch(API_URL);
+    if (!response.ok) throw new Error("Failed to load products from server.");
+    
+    products = await response.json();
+    filterData();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+// Render Table Rows
 function renderTable(data) {
   tableBody.innerHTML = '';
-  if (data.length === 0) {
+  
+  if (!data || data.length === 0) {
     tableBody.innerHTML = `
       <tr>
         <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">
@@ -73,22 +74,25 @@ function renderTable(data) {
 
   data.forEach(item => {
     const tr = document.createElement('tr');
-    const statusInfo = calculateStatus(item);
-
+    const idDisplay = `P-${String(item.product_id).padStart(3, '0')}`;
+    const isAvailable = item.is_available !== false;
+    const statusText = isAvailable ? "In Stock" : "Unavailable";
+    const badgeClass = isAvailable ? "badge-instock" : "badge-expired";
+    
     tr.innerHTML = `
-      <td class="item-sku">${item.sku}</td>
+      <td class="item-sku">${idDisplay}</td>
       <td style="font-weight: 600; color: var(--bg-sidebar);">${item.name}</td>
-      <td><span class="badge" style="background: #EAECEE; color: #2C3E50;">${item.category}</span></td>
-      <td>${formatVND(item.price)}</td>
-      <td style="font-weight: 600;">${item.stock}</td>
-      <td>${item.importDate}</td>
-      <td><span class="badge ${statusInfo.badgeClass}">${statusInfo.text}</span></td>
+      <td><span class="badge" style="background: #EAECEE; color: #2C3E50;">${item.category_name || item.category || 'General'}</span></td>
+      <td>${formatVND(item.unit_price)}</td>
+      <td style="font-weight: 600;">${item.stock || 50}</td>
+      <td>2026-10-01</td>
+      <td><span class="badge ${badgeClass}">${statusText}</span></td>
       <td>
         <div class="action-buttons" style="justify-content: flex-end;">
-          <button class="btn-icon" title="Edit Product" onclick="openEditProductModal('${item.sku}')">
+          <button class="btn-icon" title="Edit Product" onclick="openEditProductModal(${item.product_id})">
             <i class="fa-solid fa-pen-to-square"></i>
           </button>
-          <button class="btn-icon delete" title="Delete Product" onclick="deleteProduct('${item.sku}')">
+          <button class="btn-icon delete" title="Delete Product" onclick="deleteProduct(${item.product_id})">
             <i class="fa-solid fa-trash-can"></i>
           </button>
         </div>
@@ -102,59 +106,41 @@ function renderTable(data) {
 function filterData() {
   const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
   const selectedCategory = categoryFilter ? categoryFilter.value : '';
-  const selectedStatus = statusFilter ? statusFilter.value : '';
 
   const filtered = products.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm) || 
-                          item.sku.toLowerCase().includes(searchTerm);
-    const matchesCategory = selectedCategory === "" || item.category === selectedCategory;
-    
-    const statusInfo = calculateStatus(item);
-    const matchesStatus = selectedStatus === "" || statusInfo.text.includes(selectedStatus);
+    const idFormatted = `p-${String(item.product_id).padStart(3, '0')}`;
+    const matchesSearch = (item.name && item.name.toLowerCase().includes(searchTerm)) || 
+                          idFormatted.includes(searchTerm);
+    const matchesCategory = selectedCategory === "" || (item.category_name || item.category) === selectedCategory;
 
-    return matchesSearch && matchesCategory && matchesStatus;
+    return matchesSearch && matchesCategory;
   });
 
   renderTable(filtered);
 }
 
-// Show Toast Notification
-function showToast(message) {
-  if (!toast) return;
-  toast.textContent = message;
-  toast.classList.add('show');
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, 3000);
-}
-
 // Open Modal in ADD Mode
 function openAddProductModal() {
   isEditMode = false;
-  currentEditSku = null;
-  
   if (modalTitle) modalTitle.textContent = "Add New Product";
   if (productForm) productForm.reset();
-  
+  if (productIdInput) productIdInput.value = '';
   modal.classList.add('active');
 }
 
 // Open Modal in EDIT Mode
-window.openEditProductModal = function(sku) {
-  const item = products.find(p => p.sku === sku);
+window.openEditProductModal = function(id) {
+  const item = products.find(p => p.product_id === id);
   if (!item) return;
 
   isEditMode = true;
-  currentEditSku = sku;
-
   if (modalTitle) modalTitle.textContent = "Edit Product";
 
-  // Fill form fields
-  if (document.getElementById('productName')) document.getElementById('productName').value = item.name;
-  if (document.getElementById('category')) document.getElementById('category').value = item.category;
-  if (document.getElementById('price')) document.getElementById('price').value = item.price;
-  if (document.getElementById('stock')) document.getElementById('stock').value = item.stock;
-  if (document.getElementById('minStock')) document.getElementById('minStock').value = item.minStock || 10;
+  if (productIdInput) productIdInput.value = item.product_id;
+  if (productNameInput) productNameInput.value = item.name;
+  if (categoryInput) categoryInput.value = item.category_name || item.category || '';
+  if (priceInput) priceInput.value = item.unit_price;
+  if (stockInput) stockInput.value = item.stock || 50;
 
   modal.classList.add('active');
 };
@@ -165,63 +151,61 @@ function closeModal() {
   if (productForm) productForm.reset();
 }
 
-// Form Submit Handler (Handles both ADD and EDIT)
-function handleFormSubmit(e) {
+// Form Submit Handler
+async function handleFormSubmit(e) {
   e.preventDefault();
 
-  const name = document.getElementById('productName').value.trim();
-  const category = document.getElementById('category').value;
-  const price = parseFloat(document.getElementById('price').value) || 0;
-  const stock = parseInt(document.getElementById('stock').value) || 0;
-  const minStock = parseInt(document.getElementById('minStock').value) || 10;
+  const payload = {
+    name: productNameInput.value.trim(),
+    category_id: 1,
+    unit_price: parseFloat(priceInput.value) || 0,
+    is_available: true
+  };
 
-  if (!name || price < 0 || stock < 0) {
-    showToast("Please enter valid product information!");
-    return;
-  }
-
-  if (isEditMode) {
-    // EDIT LOGIC
-    const index = products.findIndex(p => p.sku === currentEditSku);
-    if (index !== -1) {
-      products[index].name = name;
-      products[index].category = category;
-      products[index].price = price;
-      products[index].stock = stock;
-      products[index].minStock = minStock;
-
-      showToast(`Updated product "${name}" successfully`);
+  try {
+    let response;
+    if (isEditMode) {
+      const id = productIdInput.value;
+      response = await fetch(`${API_URL}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } else {
+      response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
     }
-  } else {
-    // ADD LOGIC
-    const newSku = `P-00${products.length + 1}`;
-    const today = new Date().toLocaleDateString('en-GB'); // DD/MM/YYYY
 
-    const newProduct = {
-      sku: newSku,
-      name: name,
-      category: category,
-      price: price,
-      stock: stock,
-      minStock: minStock,
-      importDate: today
-    };
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.detail || "Action failed.");
+    }
 
-    products.unshift(newProduct);
-    showToast(`Added product "${name}" successfully`);
+    showToast(isEditMode ? "Updated product successfully!" : "Added new product successfully!");
+    closeModal();
+    fetchProducts();
+  } catch (error) {
+    showToast(error.message);
   }
-
-  filterData();
-  closeModal();
 }
 
 // Delete Product Handler
-window.deleteProduct = function(sku) {
-  const item = products.find(p => p.sku === sku);
-  if (item) {
-    products = products.filter(p => p.sku !== sku);
-    filterData();
-    showToast(`Deleted product "${item.name}"`);
+window.deleteProduct = async function(id) {
+  if (!confirm(`Are you sure you want to delete product ID ${id}?`)) return;
+
+  try {
+    const response = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.detail || "Failed to delete product.");
+    }
+    showToast("Deleted product successfully!");
+    fetchProducts();
+  } catch (error) {
+    showToast(error.message);
   }
 };
 
@@ -229,12 +213,10 @@ window.deleteProduct = function(sku) {
 document.addEventListener('DOMContentLoaded', () => {
   if (searchInput) searchInput.addEventListener('input', filterData);
   if (categoryFilter) categoryFilter.addEventListener('change', filterData);
-  if (statusFilter) statusFilter.addEventListener('change', filterData);
 
   if (openModalBtn) openModalBtn.addEventListener('click', openAddProductModal);
   if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
   if (cancelModalBtn) cancelModalBtn.addEventListener('click', closeModal);
-  
   if (productForm) productForm.addEventListener('submit', handleFormSubmit);
 
   if (modal) {
@@ -243,6 +225,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Initial render
-  renderTable(products);
+  fetchProducts();
 });

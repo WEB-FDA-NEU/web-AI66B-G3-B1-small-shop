@@ -26,6 +26,9 @@ app = FastAPI(title="YUMS")
 from schema.product import ProductCreate, ProductUpdate, ProductResponse
 from services.product import get_all_products, add_product, update_product, delete_product
 
+from schema.inventory import InventoryCreate, InventoryUpdate, InventoryResponse
+from services.inventory import get_all_inventory, add_inventory, update_inventory, delete_inventory
+
 # Configure CORS so browser fetch requests (POST, PUT, OPTIONS) are permitted
 app.add_middleware(
     CORSMiddleware,
@@ -228,6 +231,34 @@ def delete_product_endpoint(product_id: int):
         raise HTTPException(status_code=404, detail=f"Product with ID {product_id} not found.")
     return {"message": f"Product {product_id} deleted successfully."}
 
+# oanhtran: inventory endpoints
+
+@app.get("/inventory", response_model=List[InventoryResponse], summary="Get all inventory products")
+def get_all_inventory_endpoint():
+    try:
+        return get_all_inventory()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch inventory: {str(e)}")
+
+@app.post("/inventory", response_model=InventoryResponse, status_code=status.HTTP_201_CREATED, summary="Add a new inventory product")
+def create_inventory_endpoint(payload: InventoryCreate):
+    try:
+        return add_inventory(payload)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to create item: {str(e)}")
+
+@app.put("/inventory/{sku}", response_model=InventoryResponse, summary="Update inventory product")
+def update_inventory_endpoint(sku: str, payload: InventoryUpdate):
+    updated = update_inventory(sku, payload)
+    if not updated:
+        raise HTTPException(status_code=404, detail=f"Product SKU {sku} not found.")
+    return updated
+
+@app.delete("/inventory/{sku}", summary="Delete inventory product")
+def delete_inventory_endpoint(sku: str):
+    if not delete_inventory(sku):
+        raise HTTPException(status_code=404, detail=f"Product SKU {sku} not found.")
+    return {"message": f"Product {sku} deleted successfully."}
 
 if __name__ == "__main__":
     import uvicorn
