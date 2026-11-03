@@ -1,43 +1,43 @@
 from typing import Optional, List
 from datetime import date
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 # Schema phản hồi chi tiết mặt hàng bán chạy (Tab 1: Sales & Profit Overview)
 class SalesItemOverview(BaseModel):
-    rank: int
-    id: str
+    rank: Optional[int] = 1
+    id: Optional[str] = "P-001"
     name: str
-    category: str
-    units_sold_adjusted: int
-    price: float
-    revenue_adjusted: float
-    profit_margin: float
+    category: Optional[str] = "General"
+    units_sold_adjusted: Optional[int] = 0
+    price: Optional[float] = 0.0
+    revenue_adjusted: Optional[float] = 0.0
+    profit_margin: Optional[float] = 40.0
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Schema phản hồi các thẻ KPI tổng quan
 class SalesKPIResponse(BaseModel):
-    total_sales: float
-    net_profit: float
-    completed_orders: int
+    total_sales: float = 0.0
+    net_profit: float = 0.0
+    completed_orders: int = 0
+
+    model_config = ConfigDict(from_attributes=True)
 
 # Schema Bộ lọc Doanh thu (Query Parameters)
 class SalesFilterQuery(BaseModel):
     top_n: Optional[str] = "5"  # "3", "5", "10", "ALL"
-    category: Optional[str] = None  # "Beverage", "Food", "Dessert"
-    timeframe: Optional[str] = "monthly"  # "daily", "weekly", "monthly"
+    category: Optional[str] = None  
+    timeframe: Optional[str] = "monthly"  
 
 # Schema phản hồi Dự báo Nhu cầu & Gợi ý Nhập kho (Tab 2: Demand Prediction & Restock)
 class DemandPredictionResponse(BaseModel):
-    id: str
+    id: Optional[str] = "P-001"
     name: str
-    current_stock: int
-    predicted_demand: int
-    suggested_restock: int
-    window_days: int
-    priority_score: int  # 1: Critical Deficit, 2: Restock Needed, 3: Sufficient Stock
-    status_badge: str
+    current_stock: Optional[int] = 0
+    predicted_demand: Optional[int] = 0
+    suggested_restock: Optional[int] = 0
+    window_days: Optional[int] = 30
+    priority_score: Optional[int] = 1  
+    status_badge: Optional[str] = "<span class=\"badge badge-success\">Sufficient Stock</span>"
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
