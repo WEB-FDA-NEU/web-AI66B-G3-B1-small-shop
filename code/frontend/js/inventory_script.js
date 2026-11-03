@@ -1,6 +1,8 @@
-const API_URL = "http://127.0.0.1:8000/products";
+const API_URL = "http://127.0.0.1:8000/api/products";
+const CATEGORIES_URL = "http://127.0.0.1:8000/api/categories";
 
 let products = [];
+let categoriesList = [];
 let isEditMode = false;
 
 // DOM Elements
@@ -34,7 +36,7 @@ function formatVND(amount) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 }
 
-// Show Toast Notification (Giống hệt trang Employee)
+// Show Toast Notification
 function showToast(message) {
   if (!toast) return;
   toast.textContent = message;
@@ -42,6 +44,40 @@ function showToast(message) {
   setTimeout(() => {
     toast.classList.remove('show');
   }, 3000);
+}
+
+// Fetch categories from Database API
+async function loadCategories() {
+  try {
+    const response = await fetch(CATEGORIES_URL);
+    if (!response.ok) throw new Error("Failed to load categories.");
+    
+    categoriesList = await response.json();
+    
+    // 1. Populate Filter Select
+    if (categoryFilter) {
+      categoryFilter.innerHTML = '<option value="">All Categories</option>';
+      categoriesList.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.category_name;
+        option.textContent = cat.category_name;
+        categoryFilter.appendChild(option);
+      });
+    }
+
+    // 2. Populate Modal Category Select
+    if (categoryInput) {
+      categoryInput.innerHTML = '<option value="">-- Select Category --</option>';
+      categoriesList.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.category_id; // Lưu category_id để gửi xuống DB chính xác
+        option.textContent = cat.category_name;
+        categoryInput.appendChild(option);
+      });
+    }
+  } catch (error) {
+    console.error("Error loading categories:", error);
+  }
 }
 
 // Fetch products from API
@@ -78,11 +114,12 @@ function renderTable(data) {
     const isAvailable = item.is_available !== false;
     const statusText = isAvailable ? "In Stock" : "Unavailable";
     const badgeClass = isAvailable ? "badge-instock" : "badge-expired";
+    const displayCategory = item.category_name || item.category || 'General';
     
     tr.innerHTML = `
       <td class="item-sku">${idDisplay}</td>
       <td style="font-weight: 600; color: var(--bg-sidebar);">${item.name}</td>
-      <td><span class="badge" style="background: #EAECEE; color: #2C3E50;">${item.category_name || item.category || 'General'}</span></td>
+      <td><span class="badge" style="background: #EAECEE; color: #2C3E50;">${displayCategory}</span></td>
       <td>${formatVND(item.unit_price)}</td>
       <td style="font-weight: 600;">${item.stock || 50}</td>
       <td>2026-10-01</td>
@@ -138,7 +175,7 @@ window.openEditProductModal = function(id) {
 
   if (productIdInput) productIdInput.value = item.product_id;
   if (productNameInput) productNameInput.value = item.name;
-  if (categoryInput) categoryInput.value = item.category_name || item.category || '';
+  if (categoryInput) categoryInput.value = item.category_id || '';
   if (priceInput) priceInput.value = item.unit_price;
   if (stockInput) stockInput.value = item.stock || 50;
 
@@ -157,7 +194,7 @@ async function handleFormSubmit(e) {
 
   const payload = {
     name: productNameInput.value.trim(),
-    category_id: 1,
+    category_id: parseInt(categoryInput.value) || 1,
     unit_price: parseFloat(priceInput.value) || 0,
     is_available: true
   };
@@ -224,6 +261,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.target === modal) closeModal();
     });
   }
+});
 
-  fetchProducts();
+document.addEventListener('DOMContentLoaded', () => {
+  loadCategories(); // <--- Bắt buộc phải gọi hàm này để hiện đủ 6 categories trên giao diện
+  fetchProducts();   // <--- Gọi hàm lấy sản phẩm để thay thế chữ "General" bằng tên category thực tế
+  
+  if (searchInput) searchInput.addEventListener('input', filterData);
+  if (categoryFilter) categoryFilter.addEventListener('change', filterData);
 });
