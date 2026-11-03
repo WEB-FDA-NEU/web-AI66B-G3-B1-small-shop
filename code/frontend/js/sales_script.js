@@ -1,15 +1,8 @@
-const salesData = [
-  { id: "P-001", name: "Oolong Milk Tea", category: "Beverage", unitsSold: 420, price: 35000, cost: 15000, currentStock: 15 },
-  { id: "P-002", name: "Salted Coffee", category: "Beverage", unitsSold: 310, price: 29000, cost: 10000, currentStock: 50 },
-  { id: "P-003", name: "Pork Skin Baguette", category: "Food", unitsSold: 250, price: 20000, cost: 8000, currentStock: 80 },
-  { id: "P-004", name: "Tropical Fruit Tea", category: "Beverage", unitsSold: 180, price: 42000, cost: 18000, currentStock: 8 },
-  { id: "P-005", name: "Tiramisu Cake", category: "Dessert", unitsSold: 80, price: 45000, cost: 22000, currentStock: 5 },
-  { id: "P-006", name: "Hand-Pounded Lemon Tea", category: "Beverage", unitsSold: 290, price: 25000, cost: 9000, currentStock: 30 },
-  { id: "P-007", name: "Butter Croissant", category: "Food", unitsSold: 150, price: 35000, cost: 14000, currentStock: 12 }
-];
+const API_SALES_URL = "http://127.0.0.1:8000/api/sales";
 
 const toast = document.getElementById('toastNotification');
 
+// Show Toast Notification (Giống hệt trang Employee)
 function showToast(message) {
   if (!toast) return;
   toast.textContent = message;
@@ -29,46 +22,37 @@ function switchTab(tabName) {
   if (tabName === 'overview') {
     document.getElementById('tab-overview').classList.add('active');
     document.getElementById('btn-overview').classList.add('active');
+    fetchSalesOverview();
   } else if (tabName === 'prediction') {
     document.getElementById('tab-prediction').classList.add('active');
     document.getElementById('btn-prediction').classList.add('active');
-    renderPredictionTable();
+    fetchPredictions();
   }
 }
 
-function applyFilters() {
+async function fetchSalesOverview() {
   const topNDropdown = document.getElementById('topNDropdown');
   const categoryInput = document.getElementById('categoryInput');
   const timeframeFilter = document.getElementById('timeframeFilter');
 
-  let timeMultiplier = 1;
+  const topN = topNDropdown ? topNDropdown.value : '5';
+  const category = categoryInput ? categoryInput.value.trim() : '';
   const timeframe = timeframeFilter ? timeframeFilter.value : 'monthly';
-  if (timeframe === 'daily') timeMultiplier = 1 / 30;
-  else if (timeframe === 'weekly') timeMultiplier = 7 / 30;
 
-  let processedData = salesData.map(item => {
-    const adjustedUnits = Math.round(item.unitsSold * timeMultiplier);
-    const adjustedRevenue = adjustedUnits * item.price;
-    return {
-      ...item,
-      unitsSoldAdjusted: adjustedUnits,
-      revenueAdjusted: adjustedRevenue
-    };
-  }).sort((a, b) => b.revenueAdjusted - a.revenueAdjusted);
+  let url = `${API_SALES_URL}/overview?top_n=${topN}&timeframe=${timeframe}`;
+  if (category) url += `&category=${encodeURIComponent(category)}`;
 
-  const categoryTerm = categoryInput ? categoryInput.value.toLowerCase().trim() : '';
-  if (categoryTerm !== '') {
-    processedData = processedData.filter(item => 
-      item.category.toLowerCase().includes(categoryTerm)
-    );
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.detail || "Failed to load sales analytics from server.");
+    }
+    const data = await response.json();
+    renderSalesTable(data);
+  } catch (error) {
+    showToast(error.message);
   }
-
-  const limitValue = topNDropdown ? topNDropdown.value : 'ALL';
-  if (limitValue !== 'ALL') {
-    processedData = processedData.slice(0, parseInt(limitValue));
-  }
-
-  renderSalesTable(processedData);
 }
 
 function renderSalesTable(dataToRender) {
@@ -76,77 +60,89 @@ function renderSalesTable(dataToRender) {
   if (!tbody) return;
   tbody.innerHTML = '';
 
-  if (dataToRender.length === 0) {
+  if (!dataToRender || dataToRender.length === 0) {
     tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 25px;">No matching items found</td></tr>`;
     return;
   }
 
   dataToRender.forEach((item, index) => {
-    const margin = (((item.price - item.cost) / item.price) * 100).toFixed(1);
-    const rank = index + 1;
+    const rank = item.rank || (index + 1);
+    const id = item.id || `P-${String(item.product_id || 1).padStart(3, '0')}`;
+    const name = item.name || 'Unknown Product';
+    const category = item.category || 'General';
+    const unitsSold = item.units_sold_adjusted ?? item.units_sold ?? item.unitsSoldAdjusted ?? 0;
+    const price = item.price ?? item.unit_price ?? 0;
+    const revenue = item.revenue_adjusted ?? item.total_revenue ?? (unitsSold * price);
+    const margin = item.profit_margin ?? 40.0;
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td style="font-weight: 700; color: ${rank <= 3 ? 'var(--color-accent-red)' : 'var(--text-muted)'};">#${rank}</td>
-      <td style="font-weight: 600; color: var(--text-muted);">${item.id}</td>
-      <td style="font-weight: 600; color: var(--bg-sidebar);">${item.name}</td>
-      <td><span class="badge" style="background: #EAECEE; color: #2C3E50;">${item.category}</span></td>
-      <td>${item.unitsSoldAdjusted.toLocaleString('en-US')} units</td>
-      <td>${item.price.toLocaleString('en-US')} ₫</td>
-      <td style="font-weight: 700; color: var(--bg-sidebar);">${item.revenueAdjusted.toLocaleString('en-US')} ₫</td>
+      <td style="font-weight: 700; color: ${rank <= 3 ? 'var(--color-accent-red, #b30000)' : 'var(--text-muted)'};">#${rank}</td>
+      <td style="font-weight: 600; color: var(--text-muted);">${id}</td>
+      <td style="font-weight: 600; color: var(--bg-sidebar);">${name}</td>
+      <td><span class="badge" style="background: #EAECEE; color: #2C3E50;">${category}</span></td>
+      <td>${Number(unitsSold).toLocaleString('en-US')} units</td>
+      <td>${Number(price).toLocaleString('en-US')} ₫</td>
+      <td style="font-weight: 700; color: var(--bg-sidebar);">${Number(revenue).toLocaleString('en-US')} ₫</td>
       <td><span class="badge badge-success">${margin}%</span></td>
     `;
     tbody.appendChild(tr);
   });
 }
 
-function renderPredictionTable() {
-  const tbody = document.getElementById('predictionTableBody');
+async function fetchPredictions() {
   const selectElement = document.getElementById('predictionWindowSelect');
   const windowDays = parseInt(selectElement ? selectElement.value : "30");
+
+  try {
+    const response = await fetch(`${API_SALES_URL}/predictions?window_days=${windowDays}`);
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.detail || "Failed to load demand predictions from server.");
+    }
+    const data = await response.json();
+    renderPredictionTable(data, windowDays);
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+function renderPredictionTable(dataToRender, windowDays) {
+  const tbody = document.getElementById('predictionTableBody');
   if (!tbody) return;
   tbody.innerHTML = '';
 
-  const predictionList = salesData.map(item => {
-    const dailyRate = item.unitsSold / 30; 
-    const predictedDemand = Math.round(dailyRate * windowDays);
-    const safetyStock = 10; 
-    const suggestedRestock = Math.max(0, predictedDemand - item.currentStock + safetyStock);
+  if (!dataToRender || dataToRender.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 25px;">No prediction data available</td></tr>`;
+    return;
+  }
 
-    let priorityScore = 3;
-    let statusBadge = '';
-
-    if (item.currentStock < 10) {
-      priorityScore = 1;
-      statusBadge = `<span class="badge badge-danger">Critical Deficit</span>`;
-    } else if (suggestedRestock > 0) {
-      priorityScore = 2;
-      statusBadge = `<span class="badge badge-warning">Restock Needed</span>`;
-    } else {
-      priorityScore = 3;
-      statusBadge = `<span class="badge badge-success">Sufficient Stock</span>`;
+  dataToRender.forEach(item => {
+    const id = item.id || `P-${String(item.product_id || 1).padStart(3, '0')}`;
+    const name = item.name || 'Unknown Product';
+    const currentStock = item.current_stock ?? item.currentStock ?? 0;
+    const predictedDemand = item.predicted_demand ?? item.predictedDemand ?? 0;
+    const suggestedRestock = item.suggested_restock ?? item.suggestedRestock ?? 0;
+    
+    let statusBadge = item.status_badge || item.statusBadge;
+    if (!statusBadge) {
+      if (currentStock <= 5) {
+        statusBadge = `<span class="badge badge-danger">Critical Deficit</span>`;
+      } else if (suggestedRestock > 0) {
+        statusBadge = `<span class="badge badge-warning">Restock Needed</span>`;
+      } else {
+        statusBadge = `<span class="badge badge-success">Sufficient Stock</span>`;
+      }
     }
 
-    return {
-      ...item,
-      predictedDemand,
-      suggestedRestock,
-      priorityScore,
-      statusBadge
-    };
-  });
-
-  predictionList.sort((a, b) => a.priorityScore - b.priorityScore);
-
-  predictionList.forEach(item => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td style="font-weight: 600; color: var(--text-muted);">${item.id}</td>
-      <td style="font-weight: 600; color: var(--bg-sidebar);">${item.name}</td>
-      <td>${item.currentStock} items</td>
-      <td><strong>${item.predictedDemand}</strong> items / ${windowDays} days</td>
-      <td style="color: var(--color-accent-red); font-weight: 700;">+${item.suggestedRestock} items</td>
-      <td>${item.statusBadge}</td>
+      <td style="font-weight: 600; color: var(--text-muted);">${id}</td>
+      <td style="font-weight: 600; color: var(--bg-sidebar);">${name}</td>
+      <td>${currentStock} items</td>
+      <td><strong>${predictedDemand}</strong> items / ${windowDays} days</td>
+      <td style="color: var(--color-accent-red, #b30000); font-weight: 700;">+${suggestedRestock} items</td>
+      <td>${statusBadge}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -157,12 +153,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const categoryInput = document.getElementById('categoryInput');
   const timeframeFilter = document.getElementById('timeframeFilter');
 
-  if (topNDropdown) topNDropdown.addEventListener('change', applyFilters);
-  if (categoryInput) {
-    categoryInput.addEventListener('input', applyFilters);
-    categoryInput.addEventListener('change', applyFilters);
-  }
-  if (timeframeFilter) timeframeFilter.addEventListener('change', applyFilters);
+  if (topNDropdown) topNDropdown.addEventListener('change', fetchSalesOverview);
+  if (categoryInput) categoryInput.addEventListener('change', fetchSalesOverview);
+  if (timeframeFilter) timeframeFilter.addEventListener('change', fetchSalesOverview);
 
   const btnReset = document.getElementById('btnResetFilter');
   if (btnReset) {
@@ -170,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (topNDropdown) topNDropdown.value = '5';
       if (categoryInput) categoryInput.value = '';
       if (timeframeFilter) timeframeFilter.value = 'monthly';
-      applyFilters();
+      fetchSalesOverview();
       showToast("Filters reset to default");
     });
   }
@@ -181,7 +174,40 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnPrediction) btnPrediction.addEventListener('click', () => switchTab('prediction'));
 
   const predictionSelect = document.getElementById('predictionWindowSelect');
-  if (predictionSelect) predictionSelect.addEventListener('change', renderPredictionTable);
+  if (predictionSelect) predictionSelect.addEventListener('change', fetchPredictions);
 
-  applyFilters();
+  fetchSalesOverview();
+});
+
+// Hàm tự động nạp 6 categories từ database cho trang Sales
+async function loadSalesCategoriesDropdown() {
+  const categorySelect = document.getElementById('categoryInput');
+  if (!categorySelect) return;
+
+  try {
+    const response = await fetch("http://127.0.0.1:8000/api/categories");
+    if (!response.ok) throw new Error("Failed to load categories");
+    
+    const categories = await response.json();
+    
+    // Giữ lại option mặc định "All Categories" (hoặc "All")
+    categorySelect.innerHTML = '<option value="">All Categories</option>';
+    
+    // Thêm danh sách 6 categories thực tế từ database
+    categories.forEach(cat => {
+      const option = document.createElement('option');
+      // Gán giá trị bằng tên danh mục (hoặc cat.category_id tùy thuộc vào backend lọc theo tên hay ID)
+      option.value = cat.category_name; 
+      option.textContent = cat.category_name;
+      categorySelect.appendChild(option);
+    });
+  } catch (error) {
+    console.error("Error loading categories:", error);
+  }
+}
+
+// Gọi hàm này bên trong sự kiện DOMContentLoaded hiện có của sales_script.js
+document.addEventListener('DOMContentLoaded', () => {
+  loadSalesCategoriesDropdown(); // <-- Thêm dòng này vào
+  // ... các đoạn code khởi tạo khác giữ nguyên ...
 });
