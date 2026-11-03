@@ -26,11 +26,8 @@ app = FastAPI(title="YUMS")
 from schema.product import ProductCreate, ProductUpdate, ProductResponse
 from services.product import get_all_products, add_product, update_product, delete_product
 
-
-from schema.sales import SalesItemOverview, DemandPredictionResponse, SalesFilterQuery
-from services.sales import get_sales_overview, get_demand_predictions
-from fastapi import Query
-from typing import Optional
+from schema.inventory import InventoryCreate, InventoryUpdate, InventoryResponse
+from services.inventory import get_all_inventory, add_inventory, update_inventory, delete_inventory
 
 # Configure CORS so browser fetch requests (POST, PUT, OPTIONS) are permitted
 app.add_middleware(
@@ -234,30 +231,35 @@ def delete_product_endpoint(product_id: int):
         raise HTTPException(status_code=404, detail=f"Product with ID {product_id} not found.")
     return {"message": f"Product {product_id} deleted successfully."}
 
+# oanhtran: inventory endpoints
 
-# oanhtran: sales endpoints and analytics
-
-@app.get("/sales/overview", summary="Get sales overview (US11)")
-def get_sales_overview_endpoint(
-    top_n: Optional[str] = Query("5"),
-    category: Optional[str] = Query(None),
-    timeframe: Optional[str] = Query("monthly")
-):
+@app.get("/inventory", response_model=List[InventoryResponse], summary="Get all inventory products")
+def get_all_inventory_endpoint():
     try:
-        from services.sales import get_sales_overview
-        return get_sales_overview(top_n=top_n, category=category)
+        return get_all_inventory()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch sales overview: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch inventory: {str(e)}")
 
-@app.get("/sales/predictions", summary="Get demand forecasting (US15, US16)")
-def get_demand_predictions_endpoint(window_days: int = Query(30)):
+@app.post("/inventory", response_model=InventoryResponse, status_code=status.HTTP_201_CREATED, summary="Add a new inventory product")
+def create_inventory_endpoint(payload: InventoryCreate):
     try:
-        from services.sales import get_demand_predictions
-        return get_demand_predictions(window_days=window_days)
+        return add_inventory(payload)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to calculate predictions: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Failed to create item: {str(e)}")
 
-    
+@app.put("/inventory/{sku}", response_model=InventoryResponse, summary="Update inventory product")
+def update_inventory_endpoint(sku: str, payload: InventoryUpdate):
+    updated = update_inventory(sku, payload)
+    if not updated:
+        raise HTTPException(status_code=404, detail=f"Product SKU {sku} not found.")
+    return updated
+
+@app.delete("/inventory/{sku}", summary="Delete inventory product")
+def delete_inventory_endpoint(sku: str):
+    if not delete_inventory(sku):
+        raise HTTPException(status_code=404, detail=f"Product SKU {sku} not found.")
+    return {"message": f"Product {sku} deleted successfully."}
+
 if __name__ == "__main__":
     import uvicorn
     
