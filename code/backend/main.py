@@ -19,6 +19,10 @@ from config.api import settings
 
 app = FastAPI(title="YUMS")
 
+#oanhtran
+from schema.product import ProductCreate, ProductUpdate, ProductResponse
+from services.product import get_all_products, add_product, update_product, delete_product
+
 # Configure CORS so browser fetch requests (POST, PUT, OPTIONS) are permitted
 app.add_middleware(
     CORSMiddleware,
@@ -184,6 +188,35 @@ def delete_customer_endpoint(customer_id: int):
     delete_customer(customer_id)
 
 app.include_router(api_router)
+
+# oanhtran: product endpoints
+@app.get("/products", response_model=List[ProductResponse], summary="Get all products")
+def get_all_products_endpoint():
+    try:
+        return get_all_products()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch products: {str(e)}")
+
+@app.post("/products", response_model=ProductResponse, status_code=status.HTTP_201_CREATED, summary="Add a new product")
+def create_product_endpoint(payload: ProductCreate):
+    try:
+        return add_product(payload)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to create product: {str(e)}")
+
+@app.put("/products/{product_id}", response_model=ProductResponse, summary="Update product details")
+def update_product_endpoint(product_id: int, payload: ProductUpdate):
+    updated = update_product(product_id, payload)
+    if not updated:
+        raise HTTPException(status_code=404, detail=f"Product with ID {product_id} not found.")
+    return updated
+
+@app.delete("/products/{product_id}", summary="Delete a product")
+def delete_product_endpoint(product_id: int):
+    success = delete_product(product_id)
+    if not success:
+        raise HTTPException(status_code=404, detail=f"Product with ID {product_id} not found.")
+    return {"message": f"Product {product_id} deleted successfully."}
 
 
 if __name__ == "__main__":
