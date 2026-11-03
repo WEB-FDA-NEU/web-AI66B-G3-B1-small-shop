@@ -297,7 +297,7 @@ header.top-header {
 .btn-add:hover {
     background-color: #630202;
     border-color: #630202;
-    box-shadow: 0 2px 6px rgba(127, 3, 3, 0.25);
+    box-shadow: 0 2px 6px #7f030340;
 }
 
 .table-wrapper {

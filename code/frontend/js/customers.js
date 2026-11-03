@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <i class="fa-solid fa-eye" aria-hidden="true"></i>
                         </a>
                         <button class="btn-icon btn-delete delete" data-id="${customer.customer_id}" title="Delete">
-                            <i class="fa-solid fa-trash"></i>
+                            <i class="fa-solid fa-trash-can"></i>
                         </button>
                     </div>
                 </td>`;

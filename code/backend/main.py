@@ -8,6 +8,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 
 from schema.employee import EmployeeCreate, EmployeeUpdate, EmployeeResponse
 from services.employee import add_employee, update_employee, get_all_employees, delete_employee, get_employee_by_id
+from schema.auth import LoginRequest
+from services.auth import authenticate_user
+from schema.order import OrderCreate, DeliveryResponse
 from schema.customer import CustomerCreate, CustomerUpdate
 from services.customer import search_customers, get_customers, get_customer_details, get_customer_types, create_customer, update_customer, delete_customer
 from schema.order import OrderCreate, DeliveryResponse
@@ -99,6 +102,11 @@ app.include_router(emp_router)
 
 #all routers for order screns of maitran
 api_router = APIRouter(prefix="/api")
+
+@api_router.post("/login", tags=["Authentication"])
+def login_endpoint(payload: LoginRequest):
+    return authenticate_user(payload.username, payload.password)
+
 
 @api_router.get("/products", tags=["Products"])
 def get_products_endpoint():

@@ -140,7 +140,6 @@ table.customers-table tbody tr:last-child td {
     justify-content: center;
     transition: all var(--transition-speed);
     text-decoration: none;
-    font-size: 0.9rem;
 }
 
 .btn-icon:hover,
@@ -240,7 +239,7 @@ table.customers-table tbody tr:last-child td {
     border: 1px solid #E3C1AA;
     border-radius: 50%;
     background-color: #F8E5D8;
-    color: #8A4B20;
+    color:#7F0303;
     font-size: 1.1rem;
 }
 
@@ -275,9 +274,9 @@ table.customers-table tbody tr:last-child td {
     justify-content: center;
     gap: 8px;
     padding: 9px 18px;
-    border: 1px solid #8A4B20;
+    border: 1px solid #7F0303;
     border-radius: 4px;
-    background-color: #8A4B20;
+    background-color: #7F0303;
     color: #fff;
     font-family: var(--font-content);
     font-size: 0.85rem;
@@ -286,8 +285,9 @@ table.customers-table tbody tr:last-child td {
 }
 
 .btn-delete-confirm:hover:not(:disabled) {
-    border-color: #713B18;
-    background-color: #713B18;
+    background-color: #630202;
+    border-color: #630202;
+    box-shadow: 0 2px 6px #7f030340;
 }
 
 .btn-delete-confirm:disabled {

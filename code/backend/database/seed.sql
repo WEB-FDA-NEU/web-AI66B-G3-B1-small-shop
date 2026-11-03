@@ -6,8 +6,8 @@ INSERT INTO customer_types (type_name, discount_percent)
 VALUES
 ('Rock', 0.00),
 ('Bronze', 5.00),
-('Silver', 10.00),
-('Gold', 15.00);
+('Silver', 15.00),
+('Gold', 30.00);
 
 -- 2 CATEGORIES
 INSERT INTO categories (category_name)
@@ -19,46 +19,65 @@ VALUES
 ('Food'),
 ('Dessert');
 
--- 3 USERS
-INSERT INTO users (username, password, role)
-VALUES 
-('havy', '12345', 'Admin');
+-- 3 USER
+INSERT INTO users(username, password, role)
+VALUES
+('havy', '$2b$12$GnRbPRHYkKdx.wTmol84f.zb205mUaGNWSvu50ZO0Y7MVu4gW.0lO', 'Admin'), -- 12345
+('minhanh', '$2b$12$5m7wkDaLLs9oH2ymLxRHp.Gw1rL7TVOnNM3V3D1lGS0zmWw.rxcSG', 'Employee'), -- minhanh
+('quanghuy', '$2b$12$Ys.i/f99eRkkji8Rs.bg/.xM6A.La4rSWRGpowlnZcIOEtDGw/vwS', 'Employee'), -- quanghuy
+('thutrang', '$2b$12$wd79ID6ttO/eb0yt/vI0lO8dZlAIaw0eAUTwuKsSt38hvhSumYh.a', 'Employee'),
+('ducanh', '$2b$12$QWelM1jh2v9qdLZalHn7du.ZermdBxMa3F42nbNGd/ZsevvRIqTz6', 'Employee'),	
+('an_nv', 'mã_hoá', 'Manager'),
+('binh_tt', 'mã_hoá', 'Employee'),
+('cuong_lv', 'mã_hoá', 'Employee'),
+('dung_pt', 'mã_hoá', 'Employee'),
+('em_hv', 'mã_hoá', 'Employee'),
+('hoa_vt', 'mã_hoá', 'Employee'),
+('hung_dv', 'mã_hoá', 'Employee'),
+('lan_bt', 'mã_hoá', 'Employee'),
+('minh_dv', 'mã_hoá', 'Employee'),
+('nga_nt', 'mã_hoá', 'Manager'),
+('long_pv', 'mã_hoá', 'Employee'),
+('mai_ht', 'mã_hoá', 'Employee'),
+('nam_vq', 'mã_hoá', 'Employee'),
+('phuong_dt', 'mã_hoá', 'Employee'),
+('son_bv', 'mã_hoá', 'Employee');
 
 -- 4 EMPLOYEES
-INSERT INTO employees (name, phone, email, role, status)
+INSERT INTO employees (name, username, phone, email, role, status)
 VALUES
-('Nguyen Ha Vy', '0901234567', 'havy@yums.com', 'Manager', 'Active'),
-('Tran Minh Anh', '0912345678', 'minhanh@yums.com', 'Staff', 'Active'),
-('Le Quang Huy', '0923456789', 'quanghuy@yums.com', 'Staff', 'On Leave'),
-('Pham Thu Trang', '0934567890', 'thutrang@yums.com', 'Staff', 'Active'),
-('Do Duc Anh', '0945678901', 'ducanh@yums.com', 'Staff', 'Inactive'),
-('Nguyen Van An', '0901234567', 'an@example.com', 'Manager', 'Active'),
-('Tran Thi Binh', '0912345678', 'binh@example.com', 'Staff', 'Active'),
-('Le Van Cuong', '0923456789', 'cuong@example.com', 'Cashier', 'On Leave'),
-('Pham Thi Dung', '0934567890', 'dung@example.com', 'Staff', 'Active'),
-('Hoang Van Em', '0945678901', 'em@example.com', 'Cashier', 'Active'),
-('Vu Thi Hoa', '0956789012', 'hoa@example.com', 'Staff', 'Inactive'),
-('Dang Van Hung', '0967890123', 'hung@example.com', 'Cashier', 'Active'),
-('Bui Thi Lan', '0978901234', 'lan@example.com', 'Staff', 'On Leave'),
-('Do Van Minh', '0989012345', 'minh@example.com', 'Cashier', 'Inactive'),
-('Nguyen Thi Nga', '0990123456', 'nga@example.com', 'Manager', 'On Leave'),
-('Pham Van Long', '0903234567', 'long@yums.com', 'Cashier', 'Active'),
-('Hoang Thi Mai', '0914345678', 'mai@yums.com', 'Staff', 'Active'),
-('Vu Quoc Nam', '0925456789', 'nam@yums.com', 'Cashier', 'On Leave'),
-('Dang Thi Phuong', '0936567890', 'phuong@yums.com', 'Staff', 'Inactive'),
-('Bui Van Son', '0947678901', 'son@yums.com', 'Cashier', 'On Leave');
+('Nguyen Ha Vy', 'havy', '0901234567', 'havy@yums.com', 'Manager', 'Active'),
+('Tran Minh Anh', 'minhanh', '0912345678', 'minhanh@yums.com', 'Staff', 'Active'),
+('Le Quang Huy', 'quanghuy', '0923456789', 'quanghuy@yums.com', 'Staff', 'On Leave'),
+('Pham Thu Trang', 'thutrang', '0934567890', 'thutrang@yums.com', 'Staff', 'Active'),
+('Do Duc Anh', 'ducanh', '0945678901', 'ducanh@yums.com', 'Staff', 'Inactive'),
+('Nguyen Van An', 'an_nv', '0901234567', 'an@example.com', 'Manager', 'Active'),
+('Tran Thi Binh', 'binh_tt', '0912345678', 'binh@example.com', 'Staff', 'Active'),
+('Le Van Cuong', 'cuong_lv', '0923456789', 'cuong@example.com', 'Cashier', 'On Leave'),
+('Pham Thi Dung', 'dung_pt', '0934567890', 'dung@example.com', 'Staff', 'Active'),
+('Hoang Van Em', 'em_hv', '0945678901', 'em@example.com', 'Cashier', 'Active'),
+('Vu Thi Hoa', 'hoa_vt', '0956789012', 'hoa@example.com', 'Staff', 'Inactive'),
+('Dang Van Hung', 'hung_dv', '0967890123', 'hung@example.com', 'Cashier', 'Active'),
+('Bui Thi Lan', 'lan_bt', '0978901234', 'lan@example.com', 'Staff', 'On Leave'),
+('Do Van Minh', 'minh_dv', '0989012345', 'minh@example.com', 'Cashier', 'Inactive'),
+('Nguyen Thi Nga', 'nga_nt', '0990123456', 'nga@example.com', 'Manager', 'On Leave'),
+('Pham Van Long', 'long_pv', '0903234567', 'long@yums.com', 'Cashier', 'Active'),
+('Hoang Thi Mai', 'mai_ht', '0914345678', 'mai@yums.com', 'Staff', 'Active'),
+('Vu Quoc Nam', 'nam_vq', '0925456789', 'nam@yums.com', 'Cashier', 'On Leave'),
+('Dang Thi Phuong', 'phuong_dt', '0936567890', 'phuong@yums.com', 'Staff', 'Inactive'),
+('Bui Van Son', 'son_bv', '0947678901', 'son@yums.com', 'Cashier', 'On Leave');
 
 -- 5 CUSTOMERS 
 INSERT INTO customers
 (name, phone, email, total_spent, customer_type_id)
 VALUES
-('Nguyen Van An', '0981000001', 'an@gmail.com', 1250000, 3),
-('Tran Thu Ha', '0981000002', 'ha@gmail.com', 680000, 2),
-('Le Minh Duc', '0981000003', 'duc@gmail.com', 2500000, 4),
-('Pham Ngoc Mai', '0981000004', 'mai@gmail.com', 320000, 2),
-('Hoang Gia Bao', '0981000005', 'bao@gmail.com', 95000, 1),
-('Vu Thanh Hoa', '0981000006', 'hoa@gmail.com', 1850000, 3),
-('Do Minh Quan', '0981000007', 'quan@gmail.com', 150000, 1),
+('Nguyen Van An', '0981000001', 'an@gmail.com', 1250000, 4), 
+('Tran Thu Ha', '0981000002', 'ha@gmail.com', 680000, 3),    
+('Le Minh Duc', '0981000003', 'duc@gmail.com', 2500000, 4), 
+('Pham Ngoc Mai', '0981000004', 'mai@gmail.com', 320000, 2), 
+('Hoang Gia Bao', '0981000005', 'bao@gmail.com', 95000, 1),  
+('Vu Thanh Hoa', '0981000006', 'hoa@gmail.com', 1850000, 4), 
+('Do Minh Quan', '0981000007', 'quan@gmail.com', 150000, 2), 
 ('Bui Khanh Linh', '0981000008', 'linh@gmail.com', 4200000, 4);
 
 -- 6 PRODUCTS
@@ -102,26 +121,26 @@ VALUES
 (6, 10);
 
 -- 8 ORDERS
-INSERT INTO orders (employee_id, customer_id, note)
-VALUES
-    (1, 1, 'Customer requested extra sweet.'),
-    (2, 2, 'Please use non-lactose milk.'),
-    (3, 5, 'Customer prefers cool-served.'),
-    (4, 3, NULL);
+INSERT INTO orders (employee_id, customer_id) 
+VALUES 
+(1, 1),
+(2, 2),
+(3, 5),
+(4, 3);
 
 -- 9 ORDER ITEMS
 INSERT INTO order_items (`order_id`, `product_id`, `quantity`)
 VALUES 
-(1, 1, 45),
+(1, 1, 4),
 (2, 2, 1),
 (2, 10, 4),
 (3, 5, 2),
 (4, 11, 1);
 
+UPDATE `orders` SET `deliver_status` = 'delivered' WHERE `order_id` = 2;
 
-
-
-UPDATE `orders` SET `deliver_status` = 'delivered' WHERE `order_id` = 1;
+-- delete from customers where customer_id =1 ;
+-- delete from employees where employee_id =1;
 
 SELECT * FROM inventory;
 SELECT * FROM products;
@@ -130,3 +149,4 @@ SELECT * FROM order_items;
 SELECT * FROM customers;
 SELECT * FROM users;
 SELECT * FROM employees;
+
