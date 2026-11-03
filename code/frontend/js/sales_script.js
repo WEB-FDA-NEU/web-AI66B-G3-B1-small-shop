@@ -1,4 +1,4 @@
-const API_SALES_URL = "http://127.0.0.1:8000/sales";
+const API_SALES_URL = "http://127.0.0.1:8000/api/sales";
 
 const toast = document.getElementById('toastNotification');
 
@@ -177,4 +177,37 @@ document.addEventListener('DOMContentLoaded', () => {
   if (predictionSelect) predictionSelect.addEventListener('change', fetchPredictions);
 
   fetchSalesOverview();
+});
+
+// Hàm tự động nạp 6 categories từ database cho trang Sales
+async function loadSalesCategoriesDropdown() {
+  const categorySelect = document.getElementById('categoryInput');
+  if (!categorySelect) return;
+
+  try {
+    const response = await fetch("http://127.0.0.1:8000/api/categories");
+    if (!response.ok) throw new Error("Failed to load categories");
+    
+    const categories = await response.json();
+    
+    // Giữ lại option mặc định "All Categories" (hoặc "All")
+    categorySelect.innerHTML = '<option value="">All Categories</option>';
+    
+    // Thêm danh sách 6 categories thực tế từ database
+    categories.forEach(cat => {
+      const option = document.createElement('option');
+      // Gán giá trị bằng tên danh mục (hoặc cat.category_id tùy thuộc vào backend lọc theo tên hay ID)
+      option.value = cat.category_name; 
+      option.textContent = cat.category_name;
+      categorySelect.appendChild(option);
+    });
+  } catch (error) {
+    console.error("Error loading categories:", error);
+  }
+}
+
+// Gọi hàm này bên trong sự kiện DOMContentLoaded hiện có của sales_script.js
+document.addEventListener('DOMContentLoaded', () => {
+  loadSalesCategoriesDropdown(); // <-- Thêm dòng này vào
+  // ... các đoạn code khởi tạo khác giữ nguyên ...
 });
