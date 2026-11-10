@@ -1,0 +1,35 @@
+name: "Bug"
+description: "Something built in a previous sprint no longer works"
+title: "[Bug] "
+labels:
+  - bug
+
+body:
+  - type: textarea
+    id: steps
+    attributes:
+      label: Bug description
+      description: Describe what is broken and how to reproduce it.
+      placeholder: |
+        What happened?
+        What did you expect to happen?
+        Steps to reproduce...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - "Blocker - the demo cannot proceed"
+        - "Major - a P0 feature is affected"
+        - "Minor - cosmetic or rare"
+    validations:
+      required: true
+
+  - type: input
+    id: introduced
+    attributes:
+      label: Which PR introduced it (if known)
+      placeholder: "#34"
