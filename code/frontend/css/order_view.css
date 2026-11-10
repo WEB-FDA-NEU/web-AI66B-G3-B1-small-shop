@@ -10,171 +10,24 @@ body {
     font-family: 'Montserrat', sans-serif;
     background-color: #EFE8DF;
     color: #0F414A;
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
 }
 .layout {
     display: flex;
+    width: 100%;
+    min-width: 0;
     min-height: 100vh;
 }
 
-/*main layout*/
-:root {
-    --bg-sidebar: #0F414A;
-    --bg-main: #EFE8DF;
-    --color-accent-red: #7F0303;
-    --color-soft-blue: #96C0CE;
-    --color-warm-beige: #D8BA98;
-    --text-dark: #2A2421;
-    --text-muted: #6B625B;
-    --text-light: #F7F4EF;
-    --border-color: #D2C7B8;
-    --font-title: 'Bodoni Moda', serif;
-    --font-content: 'Montserrat', sans-serif;
-    --transition-speed: 0.25s;
-}
-* {
-    box-sizing: border-box;
-}
-body {
-    margin: 0;
-    background-color: var(--bg-main);
-    font-family: var(--font-content);
-    color: var(--text-dark);
-    -webkit-font-smoothing: antialiased;
-}
-.sidebar {
-    width: 260px;
-    height: 100dvh;
-    background-color: var(--bg-sidebar);
-    color: var(--text-light);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 1000;
-    border-right: 1px solid rgba(216, 186, 152, 0.2);
-    transition: transform 0.25s ease;
-}
-.sidebar-brand {
-    padding: 35px 25px 25px;
-    text-align: center;
-    border-bottom: 1px solid rgba(216, 186, 152, 0.25);
-}
-.sidebar-brand h1 {
-    margin: 0;
-    font-family: var(--font-title);
-    font-size: 1.6rem;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    color: var(--color-warm-beige);
-    text-transform: uppercase;
-    line-height: 1.2;
-}
-.sidebar-brand p {
-    margin: 6px 0 0;
-    font-family: var(--font-content);
-    font-size: 0.72rem;
-    font-weight: 400;
-    letter-spacing: 2px;
-    color: var(--color-soft-blue);
-    text-transform: uppercase;
-}
-.sidebar-menu {
-    flex: 1;
-    list-style: none;
-    margin: 0;
-    padding: 25px 0;
-}
-.sidebar-menu li {
-    margin: 0 0 4px;
-    padding: 0;
-}
-.sidebar-menu a {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    padding: 14px 28px;
-    border-left: 3px solid transparent;
-    color: #C2D3D6;
-    font-family: var(--font-content);
-    font-size: 0.9rem;
-    font-weight: 400;
-    letter-spacing: 0.5px;
-    text-decoration: none;
-    transition: all var(--transition-speed) ease;
-}
-.sidebar-menu a i {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    min-width: 24px;
-    margin-right: 12px;
-    color: var(--color-soft-blue);
-    font-size: 1.1rem;
-    transition: color var(--transition-speed) ease;
-}
-.sidebar-menu a span {
-    display: block;
-}
-.sidebar-menu a:hover {
-    color: var(--text-light);
-    background-color: rgba(255, 255, 255, 0.05);
-}
-.sidebar-menu a:hover i {
-    color: var(--color-warm-beige);
-}
-.sidebar-footer {
-    padding: 20px 25px;
-    border-top: 1px solid rgba(216, 186, 152, 0.2);
-    color: var(--color-soft-blue);
-    font-family: var(--font-content);
-    font-size: 0.75rem;
-    font-weight: 400;
-    text-align: center;
-}
-.sidebar-footer p {
-    margin: 0;
-}
-.menu-btn {
-    position: fixed;
-    top: 10px;
-    left: 0;
-    z-index: 1100;
-    width: 30px;
-    height: 30px;
-    margin: 0;
-    padding: 0;
-    border: none;
-    border-radius: 0 6px 6px 0;
-    background-color: var(--bg-sidebar);
-    color: var(--color-soft-blue);
-    font-family: var(--font-content);
-    font-size: 20px;
-    line-height: 30px;
-    cursor: pointer;
-    transition: all 0.25s ease;
-}
-.menu-btn:hover {
-    color: var(--color-warm-beige);
-}
-.sidebar.hidden {
-    transform: translateX(-100%);
-}
-.menu-btn.update {
-    background-color: var(--bg-main);
-    color: var(--text-muted);
-}
-
-.main-content.expand {
-    width: 100%;
-    left: 0;
-}
+/*side bar: take after employee*/
 
 /*main content*/
 .main-content {
+    display: flex;
+    flex-direction: column;
     box-sizing: border-box;
     width: calc(100% - 260px);
     height: 100dvh;

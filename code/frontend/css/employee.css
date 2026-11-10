@@ -628,6 +628,7 @@ table.employee-table tbody tr:last-child td {
 }
 
 .main-content.expand {
+    width: 100%;
     margin-left: 0;
 }
 
