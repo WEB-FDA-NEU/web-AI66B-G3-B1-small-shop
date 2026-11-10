@@ -357,6 +357,8 @@ body {
 
 .order-detail-content {
     width: 100%;
+    max-height: 55vh;
+    overflow-y: auto;
     overflow-x: auto;
 }
 .order-detail-table {
@@ -381,6 +383,9 @@ body {
     font-size: 18px;
     border-bottom: 3px solid #D8BA98;
     white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
 .order-detail-table tbody tr {
     background-color: #EFE8DF;

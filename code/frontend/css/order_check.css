@@ -365,20 +365,16 @@ body {
     font-family: 'Montserrat', sans-serif;
     font-size: 15px;
 }
+
 .order-list-content {
     width: 100%;
     min-height: 400px;
-    background-color: #F8F4ED;
-    border: 1px solid #96C0CE;
-    padding: 25px;
-}
-.order-list-content {
-    width: 100%;
-    min-height: 400px;
+    max-height: 80vh;
     background-color: #EFE8DF;
     border: none;
     padding: 0;
-    overflow-x: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /*bảng fake*/
@@ -414,6 +410,9 @@ body {
     font-size: 16px;
     border-bottom: 3px solid #D8BA98;
     white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
 .orders-table tbody tr {
     background-color: #EFE8DF;
