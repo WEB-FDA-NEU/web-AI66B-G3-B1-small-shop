@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUMS - Employee Detail</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/employee.css">
+    <link rel="stylesheet" href="../css/profile.css">
+    <link rel="stylesheet" href="../css/customers_detail.css">
+    <link rel="stylesheet" href="../css/employee_details.css">
+</head>
+<body>
+    <button type="button" class="menu-btn" id="menuBtn" aria-label="Toggle navigation">☰</button>
+
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-brand">
+                <a href="home.html"><h1>YUMS</h1></a>
+                <p>You Manage your Shop</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="order_create_edit.html"><i class="fa-solid fa-receipt"></i> Orders</a></li>
+                <li><a href="customers.html"><i class="fa-solid fa-users"></i> Customers</a></li>
+                <li><a href="inventory.html"><i class="fa-solid fa-utensils"></i> Inventory</a></li>
+                <li class="active"><a href="employees.html"><i class="fa-solid fa-id-badge"></i> Employees</a></li>
+                <li><a href="sales.html"><i class="fa-solid fa-chart-line"></i> Sales</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-footer"><p>&copy; 2026 YUMS v1.0</p></div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="header-title">
+                <h2>Employee Detail</h2>
+                <p>View employee information, performance, and recent orders served.</p>
+            </div>
+            <div class="header-actions">
+                <a class="btn-secondary" href="employees.html">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    Back to Employees
+                </a>
+            </div>
+        </header>
+
+        <section class="customer-profile-card">
+            <div class="customer-avatar-section">
+                <div class="customer-avatar" id="employeeAvatar">…</div>
+                <h3 id="employeeName">Loading employee...</h3>
+                <span class="membership-badge employee-status" id="employeeStatus">Loading...</span>
+            </div>
+            <div class="customer-info-grid">
+                <div class="info-item">
+                    <label>Employee ID</label>
+                    <p id="employeeId">—</p>
+                </div>
+                <div class="info-item">
+                    <label>Username</label>
+                    <p id="employeeUsername">—</p>
+                </div>
+                <div class="info-item">
+                    <label>Phone</label>
+                    <p id="employeePhone">—</p>
+                </div>
+                <div class="info-item">
+                    <label>Position</label>
+                    <p id="employeeRole">—</p>
+                </div>
+                <div class="info-item">
+                    <label>Start Date</label>
+                    <p id="employeeStartDate">—</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="customer-stats employee-stats">
+            <div class="stat-card">
+                <h4>Orders Served</h4>
+                <h2 id="totalOrders">0</h2>
+            </div>
+            <div class="stat-card">
+                <h4>Total Sales</h4>
+                <h2 id="totalSales">0 ₫</h2>
+            </div>
+            <div class="stat-card">
+                <h4>Days Worked</h4>
+                <h2 id="daysWorked">0</h2>
+            </div>
+        </section>
+        
+        <div class="section-header"><h3>Recent Orders Served</h3></div>
+        <section class="table-wrapper employee-orders-section">
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="recentOrdersBody">
+                    <tr><td colspan="6" class="table-message">Loading orders...</td></tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="../js/home.js"></script>
+    <script src="../js/employee_details.js"></script>
+</body>
+</html>

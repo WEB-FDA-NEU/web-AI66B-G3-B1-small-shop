@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:8000/employees";
+const API_URL = "https://small-shop-tailscale.onrender.com/employees";
 
 let employees = [];
 let isEditMode = false;
@@ -20,7 +20,7 @@ const toast = document.getElementById('toastNotification');
 // Form Input Elements
 const employeeIdInput = document.getElementById('employeeId');
 const fullNameInput = document.getElementById('fullName');
-const emailInput = document.getElementById('email');
+const usernameInput = document.getElementById('username');
 const phoneInput = document.getElementById('phone');
 const roleInput = document.getElementById('role');
 const statusInput = document.getElementById('status');
@@ -186,7 +186,7 @@ function renderTable(data) {
           <div class="emp-avatar">${getInitials(emp.name)}</div>
           <div>
             <div style="font-weight: 500;">${emp.name}</div>
-            <div style="font-size: 0.8rem; color: #777;">${emp.email || 'N/A'}</div>
+            <div style="font-size: 0.8rem; color: #777;">${emp.username || 'N/A'}</div>
           </div>
         </div>
       </td>
@@ -199,6 +199,10 @@ function renderTable(data) {
           <button class="btn-icon" title="Edit Employee" onclick="openEditEmployeeModal(${emp.employee_id})">
             <i class="fa-solid fa-pen-to-square"></i>
           </button>
+          <a class="btn-icon" href="employee_details.html?id=${encodeURIComponent(emp.employee_id)}"
+             title="View Employee Details" aria-label="View details for ${idDisplay}">
+            <i class="fa-solid fa-eye"></i>
+          </a>
           <button class="btn-icon btn-delete" title="Delete Employee" onclick="deleteEmployee(${emp.employee_id}, '${safeName}')">
             <i class="fa-solid fa-trash-can"></i>
           </button>
@@ -218,6 +222,7 @@ function filterData() {
   const filtered = employees.filter(emp => {
     const empIdFormatted = `nv-${String(emp.employee_id).padStart(3, '0')}`;
     const matchesSearch = (emp.name && emp.name.toLowerCase().includes(searchTerm)) || 
+                          (emp.username && emp.username.toLowerCase().includes(searchTerm)) ||
                           empIdFormatted.includes(searchTerm);
     const matchesRole = selectedRole === "" || emp.role === selectedRole;
     
@@ -246,7 +251,7 @@ function openEditEmployeeModal(id) {
 
   if (employeeIdInput) employeeIdInput.value = emp.employee_id;
   if (fullNameInput) fullNameInput.value = emp.name;
-  if (emailInput) emailInput.value = emp.email || '';
+  if (usernameInput) usernameInput.value = emp.username || '';
   if (phoneInput) phoneInput.value = emp.phone || '';
   if (roleInput) roleInput.value = emp.role;
   if (statusInput) statusInput.value = emp.status;
@@ -266,7 +271,7 @@ async function handleFormSubmit(e) {
 
   const payload = {
     name: fullNameInput.value.trim(),
-    email: emailInput.value.trim() || null,
+    username: usernameInput.value.trim(),
     phone: phoneInput.value.trim() || null,
     role: roleInput.value,
     status: statusInput.value

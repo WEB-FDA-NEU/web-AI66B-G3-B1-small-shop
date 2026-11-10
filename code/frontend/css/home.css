@@ -1,33 +1,3 @@
-/*MAIN SCREEN PART*/
-.main-content {
-    position: fixed;
-    top: 0;
-    left: 260px;
-    right: 0;
-    bottom: 0;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: 0.25s;
-}
-
-.welcome {
-    text-align: center;
-}
-
-.welcome h1 {
-    font-family: var(--font-title);
-    font-size: 2.5rem;
-    color: var(--text-dark);
-    margin-bottom: 10px;
-}
-
-.welcome p {
-    color: var(--color-accent-red);
-    font-size: 1rem;
-}
-
 /*MENU BUTTON*/
 .menu-btn {
     position: fixed;

@@ -1,0 +1,37 @@
+.employee-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.employee-status.active {
+    background-color: #E2EFCB;
+    color: #2E5A1C;
+    border: 1px solid #C4E197;
+}
+
+.employee-status.onleave {
+    background-color: #FDF3D6;
+    color: #7A5B0B;
+    border: 1px solid #F5E1A4;
+}
+
+.employee-status.inactive {
+    background-color: #F8D7DA;
+    color: #842029;
+    border: 1px solid #F5C2C7;
+}
+
+.employee-orders-section {
+    overflow-x: auto;
+}
+
+@media (max-width: 1100px) {
+    .employee-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 650px) {
+    .employee-stats {
+        grid-template-columns: 1fr;
+    }
+}

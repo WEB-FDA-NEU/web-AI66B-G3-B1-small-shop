@@ -711,7 +711,7 @@ body {
     background-color: #F8F4ED;
     color: #0F414A;
     font-family: 'Montserrat', sans-serif;
-    font-size: 12px;
+    font-size: 14px;
     box-sizing: border-box;
 }
 .confirm-customer input:focus {
@@ -723,6 +723,126 @@ body {
     gap: 10px;
     margin-top: 8px;
 }
+.customer-search-wrapper {
+    position: relative;
+    width: 100%;
+}
+.customer-suggestions {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-height: 160px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    z-index: 1000;
+}
+.customer-suggestions.show {
+    display: block;
+}
+.customer-suggestion-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    cursor: pointer;
+}
+.customer-suggestion-item:hover {
+    background: #f5f5f5;
+}
+.customer-suggestion-phone {
+    font-weight: 400;
+    color: #222;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.customer-suggestion-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    min-width: 0;
+}
+.customer-suggestion-name {
+    color: #222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.customer-suggestion-rank {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    text-align: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.customer-suggestion-rank.gold {
+    background-color: #FFF0C2;
+    color: #8C6200;
+    border: 1px solid #E6C875;
+}
+.customer-suggestion-rank.silver {
+    background-color: #DDE2E6;
+    color: #39424A;
+    border: 1px solid #BCC4CB;
+}
+.customer-suggestion-rank.rock {
+    background-color: #F7F8F9;
+    color: #65717B;
+    border: 1px solid #E4E7EA;
+}
+.customer-suggestion-rank.bronze {
+    background-color: #F8E5D8;
+    color: #8A4B20;
+    border: 1px solid #E3C1AA;
+}
+.customer-suggestion-empty {
+    padding: 12px;
+    color: #888;
+    text-align: center;
+}
+
+.selected-customer-info {
+    display: none;
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    align-items: center;
+    gap: 8px;
+    max-width: 65%;
+    pointer-events: none;
+    z-index: 2;
+}
+.selected-customer-info.show {
+    display: flex;
+}
+#selectedCustomerName {
+    color: #888;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.selected-customer-info .customer-suggestion-rank {
+    opacity: 0.75;
+    font-size: 0.7rem;
+    padding: 3px 8px;
+}
+#customerPhoneInput {
+    padding-right: 45%;
+}
+
 .confirm-note {
     margin-top: 0;
     padding-top: 14px;
@@ -734,12 +854,17 @@ body {
     background-color: #F8F4ED;
     color: #0F414A;
     font-family: 'Montserrat', sans-serif;
-    font-size: 11px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
 }
 .customer-option-btn:hover {
     opacity: 0.85;
+}
+
+/*this is too keep the Add cus mini popup above the Cf order popup one layer*/
+.order-add-customer-overlay {
+    z-index: 2101;
 }
 
 .confirm-items {
@@ -769,14 +894,14 @@ body {
     flex: 1;
     color: #0F414A;
     font-family: 'Montserrat', sans-serif;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
 }
 .confirm-item-quantity {
     flex-shrink: 0;
     color: #0F414A;
     font-family: 'Montserrat', sans-serif;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
 }
 /* cái này là price lẻ của món á*/
@@ -785,7 +910,7 @@ body {
     min-width: 90px;
     color: #0F414A;
     font-family: 'Montserrat', sans-serif;
-    font-size: 12px;
+    font-size: 14px;
     text-align: right;
     font-weight: 600;
 }
@@ -799,7 +924,7 @@ body {
     flex-shrink: 0;
 }
 .confirm-total span {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
 }
 .confirm-total strong {

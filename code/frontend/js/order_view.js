@@ -1,20 +1,25 @@
-const API_BASE_URL = "http://127.0.0.1:8000/api";
+const API_BASE_URL = "https://small-shop-tailscale.onrender.com";
 
 const params = new URLSearchParams(window.location.search);
 const orderId = params.get("id");
 
 const orderCode = document.querySelector("#orderCode");
+const createdBy = document.querySelector("#createdBy");
+const createdAt = document.querySelector("#createdAt");
 const customerName = document.querySelector("#customerName");
 const orderStatus = document.querySelector("#orderStatus");
 const orderItems = document.querySelector("#orderItems");
+
 const pendingActions = document.querySelector("#pendingActions");
 const confirmDeliveryBtn = document.querySelector("#confirmDeliveryBtn");
+
 const statusConfirmOverlay = document.querySelector("#statusConfirmOverlay");
 const statusConfirmClose = document.querySelector("#statusConfirmClose");
 const statusConfirmNo = document.querySelector("#statusConfirmNo");
 const statusConfirmYes = document.querySelector("#statusConfirmYes");
 
-//must be VND !!!!
+
+// HELPER FUNCTIONS
 function formatCurrency(amount) {
     return Number(amount || 0).toLocaleString("vi-VN") + " VND";
 }
@@ -53,9 +58,52 @@ function getStatusClass(status) {
     return "";
 }
 
-// Render Note row
+//ORDER NOTE
+//save note thru backend api
+async function saveOrderNote(input, button, display, editArea) {
+    if (!orderId) return;
 
-// Render Note row
+    const newNote = input.value.trim();
+
+    button.disabled = true;
+
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/orders/${encodeURIComponent(orderId)}/note`,
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    note: newNote || null
+                })
+            }
+        );
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || `HTTP ${response.status}`);
+        }
+
+        const updatedOrder = await response.json();
+        const savedNote = updatedOrder.note ?? newNote;
+
+        display.textContent = savedNote;
+        input.value = savedNote;
+
+        editArea.hidden = true;
+        display.hidden = false;
+
+    } catch (error) {
+        console.error("Failed to update order note:", error);
+        alert(`Unable to update Note: ${error.message}`);
+
+    } finally {
+        button.disabled = false;
+    }
+}
+
 function renderOrderNote(order) {
     const noteRow = document.createElement("tr");
     noteRow.className = "order-note-row";
@@ -147,102 +195,42 @@ function renderOrderNote(order) {
     return noteRow;
 }
 
-//save note thru backend api
-async function saveOrderNote(input, button, display, editArea) {
-    if (!orderId) return;
 
-    const newNote = input.value.trim();
+//ORDER DETAIL
+function showOrderNotFound(message = "Order not found.") {
+    orderCode.textContent = "Not found";
+    customerName.textContent = "Unknown customer";
 
-    button.disabled = true;
-
-    try {
-        const response = await fetch(
-            `${API_BASE_URL}/orders/${encodeURIComponent(orderId)}/note`,
-            {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    note: newNote || null
-                })
-            }
-        );
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.detail || `HTTP ${response.status}`);
-        }
-
-        const updatedOrder = await response.json();
-        const savedNote = updatedOrder.note ?? newNote;
-
-        display.textContent = savedNote;
-        input.value = savedNote;
-
-        editArea.hidden = true;
-        display.hidden = false;
-
-    } catch (error) {
-        console.error("Failed to update order note:", error);
-        alert(`Unable to update Note: ${error.message}`);
-
-    } finally {
-        button.disabled = false;
-    }
-}
-
-//fetch from REAL data
-async function loadOrderDetails() {
-    if (!orderId) {
-        showOrderNotFound("Missing order ID.");
-        return;
-    }
+    orderStatus.textContent = "Unknown";
+    orderStatus.className = "status-badge";
 
     orderItems.innerHTML = `
         <tr>
             <td colspan="5" style="text-align: center; padding: 30px;">
-                Loading order details...
+                ${escapeHtml(message)}
             </td>
         </tr>
     `;
 
-    try {
-        const response = await fetch(
-            `${API_BASE_URL}/orders/${encodeURIComponent(orderId)}`
-        );
-
-        if (response.status === 404) {
-            showOrderNotFound();
-            return;
-        }
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-
-        const order = await response.json();
-
-        renderOrder(order);
-
-    } catch (error) {
-        console.error("Failed to load order details:", error);
-
-        orderItems.innerHTML = `
-            <tr>
-                <td colspan="5" style="text-align: center; padding: 30px;">
-                    Unable to load order details. Please try again.
-                </td>
-            </tr>
-        `;
+    if (pendingActions) {
+        pendingActions.classList.remove("show");
     }
 }
 
-//Render in4mation
 function renderOrder(order) {
     orderCode.textContent = order.order_id;
+    createdBy.textContent = order.employee_name || "Unknown";
+    createdAt.textContent = order.created_at
+        ? new Date(order.created_at).toLocaleString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
+        })
+        : "Unknown";
     customerName.textContent = order.customer_name || "Guest";
-
     orderStatus.textContent = getStatusLabel(order.deliver_status);
     orderStatus.className =
         `status-badge ${getStatusClass(order.deliver_status)}`;
@@ -308,49 +296,73 @@ function renderOrder(order) {
     }
 }
 
-//handle missing order error
-function showOrderNotFound(message = "Order not found.") {
-    orderCode.textContent = "Not found";
-    customerName.textContent = "Unknown customer";
-
-    orderStatus.textContent = "Unknown";
-    orderStatus.className = "status-badge";
+async function loadOrderDetails() {
+    if (!orderId) {
+        showOrderNotFound("Missing order ID.");
+        return;
+    }
 
     orderItems.innerHTML = `
         <tr>
             <td colspan="5" style="text-align: center; padding: 30px;">
-                ${escapeHtml(message)}
+                Loading order details...
             </td>
         </tr>
     `;
 
-    if (pendingActions) {
-        pendingActions.classList.remove("show");
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/orders/${encodeURIComponent(orderId)}`
+        );
+
+        if (response.status === 404) {
+            showOrderNotFound();
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const order = await response.json();
+
+        renderOrder(order);
+
+    } catch (error) {
+        console.error("Failed to load order details:", error);
+
+        orderItems.innerHTML = `
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 30px;">
+                    Unable to load order details. Please try again.
+                </td>
+            </tr>
+        `;
     }
 }
 
-//delivery confirmation mini pop
-// Open confirmation modal
+
+
+
+
+// DELIVERY CONFIRMATION
 function openDeliveryModal() {
     if (statusConfirmOverlay) {
         statusConfirmOverlay.classList.add("show");
     }
 }
-//close it
+
 function closeDeliveryModal() {
     if (statusConfirmOverlay) {
         statusConfirmOverlay.classList.remove("show");
     }
 }
 
-//yes button to cf delivery status
 async function confirmOrderDelivery() {
     if (!orderId || !statusConfirmYes) return;
-
     //avoid repeating clicks whil handling
     statusConfirmYes.disabled = true;
     statusConfirmYes.textContent = "Processing...";
-
     try {
         const response = await fetch(
             `${API_BASE_URL}/orders/${encodeURIComponent(orderId)}/deliver`,
@@ -366,36 +378,32 @@ async function confirmOrderDelivery() {
         if (updatedOrder.deliver_status !== "delivered") {
             throw new Error("The delivery status was not updated successfully.");
         }
-
         //close poppup
         closeDeliveryModal();
         //reload od detaiils in backend
         await loadOrderDetails();
-
     } catch (error) {
         console.error("Failed to confirm delivery:", error);
         alert(`Unable to confirm delivery: ${error.message}`);
-
     } finally {
         statusConfirmYes.disabled = false;
         statusConfirmYes.textContent = "Yes";
     }
 }
 
-//assign events for buttons
-//open popup
+// event listeners
 if (confirmDeliveryBtn) {
     confirmDeliveryBtn.addEventListener("click", openDeliveryModal);
 }
-//approve when clicking Yes
+
 if (statusConfirmYes) {
     statusConfirmYes.addEventListener("click", confirmOrderDelivery);
 }
-//close it when clicking No
+
 if (statusConfirmNo) {
     statusConfirmNo.addEventListener("click", closeDeliveryModal);
 }
-//or when clicking X
+
 if (statusConfirmClose) {
     statusConfirmClose.addEventListener("click", closeDeliveryModal);
 }
@@ -407,5 +415,7 @@ if (statusConfirmOverlay) {
         }
     });
 }
+
+
 
 loadOrderDetails();

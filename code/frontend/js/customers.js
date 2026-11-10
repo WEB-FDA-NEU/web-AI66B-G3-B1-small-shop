@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE_URL = 'http://127.0.0.1:8000/api';
+    const API_BASE_URL = 'https://small-shop-tailscale.onrender.com';
     let customers = [];
     let customerTypes = [];
 
@@ -31,16 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             input: document.getElementById('editPhone'),
             error: document.getElementById('editPhoneError')
-        }
-    ];
-    const emailInputs = [
-        {
-            input: document.getElementById('email'),
-            error: document.getElementById('emailError')
-        },
-        {
-            input: document.getElementById('editEmail'),
-            error: document.getElementById('editEmailError')
         }
     ];
     let sortAscending = true;
@@ -106,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sortedData.length === 0) {
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 24px;">
+                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">
                         No customer data found.
                     </td>
                 </tr>`;
@@ -121,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td><strong class="cus-id">${customerLabel(customer.customer_id)}</strong></td>
                 <td>${escapeHTML(customer.name)}</td>
                 <td>${escapeHTML(customer.phone)}</td>
-                <td>${escapeHTML(customer.email || '—')}</td>
                 <td style="text-align: right;">${formatVND(customer.total_spent)}</td>
                 <td style="text-align: center;"><span class="badge badge-tier ${tierClass}">${escapeHTML(tier)}</span></td>
                 <td style="text-align: center;">${formatDate(customer.created_at)}</td>
@@ -134,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <i class="fa-solid fa-eye" aria-hidden="true"></i>
                         </a>
                         <button class="btn-icon btn-delete delete" data-id="${customer.customer_id}" title="Delete">
-                            <i class="fa-solid fa-trash-can"></i>
+                            <i class="fa-solid fa-trash"></i>
                         </button>
                     </div>
                 </td>`;
@@ -149,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const searchable = [
                 customer.name,
                 customer.phone,
-                customer.email,
                 customerLabel(customer.customer_id),
                 customer.customer_id
             ].join(' ').toLowerCase();
@@ -195,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="8" style="text-align: center; color: #b42318; padding: 24px;">
+                    <td colspan="7" style="text-align: center; color: #b42318; padding: 24px;">
                         Unable to load customers: ${escapeHTML(error.message)}
                     </td>
                 </tr>`;
@@ -204,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function loadCustomerTypes() {
-        customerTypes = await request('/customer-types');
+        customerTypes = await request('/customers/customer-types');
         [addTypeSelect, editTypeSelect].forEach(select => {
             select.innerHTML = customerTypes.map(type =>
                 `<option value="${type.customer_type_id}">${escapeHTML(type.type_name)}</option>`
@@ -260,7 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return {
             name: formData.get('name').trim(),
             phone: formData.get('phone').trim(),
-            email: formData.get('email').trim() || null,
             customer_type_id: Number(typeSelect.value)
         };
     }
@@ -277,27 +264,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return isValid;
     }
 
-    function validateEmail(input, errorElement) {
-        input.value = input.value.trim();
-        const isValid = !input.value ||
-            (!input.validity.typeMismatch && /^[^@\s]+@gmail\.com$/i.test(input.value));
-        const message = isValid ? '' : 'Enter a valid email address ending with @gmail.com.';
-
-        input.setCustomValidity(message);
-        errorElement.textContent = message;
-        return isValid;
-    }
-
     phoneInputs.forEach(({ input, error }) => {
         input.addEventListener('input', () => validatePhone(input, error));
         input.addEventListener('blur', () => {
             if (input.value) validatePhone(input, error);
         });
-    });
-
-    emailInputs.forEach(({ input, error }) => {
-        input.addEventListener('input', () => validateEmail(input, error));
-        input.addEventListener('blur', () => validateEmail(input, error));
     });
 
     document.getElementById('openAddModalBtn')?.addEventListener('click', () => openModal(addModal));
@@ -322,10 +293,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     addForm.addEventListener('submit', async event => {
         event.preventDefault();
-        if (!validateEmail(emailInputs[0].input, emailInputs[0].error)) {
-            emailInputs[0].input.reportValidity();
-            return;
-        }
         if (!validatePhone(phoneInputs[0].input, phoneInputs[0].error)) {
             phoneInputs[0].input.reportValidity();
             return;
@@ -355,8 +322,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!customer) return;
             document.getElementById('editCustomerId').value = customer.customer_id;
             document.getElementById('editFullName').value = customer.name;
-            document.getElementById('editEmail').value = customer.email || '';
-            validateEmail(emailInputs[1].input, emailInputs[1].error);
             document.getElementById('editPhone').value = customer.phone;
             editTypeSelect.value = String(customer.customer_type_id);
             openModal(editModal);
@@ -371,10 +336,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     editForm.addEventListener('submit', async event => {
         event.preventDefault();
-        if (!validateEmail(emailInputs[1].input, emailInputs[1].error)) {
-            emailInputs[1].input.reportValidity();
-            return;
-        }
         if (!validatePhone(phoneInputs[1].input, phoneInputs[1].error)) {
             phoneInputs[1].input.reportValidity();
             return;

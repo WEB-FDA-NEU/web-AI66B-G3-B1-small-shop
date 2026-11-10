@@ -86,11 +86,20 @@ def create_order(data: OrderCreate) -> Dict[str, Any]:
         connection.begin()
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT employee_id FROM employees WHERE employee_id = %s AND status = 'Active'",
-                (data.employee_id,)
+                """
+                SELECT employee_id
+                FROM employees
+                WHERE username = %s AND status = 'Active'
+                """,
+                (data.username.strip(),)
             )
-            if not cursor.fetchone():
-                raise HTTPException(status_code=400, detail="Employee does not exist or is not active.")
+            employee = cursor.fetchone()
+            if not employee:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Employee does not exist or is not active."
+                )
+            employee_id = employee["employee_id"]
 
             if data.customer_id is not None:
                 cursor.execute(
@@ -129,7 +138,7 @@ def create_order(data: OrderCreate) -> Dict[str, Any]:
                     (employee_id, customer_id, note, deliver_status, total_amount, discount_amount)
                 VALUES (%s, %s, %s, 'not_deliver', %s, 0)
             """, (
-                data.employee_id,
+                employee_id,
                 data.customer_id,
                 data.note.strip() or None if data.note is not None else None,
                 total

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>View Order's Detail</title>
     <link rel="stylesheet" href="../css/order_view.css">
+    <link rel="stylesheet" href="../css/profile.css">
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda&display=swap" rel="stylesheet">
@@ -75,7 +76,7 @@
             <!--switching buttons between New and Check-->
             <div class="order-tabs">
                 <a class="tab-btn" href="order_create_edit.html">New order</a>
-                <a class="tab-btn active" href="order_check.html">Check orders</a>
+                <a class="tab-btn active" href="order_check.html">Check all orders</a>
             </div>
             <!--order detail zone-->
             <section class="order-detail">
@@ -83,6 +84,14 @@
                     <div class="order-code">
                         <span class="detail-label">Order code</span>
                         <strong id="orderCode"></strong>
+                    </div>
+                    <div class="created-by">
+                        <span class="detail-label">Created by</span>
+                        <strong id="createdBy"></strong>
+                    </div>
+                    <div class="created-at">
+                        <span class="detail-label">Created at</span>
+                        <strong id="createdAt"></strong>
                     </div>
                     <div class="customer-name">
                         <span class="detail-label">Customer</span>

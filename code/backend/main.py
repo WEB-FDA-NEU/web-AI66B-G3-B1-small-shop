@@ -1,35 +1,44 @@
-import sys
 import os
-from fastapi import FastAPI, HTTPException, status, APIRouter, Depends
+import sys
+from typing import List, Optional
+
+from database.connect_db import get_connection
+from fastapi import APIRouter, FastAPI, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
+# Employee schemas and services
 from schema.employee import EmployeeCreate, EmployeeUpdate, EmployeeResponse
-from services.employee import add_employee, update_employee, get_all_employees, delete_employee, get_employee_by_id
+from services.employee import add_employee, update_employee, get_all_employees, delete_employee, get_employee_by_id, get_employee_details
+
+# Authentication schemas and services
 from schema.auth import LoginRequest
 from services.auth import authenticate_user
+
+# Order schemas and services
 from schema.order import OrderCreate, DeliveryResponse
 from services.order import get_products, create_order, get_orders, get_order_by_id, mark_order_delivered
+from backend.schema.order import OrderNoteUpdate
+from backend.services.order import update_order_note
 
+# Customer schemas and services
 from schema.customer import CustomerCreate, CustomerUpdate
 from services.customer import search_customers, get_customers, get_customer_details, get_customer_types, create_customer, update_customer, delete_customer
 
-from config.api import settings
-
-#oanhtran
+# Product schemas and services
 from schema.product import ProductCreate, ProductUpdate, ProductResponse
 from services.product import get_all_products, add_product, update_product, delete_product
 
+# Inventory schemas and services
 from schema.inventory import InventoryCreate, InventoryUpdate, InventoryResponse
 from services.inventory import get_all_inventory, add_inventory, update_inventory, delete_inventory
 
-from schema.sales import SalesItemOverview, DemandPredictionResponse, SalesFilterQuery
+# Sales schemas and services
+from schema.sales import SalesItemOverview
 from services.sales import get_sales_overview, get_demand_predictions
-from fastapi import Query
-from typing import Optional
-#het oanhtran
+
+from config.api import settings
 
 app = FastAPI(title="YUMS")
 
@@ -42,9 +51,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+# Router declarations
 emp_router = APIRouter(prefix="/employees", tags=["Employees"])
+auth_router = APIRouter(prefix="/auth", tags=["Authentication"])
+cus_router = APIRouter(prefix="/customers", tags=["Customers"])
+ord_router = APIRouter(prefix="/orders", tags=["Orders"])
+prod_router = APIRouter(prefix="/products", tags=["Products"])
+inv_router = APIRouter(prefix="/inventory", tags=["Inventory"])
+cat_router = APIRouter(prefix="/categories", tags=["Categories"])
+sales_router = APIRouter(prefix="/sales", tags=["Sales"])
+sales_test_router = APIRouter(prefix="/sales", tags=["Sales Test Alias"])
 
+# Employee endpoints
 @emp_router.get(
     "",
     response_model=List[EmployeeResponse],
@@ -74,6 +92,22 @@ def get_employee_by_id_endpoint(employee_id: int):
             detail=f"Employee with ID {employee_id} not found.",
         )
     return employee
+
+@emp_router.get(
+    "/{employee_id}/details",
+    summary="Get employee details and order history",
+)
+def get_employee_details_endpoint(employee_id: int):
+    """Returns an employee profile, sales statistics, and recent orders."""
+    try:
+        return get_employee_details(employee_id)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Employee details are unavailable. Check the database connection.",
+        ) from e
     
 @emp_router.post(
     "",
@@ -85,6 +119,8 @@ def create_employee_endpoint(payload: EmployeeCreate):
     try:
         new_employee = add_employee(payload)
         return new_employee
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -110,40 +146,40 @@ def update_employee_endpoint(employee_id: int, payload: EmployeeUpdate):
 def delete_employee_endpoint(employee_id: int):
     return delete_employee(employee_id=employee_id)
 
-app.include_router(emp_router)
-
-#all routers for order screns of maitran
-api_router = APIRouter(prefix="/api")
-
-@api_router.post("/login", tags=["Authentication"])
+# Authentication endpoints
+@auth_router.post("/login", summary="Authenticate user and return token")
 def login_endpoint(payload: LoginRequest):
     return authenticate_user(payload.username, payload.password)
 
-@api_router.get("/products", tags=["Products"])
-def get_products_endpoint():
-    return get_products()
-
-@api_router.post("/orders", tags=["Orders"], status_code=status.HTTP_201_CREATED)
+# Order endpoints
+@ord_router.post("", status_code=status.HTTP_201_CREATED)
 def create_order_endpoint(payload: OrderCreate):
     return create_order(payload)
 
-@api_router.get("/orders", tags=["Orders"])
+@ord_router.get("")
 def get_orders_endpoint():
     return get_orders()
 
-@api_router.get("/orders/{order_id}", tags=["Orders"])
+@ord_router.get("/{order_id}")
 def get_order_endpoint(order_id: int):
     order = get_order_by_id(order_id)
     if not order:
         raise HTTPException(status_code=404, detail="Order not found.")
     return order
 
-@api_router.patch("/orders/{order_id}/deliver", response_model=DeliveryResponse, tags=["Orders"])
+@ord_router.patch("/{order_id}/deliver", response_model=DeliveryResponse)
 def deliver_order_endpoint(order_id: int):
     return mark_order_delivered(order_id)
 
-#2 customer endpoints since maitran need them for the create ord screen
-@api_router.get("/customers", tags=["Customers"])
+@ord_router.patch("/{order_id}/note")
+def update_order_note_route(
+    order_id: int,
+    data: OrderNoteUpdate
+):
+    return update_order_note(order_id, data)
+
+# Customer endpoints
+@cus_router.get("")
 def get_customers_endpoint():
     try:
         return get_customers()
@@ -153,7 +189,7 @@ def get_customers_endpoint():
             detail="Customer database is unavailable. Check the MySQL settings in backend/.env.",
         ) from e
 
-@api_router.get("/customer-types", tags=["Customers"])
+@cus_router.get("/customer-types")
 def get_customer_types_endpoint():
     try:
         return get_customer_types()
@@ -163,7 +199,7 @@ def get_customer_types_endpoint():
             detail="Customer database is unavailable. Check the MySQL settings in backend/.env.",
         ) from e
 
-@api_router.get("/customers/{customer_id}/details", tags=["Customers"])
+@cus_router.get("/{customer_id}/details")
 def get_customer_details_endpoint(customer_id: int):
     try:
         return get_customer_details(customer_id)
@@ -175,7 +211,7 @@ def get_customer_details_endpoint(customer_id: int):
             detail="Customer database is unavailable. Check the MySQL settings in backend/.env.",
         ) from e
 
-@api_router.get("/customers/search", tags=["Customers"])
+@cus_router.get("/search")
 def search_customers_endpoint(phone: str = ""):
     try:
         return search_customers(phone)
@@ -185,96 +221,99 @@ def search_customers_endpoint(phone: str = ""):
             detail="Customer database is unavailable. Check the MySQL settings in backend/.env.",
         ) from e
 
-@api_router.post("/customers", tags=["Customers"], status_code=status.HTTP_201_CREATED)
+@cus_router.post("", status_code=status.HTTP_201_CREATED)
 def create_customer_endpoint(payload: CustomerCreate):
     return create_customer(payload)
 
-@api_router.put("/customers/{customer_id}", tags=["Customers"])
+@cus_router.put("/{customer_id}")
 def update_customer_endpoint(customer_id: int, payload: CustomerUpdate):
     return update_customer(customer_id, payload)
 
-@api_router.delete("/customers/{customer_id}", tags=["Customers"], status_code=status.HTTP_204_NO_CONTENT)
+@cus_router.delete("/{customer_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_customer_endpoint(customer_id: int):
     delete_customer(customer_id)
 
-# Product Endpoints 
-@api_router.get("/products", response_model=List[ProductResponse], tags=["Products"])
+# Product endpoints
+@prod_router.get("")
+def get_products_endpoint():
+    return get_products()
+
+@prod_router.get("", response_model=List[ProductResponse])
 def get_all_products_endpoint():
     try:
         return get_all_products()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch products: {str(e)}")
 
-@api_router.post("/products", response_model=ProductResponse, status_code=status.HTTP_201_CREATED, tags=["Products"])
+@prod_router.post("", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
 def create_product_endpoint(payload: ProductCreate):
     try:
         return add_product(payload)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to create product: {str(e)}")
 
-@api_router.put("/products/{product_id}", response_model=ProductResponse, tags=["Products"])
+@prod_router.put("/{product_id}", response_model=ProductResponse)
 def update_product_endpoint(product_id: int, payload: ProductUpdate):
     updated = update_product(product_id, payload)
     if not updated:
         raise HTTPException(status_code=404, detail=f"Product with ID {product_id} not found.")
     return updated
 
-@api_router.delete("/products/{product_id}", tags=["Products"])
+@prod_router.delete("/{product_id}")
 def delete_product_endpoint(product_id: int):
     success = delete_product(product_id)
     if not success:
         raise HTTPException(status_code=404, detail=f"Product with ID {product_id} not found.")
     return {"message": f"Product {product_id} deleted successfully."}
 
-# Inventory Endpoints
-@api_router.get("/inventory", response_model=List[InventoryResponse], tags=["Inventory"])
+# Inventory endpoints
+@inv_router.get("", response_model=List[InventoryResponse])
 def get_all_inventory_endpoint():
     try:
         return get_all_inventory()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch inventory: {str(e)}")
 
-@api_router.post("/inventory", response_model=InventoryResponse, status_code=status.HTTP_201_CREATED, tags=["Inventory"])
+@inv_router.post("", response_model=InventoryResponse, status_code=status.HTTP_201_CREATED)
 def create_inventory_endpoint(payload: InventoryCreate):
     try:
         return add_inventory(payload)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to create item: {str(e)}")
 
-@api_router.put("/inventory/{sku}", response_model=InventoryResponse, tags=["Inventory"])
+@inv_router.put("/{sku}", response_model=InventoryResponse)
 def update_inventory_endpoint(sku: str, payload: InventoryUpdate):
     updated = update_inventory(sku, payload)
     if not updated:
         raise HTTPException(status_code=404, detail=f"Product SKU {sku} not found.")
     return updated
 
-@api_router.delete("/inventory/{sku}", tags=["Inventory"])
+@inv_router.delete("/{sku}")
 def delete_inventory_endpoint(sku: str):
     if not delete_inventory(sku):
         raise HTTPException(status_code=404, detail=f"Product SKU {sku} not found.")
     return {"message": f"Product {sku} deleted successfully."}
 
-# Categories Endpoint
-@api_router.get("/categories", tags=["Categories"])
+# Category endpoints
+@cat_router.get("")
 def get_categories_endpoint():
     conn = None
     try:
         from database.connect_db import get_connection
         conn = get_connection()
         with conn.cursor() as cursor:
-            # Sửa từ 'category' thành 'categories' cho khớp với database
             cursor.execute("SELECT category_id, category_name FROM categories")
             categories = cursor.fetchall()
             return categories if categories else []
     except Exception as e:
-        print(f"Error details: {str(e)}") # In lỗi ra terminal để dễ debug
+        print(f"Error details: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch categories: {str(e)}")
     finally:
         if conn and conn.open:
             conn.close()
 
-# Sales Analytics Endpoints (Đã bổ sung response_model chuẩn)
-@api_router.get("/sales/overview", response_model=List[SalesItemOverview], tags=["Sales"])
+# Sales analytics endpoints
+@sales_router.get("/sales/overview", response_model=List[SalesItemOverview], tags=["Sales"])
 def get_sales_overview_endpoint(
     top_n: Optional[str] = Query("5"),
     category: Optional[str] = Query(None),
@@ -285,14 +324,12 @@ def get_sales_overview_endpoint(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch sales overview: {str(e)}")
 
-@api_router.get("/sales/predictions", tags=["Sales"])
+@sales_router.get("/sales/predictions", tags=["Sales"])
 def get_demand_predictions_endpoint(window_days: int = Query(30)):
     try:
         return get_demand_predictions(window_days=window_days)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to calculate predictions: {str(e)}")
-# Bổ sung một router riêng cho /sales để tương thích với các file test gọi trực tiếp không có tiền tố /api
-sales_test_router = APIRouter(prefix="/sales", tags=["Sales Test Alias"])
 
 @sales_test_router.get("/overview", response_model=List[SalesItemOverview])
 def get_sales_overview_alias(
@@ -312,9 +349,64 @@ def get_demand_predictions_alias(window_days: int = Query(30)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to calculate predictions: {str(e)}")
 
-app.include_router(sales_test_router)
 
-app.include_router(api_router)
+import logging
+logger = logging.getLogger(__name__)
+
+@app.get("/health")
+def health():
+    conn = None
+    cursor = None
+
+    try:
+        logger.info("Health check: testing MySQL connection...")
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT 1")
+        result = cursor.fetchone()
+        if result is None:
+            raise RuntimeError("MySQL SELECT 1 returned no result")
+        logger.info("Health check: MySQL connection successful.")
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "test_query": "passed"
+        }
+    except Exception as e:
+        logger.exception("HEALTH CHECK DATABASE ERROR")
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "status": "unhealthy",
+                "database": "unavailable",
+                "error_type": type(e).__name__,
+                "error": str(e)
+            }
+        )
+    finally:
+        if cursor is not None:
+            try:
+                cursor.close()
+            except Exception:
+                logger.exception("Error closing MySQL cursor")
+        if conn is not None:
+            try:
+                conn.close()
+            except Exception:
+                logger.exception("Error closing MySQL connection")
+
+
+    
+# Register all routers after their endpoint declarations
+app.include_router(emp_router)
+app.include_router(auth_router)
+app.include_router(cus_router)
+app.include_router(ord_router)
+app.include_router(prod_router)
+app.include_router(inv_router)
+app.include_router(cat_router)
+app.include_router(sales_router)
+app.include_router(sales_test_router)
 
 if __name__ == "__main__":
     import uvicorn

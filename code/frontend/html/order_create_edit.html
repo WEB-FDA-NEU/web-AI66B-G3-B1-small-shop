@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Create Order</title>
+    <link rel="stylesheet" href="../css/employee.css">
+    <link rel="stylesheet" href="../css/profile.css">
+    <link rel="stylesheet" href="../css/customers.css">
     <link rel="stylesheet" href="../css/order_create_edit.css">
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="../js/dishes_data.js" defer></script>
-    <script src="../js/orders_data.js" defer></script>
     <script src="../js/order_create_edit.js" defer></script>
 </head>
 
@@ -80,7 +81,7 @@
             <!--switching button between new and check order-->
             <div class="order-tabs">
                 <a class="tab-btn active" href="order_create_edit.html">New order</a>
-                <a class="tab-btn" href="order_check.html">Check orders</a>
+                <a class="tab-btn" href="order_check.html">Check all orders</a>
             </div>
 
             <!--menu part-->
@@ -130,7 +131,20 @@
                         
                         <div class="confirm-customer">
                             <label for="customerPhoneInput">Phone number</label>
-                            <input type="tel" id="customerPhoneInput" name="customerPhone" autocomplete="tel" placeholder="Enter customer phone number...">
+                            <div class="customer-search-wrapper">
+                                <input
+                                    type="tel"
+                                    id="customerPhoneInput"
+                                    name="customerPhone"
+                                    autocomplete="off"
+                                    placeholder="Enter customer phone number..."
+                                >
+                                <div id="selectedCustomerInfo" class="selected-customer-info">
+                                    <span id="selectedCustomerName"></span>
+                                    <span id="selectedCustomerRank" class="customer-suggestion-rank"></span>
+                                </div>
+                                <div id="customerSuggestions" class="customer-suggestions"></div>
+                            </div>
                             <div class="customer-options">
                                 <button type="button" class="customer-option-btn" id="addCustomerBtn">Add customer</button>
                                 <button type="button" class="customer-option-btn" id="guestCustomerBtn">Guest customer</button>
@@ -157,6 +171,82 @@
                         </div>
                     </div>
                 </div>
+                <!--mini popup add new customer-->
+                <div class="modal-overlay order-add-customer-overlay" id="orderAddCustomerModal">
+                    <div class="modal-container">
+                        <div class="modal-header">
+                            <h3>Add New Customer</h3>
+                            <button
+                                type="button"
+                                class="modal-close"
+                                id="closeOrderAddCustomerBtn"
+                            >
+                                &times;
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="orderNewCustomerForm" novalidate>
+                                <div class="form-grid">
+                                    <div class="form-group full-width">
+                                        <label for="orderNewCustomerName">Full Name *</label>
+                                        <input
+                                            type="text"
+                                            id="orderNewCustomerName"
+                                            name="name"
+                                            placeholder="e.g., John Doe"
+                                            maxlength="100"
+                                            required
+                                        >
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="orderNewCustomerPhone">Phone Number *</label>
+                                        <input
+                                            type="tel"
+                                            id="orderNewCustomerPhone"
+                                            name="phone"
+                                            placeholder="0901234567"
+                                            inputmode="numeric"
+                                            pattern="0[0-9]{9}"
+                                            maxlength="10"
+                                            required
+                                        >
+                                        <span
+                                            class="form-error"
+                                            id="orderNewCustomerPhoneError"
+                                        ></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Membership</label>
+                                        <input type="text" value="Rock" readonly>
+                                    </div>
+
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button
+                                type="button"
+                                class="btn-secondary"
+                                id="cancelOrderAddCustomerBtn"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="submit"
+                                form="orderNewCustomerForm"
+                                class="btn-primary"
+                                id="saveOrderNewCustomerBtn"
+                            >
+                                Save Information
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
             </div>
         </main>
     </div>

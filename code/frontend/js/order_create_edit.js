@@ -1,14 +1,43 @@
-const API_BASE_URL = "http://127.0.0.1:8000/api";
+const API_BASE_URL = "https://small-shop-tailscale.onrender.com";
 
-let availableDishes = [];
-let selectedCustomerId = null;
-let isCreatingOrder = false;
-let selectedDishes = [];
 const dishGrid = document.querySelector("#dishGrid");
 const billItems = document.querySelector("#billItems");
 const billTotal = document.querySelector("#billTotal");
 const dishSearch = document.querySelector("#dishSearch");
 const sumBtn = document.querySelector("#sumBtn");
+const orderAuthenticatedUser = JSON.parse(sessionStorage.getItem("authenticatedUser") || "null");
+const orderConfirmOverlay = document.querySelector("#orderConfirmOverlay");
+const customerPhoneInput = document.querySelector("#customerPhoneInput");
+const customerSuggestions = document.querySelector("#customerSuggestions");
+const orderNoteInput = document.querySelector("#orderNoteInput");
+const confirmItems = document.querySelector("#confirmItems");
+const confirmTotal = document.querySelector("#confirmTotal");
+const confirmClose = document.querySelector("#confirmClose");
+const cancelOrderBtn = document.querySelector("#cancelOrderBtn");
+const confirmOrderBtn = document.querySelector("#confirmOrderBtn");
+const addCustomerBtn = document.querySelector("#addCustomerBtn");
+//add new cus popup elements
+const orderAddCustomerModal = document.querySelector("#orderAddCustomerModal");
+const closeOrderAddCustomerBtn = document.querySelector("#closeOrderAddCustomerBtn");
+const cancelOrderAddCustomerBtn = document.querySelector("#cancelOrderAddCustomerBtn");
+const orderNewCustomerForm = document.querySelector("#orderNewCustomerForm");
+const orderNewCustomerName = document.querySelector("#orderNewCustomerName");
+const orderNewCustomerPhone = document.querySelector("#orderNewCustomerPhone");
+const orderNewCustomerPhoneError = document.querySelector("#orderNewCustomerPhoneError");
+const saveOrderNewCustomerBtn = document.querySelector("#saveOrderNewCustomerBtn");
+const guestCustomerBtn = document.querySelector("#guestCustomerBtn");
+const selectedCustomerInfo = document.querySelector("#selectedCustomerInfo");
+const selectedCustomerName = document.querySelector("#selectedCustomerName");
+const selectedCustomerRank = document.querySelector("#selectedCustomerRank");
+
+let availableDishes = [];
+let isCreatingOrder = false;
+let selectedDishes = [];
+let selectedCustomerId = null;
+let customerSearchRequestId = 0;
+let isGuestCustomer = false;
+let rockCustomerTypeId = null;
+
 
 const productImages = {
     1: "../img/espresso.jpg",
@@ -31,6 +60,8 @@ const productImages = {
     18: "../img/ice_cream.jpg",
 };
 
+
+// DISH AND BILL AND THINGS
 async function loadDishes() {
     try {
         const response = await fetch(`${API_BASE_URL}/products`);
@@ -187,43 +218,275 @@ function searchDishes() {
 
     renderDishes(filteredDishes);
 }
-
 dishSearch.addEventListener("input", searchDishes);
-const orderConfirmOverlay = document.querySelector("#orderConfirmOverlay");
-const customerPhoneInput = document.querySelector("#customerPhoneInput");
-const orderNoteInput = document.querySelector("#orderNoteInput");
-const confirmItems = document.querySelector("#confirmItems");
-const confirmTotal = document.querySelector("#confirmTotal");
-const confirmClose = document.querySelector("#confirmClose");
-const cancelOrderBtn = document.querySelector("#cancelOrderBtn");
-const confirmOrderBtn = document.querySelector("#confirmOrderBtn");
-const addCustomerBtn = document.querySelector("#addCustomerBtn");
-const guestCustomerBtn = document.querySelector("#guestCustomerBtn");
 
-function getNextOrderId() {
-    const savedOrders = JSON.parse(localStorage.getItem("yumsOrders") || "[]");
-    const allIds = [...ordersData, ...savedOrders].map(order => {
-        const number = parseInt(order.id.replace("ORD-", ""), 10);
-        return isNaN(number) ? 0 : number;
-    });
-    const nextNumber = Math.max(...allIds, 0) + 1;
-    return `ORD-${String(nextNumber).padStart(3, "0")}`;
+
+// ADD NEW CUS POPUP
+function closeOrderAddCustomerModal() {
+    orderAddCustomerModal.classList.remove("active");
 }
 
-async function findCustomerByPhone(phone) {
-    const response = await fetch(
-        `${API_BASE_URL}/customers/search?phone=${encodeURIComponent(phone)}`
-    );
+async function loadRockCustomerTypeId() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/customers/customer-types`);
+        if (!response.ok) {
+            throw new Error("Failed to load customer types.");
+        }
 
-    if (!response.ok) {
-        throw new Error(`Customer search failed: HTTP ${response.status}`);
+        const customerTypes = await response.json();
+        const rockType = customerTypes.find(
+            type => type.type_name?.trim().toLowerCase() === "rock"
+        );
+        if (!rockType) {
+            throw new Error("Rock membership type was not found.");
+        }
+        rockCustomerTypeId = rockType.customer_type_id;
+        console.log("Rock customer type ID:", rockCustomerTypeId);
+    } catch (error) {
+        console.error("Error loading customer types:", error);
+        alert("Unable to load membership types. Please try again.");
+    }
+}
+
+function validateNewCustomer() {
+    const name = orderNewCustomerName.value.trim();
+    const phone = orderNewCustomerPhone.value.trim();
+    //validate empty name
+    if (!name) {
+        alert("Please enter customer name.");
+        orderNewCustomerName.focus();
+        return false;
+    }
+    //validate empty phone
+    if (!phone) {
+        orderNewCustomerPhoneError.textContent =
+            "Please enter customer phone number.";
+        orderNewCustomerPhone.focus();
+        return false;
+    }
+    //validate  start w 0
+    if (!phone.startsWith("0")) {
+        orderNewCustomerPhoneError.textContent =
+            "Phone number must start with 0.";
+        orderNewCustomerPhone.focus();
+        return false;
+    }
+    //validate  length
+    if (phone.length !== 10) {
+        orderNewCustomerPhoneError.textContent =
+            "Phone number must contain exactly 10 digits.";
+        orderNewCustomerPhone.focus();
+        return false;
+    }
+    //validate num only digit
+    if (!/^[0-9]{10}$/.test(phone)) {
+        orderNewCustomerPhoneError.textContent =
+            "Phone number must contain digits only.";
+        orderNewCustomerPhone.focus();
+        return false;
+    }
+    orderNewCustomerPhoneError.textContent = "";
+    return true;
+}
+orderNewCustomerForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!validateNewCustomer()) {
+        return;
+    }
+    if (!rockCustomerTypeId) {
+        alert("Rock membership type is not available. Please refresh the page.");
+        return;
+    }
+    const customerData = {
+        name: orderNewCustomerName.value.trim(),
+        phone: orderNewCustomerPhone.value.trim(),
+        customer_type_id: rockCustomerTypeId
+    };
+    try {
+        saveOrderNewCustomerBtn.disabled = true;
+        saveOrderNewCustomerBtn.textContent = "Saving...";
+        const response = await fetch(`${API_BASE_URL}/customers`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(customerData)
+        });
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(
+                result.detail || "Failed to create customer."
+            );
+        }
+        console.log("Customer created successfully:", result);
+        const newCustomer = {
+            customer_id: result.customer_id,
+            name: result.name,
+            phone: result.phone,
+            customer_type_name: result.type_name
+        };
+        //select that freshly created customer
+        selectedCustomerId = newCustomer.customer_id;
+        isGuestCustomer = false;
+        customerPhoneInput.value = newCustomer.phone;
+        showSelectedCustomerInfo(newCustomer);
+        customerSuggestions.classList.remove("show");
+        customerSuggestions.innerHTML = "";
+        //close only Add New Customer popup
+        closeOrderAddCustomerModal();
+        //reset Add New Customer form
+        orderNewCustomerForm.reset();
+        orderNewCustomerPhoneError.textContent = "";
+        //cuccess msg
+        alert("Customer created and selected successfully!");
+    } catch (error) {
+        console.error("Error creating customer:", error);
+        alert(error.message);
+    } finally {
+        saveOrderNewCustomerBtn.disabled = false;
+        saveOrderNewCustomerBtn.textContent = "Save Information";
+    }
+});
+
+function openOrderAddCustomerModal() {
+    orderAddCustomerModal.classList.add("active");
+}
+
+// event listeners
+addCustomerBtn.addEventListener("click", openOrderAddCustomerModal);
+orderNewCustomerPhone.addEventListener("input", () => {
+    orderNewCustomerPhoneError.textContent = "";
+});
+closeOrderAddCustomerBtn.addEventListener("click", closeOrderAddCustomerModal);
+cancelOrderAddCustomerBtn.addEventListener("click", closeOrderAddCustomerModal);
+
+
+//CUSTOMER SEARCH AND SELECTION
+async function searchCustomers(phone) {
+    const requestId = ++customerSearchRequestId;
+    if (!phone.trim()) {
+        customerSuggestions.classList.remove("show");
+        customerSuggestions.innerHTML = "";
+        return;
+    }
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/customers/search?phone=${encodeURIComponent(phone)}`
+        );
+        if (!response.ok) {
+            throw new Error(`Customer search failed: HTTP ${response.status}`);
+        }
+        const customers = await response.json();
+        if (requestId !== customerSearchRequestId) {
+            return;
+        }
+        renderCustomerSuggestions(customers);
+    } catch (error) {
+        if (requestId !== customerSearchRequestId) {
+            return;
+        }
+        console.error("Customer search failed:", error);
+        customerSuggestions.innerHTML = "";
+        const message = document.createElement("div");
+        message.className = "customer-suggestion-empty";
+        message.textContent = "Unable to search for customers";
+        customerSuggestions.appendChild(message);
+        customerSuggestions.classList.add("show");
+    }
+}
+
+function renderCustomerSuggestions(customers) {
+    customerSuggestions.innerHTML = "";
+
+    if (!customers.length) {
+        const emptyMessage = document.createElement("div");
+        emptyMessage.className = "customer-suggestion-empty";
+        emptyMessage.textContent = "No customer found";
+        customerSuggestions.appendChild(emptyMessage);
+        customerSuggestions.classList.add("show");
+        return;
     }
 
-    const customers = await response.json();
+    customers.forEach(customer => {
+        const item = document.createElement("div");
+        item.className = "customer-suggestion-item";
+        const phone = document.createElement("span");
+        phone.className = "customer-suggestion-phone";
+        phone.textContent = customer.phone;
+        const info = document.createElement("div");
+        info.className = "customer-suggestion-info";
+        const name = document.createElement("span");
+        name.className = "customer-suggestion-name";
+        name.textContent = customer.name;
+        const rank = document.createElement("span");
+        const rankName = (customer.customer_type_name || "").toLowerCase();
+        rank.className = `customer-suggestion-rank ${rankName}`;
+        rank.textContent = customer.customer_type_name || "";
+        info.append(name, rank);
+        item.append(phone, info);
+        item.addEventListener("mousedown", event => {
+            event.preventDefault();
+            selectedCustomerId = customer.customer_id;
+            isGuestCustomer = false;
+            customerPhoneInput.value = customer.phone;
 
-    return customers.find(customer => customer.phone === phone) || null;
+            showSelectedCustomerInfo(customer);
+
+            customerSuggestions.classList.remove("show");
+            customerSuggestions.innerHTML = "";
+        });
+        customerSuggestions.appendChild(item);
+    });
+
+    customerSuggestions.classList.add("show");
 }
 
+function showSelectedCustomerInfo(customer) {
+    selectedCustomerName.textContent = customer.name || "";
+    const rankName = (customer.customer_type_name || "").toLowerCase();
+    selectedCustomerRank.className =
+        `customer-suggestion-rank ${rankName}`;
+    selectedCustomerRank.textContent =
+        customer.customer_type_name || "";
+    selectedCustomerInfo.classList.add("show");
+}
+
+function hideSelectedCustomerInfo() {
+    selectedCustomerInfo.classList.remove("show");
+    selectedCustomerName.textContent = "";
+    selectedCustomerRank.textContent = "";
+}
+
+//event listeners
+customerPhoneInput.addEventListener("input", () => {
+    customerPhoneInput.style.borderColor = "#96C0CE";
+    selectedCustomerId = null;
+    isGuestCustomer = false;
+    hideSelectedCustomerInfo();
+    customerPhoneInput.style.borderColor = "";
+    searchCustomers(customerPhoneInput.value);
+});
+customerPhoneInput.addEventListener("focus", () => {
+    if (isGuestCustomer) {
+        customerPhoneInput.value = "";
+        isGuestCustomer = false;
+        selectedCustomerId = null;
+        hideSelectedCustomerInfo();
+    }
+    if (customerPhoneInput.value.trim()) {
+        searchCustomers(customerPhoneInput.value);
+    }
+});
+document.addEventListener("click", event => {
+    if (
+        !event.target.closest(".customer-search-wrapper")
+    ) {
+        customerSuggestions.classList.remove("show");
+    }
+});
+
+
+// ORDER CONFIRMATION
 function renderConfirmItems() {
     confirmItems.innerHTML = "";
     selectedDishes.forEach(dish => {
@@ -238,6 +501,7 @@ function renderConfirmItems() {
     });
     confirmTotal.textContent = formatCurrency(calculateTotal());
 }
+
 function openConfirmDialog() {
     if (selectedDishes.length === 0) {
         return;
@@ -252,7 +516,6 @@ function openConfirmDialog() {
 }
 function closeConfirmDialog() {
     orderConfirmOverlay.classList.remove("show");
-
 }
 
 async function saveNewOrder(isGuest = false) {
@@ -262,35 +525,24 @@ async function saveNewOrder(isGuest = false) {
 
     let customerId = null;
 
-    if (!isGuest) {
-        const phone = customerPhoneInput.value.trim();
-
-        if (!phone) {
+    if (!isGuestCustomer) {
+        if (!customerPhoneInput.value.trim()) {
             customerPhoneInput.focus();
             customerPhoneInput.style.borderColor = "#7F0303";
             return;
         }
 
-        try {
-            const customer = await findCustomerByPhone(phone);
-
-            if (!customer) {
-                alert(
-                    "Customer not found. Please check the phone number."
-                );
-                return;
-            }
-
-            customerId = customer.customer_id;
-        } catch (error) {
-            console.error("Customer lookup failed:", error);
-            alert("Unable to search for the customer. Please try again.");
+        if (!selectedCustomerId) {
+            alert("Please select a customer from the suggestion list.");
+            customerPhoneInput.focus();
             return;
         }
+
+        customerId = selectedCustomerId;
     }
 
     const payload = {
-        employee_id: 1, //i'll change into "now logged in employee" instead of emp. no1 like this later
+        username: orderAuthenticatedUser.username,
         customer_id: customerId,
         note: orderNoteInput.value.trim() || null,
         items: selectedDishes.map(dish => ({
@@ -343,40 +595,25 @@ async function saveNewOrder(isGuest = false) {
     }
 }
 
-sumBtn.addEventListener("click", openConfirmDialog);
-
-confirmClose.addEventListener("click", closeConfirmDialog);
-cancelOrderBtn.addEventListener("click", closeConfirmDialog);
-
+//event listeners
 confirmOrderBtn.addEventListener("click", () => {
     saveNewOrder(false);
 });
-
-//addCustomerBtn.addEventListener("click", () => {
-//    const customerPhone = customerPhoneInput.value.trim();
-//
-//    if (customerPhone === "") {
-//        customerPhoneInput.focus();
-//        customerPhoneInput.style.borderColor = "#7F0303";
-//        return;
-//    }
-//
-//    saveNewOrder("Success");
-//});
-
 guestCustomerBtn.addEventListener("click", () => {
-    saveNewOrder(true);
+    isGuestCustomer = true;
+    selectedCustomerId = null;
+    customerPhoneInput.value = "Guest"; //change this if u want the dummy value to look different
+    hideSelectedCustomerInfo();
+    customerSuggestions.classList.remove("show");
+    customerSuggestions.innerHTML = "";
+    customerPhoneInput.style.borderColor = "";
 });
+sumBtn.addEventListener("click", openConfirmDialog);
+confirmClose.addEventListener("click", closeConfirmDialog);
+cancelOrderBtn.addEventListener("click", closeConfirmDialog);
 
-orderConfirmOverlay.addEventListener("click", event => {
-    if (event.target === orderConfirmOverlay) {
-        closeConfirmDialog();
-    }
-});
 
-customerPhoneInput.addEventListener("input", () => {
-    customerPhoneInput.style.borderColor = "#96C0CE";
-});
 
+loadRockCustomerTypeId();
 loadDishes();
 renderBill();

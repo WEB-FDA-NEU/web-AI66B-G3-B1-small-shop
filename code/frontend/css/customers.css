@@ -16,7 +16,7 @@
 /* 2. Customer Table Styling */
 table.customers-table {
     width: 100%;
-    min-width: 1120px;
+    min-width: 980px;
     border-collapse: collapse;
     text-align: left;
     table-layout: fixed;
@@ -62,11 +62,10 @@ table.customers-table tbody tr:last-child td {
 .customers-table th:nth-child(1), .customers-table td:nth-child(1) { width: 105px; } /* Customer ID */
 .customers-table th:nth-child(2), .customers-table td:nth-child(2) { width: 150px; } /* Name */
 .customers-table th:nth-child(3), .customers-table td:nth-child(3) { width: 130px; } /* Phone */
-.customers-table th:nth-child(4), .customers-table td:nth-child(4) { width: 205px; } /* Email */
-.customers-table th:nth-child(5), .customers-table td:nth-child(5) { width: 155px; text-align: right; } /* Spending */
-.customers-table th:nth-child(6), .customers-table td:nth-child(6) { width: 130px; text-align: center; } /* Membership */
-.customers-table th:nth-child(7), .customers-table td:nth-child(7) { width: 125px; text-align: center; } /* Created at */
-.customers-table th:nth-child(8), .customers-table td:nth-child(8) {
+.customers-table th:nth-child(4), .customers-table td:nth-child(4) { width: 155px; text-align: right; } /* Spending */
+.customers-table th:nth-child(5), .customers-table td:nth-child(5) { width: 130px; text-align: center; } /* Membership */
+.customers-table th:nth-child(6), .customers-table td:nth-child(6) { width: 125px; text-align: center; } /* Created at */
+.customers-table th:nth-child(7), .customers-table td:nth-child(7) {
     width: 120px;
     text-align: center; 
     overflow: visible; /* Đảm bảo nút bấm không bị che/ẩn */
@@ -165,20 +164,6 @@ table.customers-table tbody tr:last-child td {
     font-weight: 500;
     letter-spacing: 0.3px;
     text-align: center;
-}
-
-/* Status Badges */
-.badge-active {
-    background-color: #E2EFCB;
-    color: #2E5A1C;
-    border: 1px solid #C4E197;
-}
-
-.badge-leave,
-.badge-inactive {
-    background-color: #FDF3D6;
-    color: #7A5B0B;
-    border: 1px solid #F5E1A4;
 }
 
 /* Tier Badges (Vintage Style Harmony) */

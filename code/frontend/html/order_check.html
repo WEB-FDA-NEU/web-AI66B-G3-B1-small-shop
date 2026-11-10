@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Check All Orders</title>
     <link rel="stylesheet" href="../css/order_check.css">
+    <link rel="stylesheet" href="../css/profile.css">
     <script src="../js/orders_data.js" defer></script>
     <script src="../js/order_check.js" defer></script>
     
@@ -77,7 +78,7 @@
             <!--switching buttons between New and Check-->
             <div class="order-tabs">
                 <a class="tab-btn" href="order_create_edit.html">New order</a>
-                <a class="tab-btn active" href="order_check.html">Check orders</a>
+                <a class="tab-btn active" href="order_check.html">Check all orders</a>
             </div>
             <!--orders list zone-->
             <section class="order-list">
@@ -97,6 +98,15 @@
                 </div>
                 <div class="order-list-content">
                     <table class="orders-table">
+                        <colgroup>
+                            <col class="col-order-id">
+                            <col class="col-order-items">
+                            <col class="col-quantity">
+                            <col class="col-total">
+                            <col class="col-customer">
+                            <col class="col-created-at">
+                            <col class="col-status">
+                        </colgroup>
                         <thead>
                             <tr>
                                 <th>Order code</th>
@@ -104,6 +114,7 @@
                                 <th>Quantity</th>
                                 <th>Total</th>
                                 <th>Customer</th>
+                                <th>Created at</th>
                                 <th>Status</th>
                             </tr>
                         </thead>

@@ -14,6 +14,7 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="../css/employee.css">
+    <link rel="stylesheet" href="../css/profile.css">
     <link rel="stylesheet" href="../css/customers.css">
     <link rel="stylesheet" href="../css/sales.css">
 </head>
@@ -139,7 +140,6 @@
                         <th scope="col">Customer ID</th>
                         <th scope="col">Name</th>
                         <th scope="col">Phone</th>
-                        <th scope="col">Email</th>
                         <th scope="col">Total Spending</th>
                         <th scope="col">Membership</th>
                         <th scope="col">Created At</th>
@@ -165,19 +165,6 @@
                             <div class="form-group full-width">
                                 <label for="fullName">Full Name *</label>
                                 <input type="text" id="fullName" name="name" placeholder="e.g., John Doe" required>
-                            </div>
-                            <div class="form-group full-width">
-                                <label for="email">Email</label>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    placeholder="john@gmail.com"
-                                    pattern="[^@\s]+@gmail\.com"
-                                    title="Enter a valid email address ending with @gmail.com."
-                                    aria-describedby="emailError"
-                                >
-                                <span class="form-error" id="emailError" aria-live="polite"></span>
                             </div>
                             <div class="form-group">
                                 <label for="phone">Phone Number *</label>
@@ -223,18 +210,6 @@
                             <div class="form-group full-width">
                                 <label for="editFullName">Full Name *</label>
                                 <input type="text" id="editFullName" name="name" required>
-                            </div>
-                            <div class="form-group full-width">
-                                <label for="editEmail">Email</label>
-                                <input
-                                    type="email"
-                                    id="editEmail"
-                                    name="email"
-                                    pattern="[^@\s]+@gmail\.com"
-                                    title="Enter a valid email address ending with @gmail.com."
-                                    aria-describedby="editEmailError"
-                                >
-                                <span class="form-error" id="editEmailError" aria-live="polite"></span>
                             </div>
                             <div class="form-group">
                                 <label for="editPhone">Phone Number *</label>
@@ -299,6 +274,7 @@
     <div class="toast" id="toastNotification">Notification Message</div>
 
     <!-- Script File -->
-    <script src="../js/customers.js?v=5"></script>
+    <script src="../js/customers.js?v=6"></script>
+    <script src="../js/home.js"></script>
 </body>
 </html>

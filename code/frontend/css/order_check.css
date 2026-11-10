@@ -384,16 +384,26 @@ body {
 /*bảng fake*/
 .orders-table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
     background-color: #EFE8DF;
     font-family: 'Montserrat', sans-serif;
-    font-size: 15px;
+    font-size: 16px;
     color: #0F414A;
 }
+
+.orders-table .col-order-id {width: 9%;}
+.orders-table .col-order-items {width: 35%;}
+.orders-table .col-quantity {width: 9%;}
+.orders-table .col-total {width: 11%;}
+.orders-table .col-customer {width: 15%;}
+.orders-table .col-created-at {width: 11%;}
+.orders-table .col-status {width: 10%;}
+
 .orders-table th,
 .orders-table td {
     border: 1px solid #D8BA98;
-    padding: 15px 14px;
+    padding: 11px 10px;
     text-align: left;
     vertical-align: middle;
 }
@@ -401,7 +411,7 @@ body {
     background-color: #D8BA98;
     color: #0F414A;
     font-weight: 800;
-    font-size: 15px;
+    font-size: 16px;
     border-bottom: 3px solid #D8BA98;
     white-space: nowrap;
 }
@@ -412,32 +422,50 @@ body {
 .orders-table tbody tr:hover {
     background-color: #EFE8DF;
 }
+
 .orders-table .order-id {
     font-weight: 800;
     white-space: nowrap;
 }
 .orders-table .order-items {
-    max-width: 360px;
+    max-width: none;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+.orders-table td:nth-child(5) {
+    overflow-wrap: anywhere;
+}
+.orders-table th:nth-child(3),
+.orders-table td:nth-child(3) {
+    text-align: center;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
-.clickable-order {
-    cursor: pointer;
+.orders-table td:nth-child(4) {
+    white-space: nowrap;
 }
-.clickable-order:hover {
-    background-color: #D8BA98 !important;
+.orders-table th:nth-child(6),
+.orders-table td:nth-child(6) {
+    font-size: 16px;
+    white-space: nowrap;
 }
-.status-badge {
+.orders-table th:nth-child(7),
+.orders-table td:nth-child(7) {
+    text-align: center;
+    font-size: 14px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+.orders-table .status-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 5px 12px;
+    padding: 4px 8px;
     border-radius: 20px;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     white-space: nowrap;
 }
+
 .status-badge.success {
     background-color: #DDEFD5;
     color: #39702C;
@@ -448,8 +476,10 @@ body {
     color: #8A6818;
     border: 1px solid #E7D39A;
 }
-.status-badge.cancelled {
-    background-color: #F3D6D2;
-    color: #7F0303;
-    border: 1px solid #DEB0A9;
+
+.clickable-order {
+    cursor: pointer;
+}
+.clickable-order:hover {
+    background-color: #D8BA98 !important;
 }

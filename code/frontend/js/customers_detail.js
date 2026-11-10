@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE_URL = 'http://127.0.0.1:8000/api';
+    const API_BASE_URL = 'https://small-shop-tailscale.onrender.com';
     const customerId = Number(new URLSearchParams(window.location.search).get('id'));
     const recentOrdersBody = document.getElementById('recentOrdersBody');
 
@@ -57,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
         tierBadge.textContent = `${tier} Member`;
         tierBadge.className = `membership-badge ${tierClass}`;
         document.getElementById('customerId').textContent = customerLabel(customer.customer_id);
-        document.getElementById('customerEmail').textContent = customer.email || '—';
         document.getElementById('customerPhone').textContent = customer.phone || '—';
         document.getElementById('customerCreatedAt').textContent = formatDate(customer.created_at);
         document.getElementById('customerDiscount').textContent =

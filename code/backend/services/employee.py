@@ -26,9 +26,7 @@ def get_all_employees() -> List[Dict[str, Any]]:
         connection.close()
 
 def add_employee(employee_data: EmployeeCreate) -> Dict[str, Any]:
-    """Inserts a new employee into the database and returns the inserted record.
-    Prevents creation if an exact duplicate record already exists across all fields.
-    """
+    """Inserts a new employee if the username is not already assigned."""
     connection = get_connection()
     if not connection:
         raise HTTPException(
@@ -38,43 +36,25 @@ def add_employee(employee_data: EmployeeCreate) -> Dict[str, Any]:
     
     try:
         with connection.cursor() as cursor:
-            # 1. Check for exact duplicate across ALL incoming fields
-            check_query = """
-                SELECT employee_id FROM employees 
-                WHERE name <=> %s 
-                  AND email <=> %s 
-                  AND phone <=> %s 
-                  AND role <=> %s 
-                  AND status <=> %s;
-            """
             cursor.execute(
-                check_query,
-                (
-                    employee_data.name,
-                    employee_data.email,
-                    employee_data.phone,
-                    employee_data.role,
-                    employee_data.status,
-                )
+                "SELECT employee_id FROM employees WHERE username = %s LIMIT 1;",
+                (employee_data.username,)
             )
-            
-            existing_employee = cursor.fetchone()
-            if existing_employee:
+            if cursor.fetchone():
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
-                    detail="An identical employee record with these exact details already exists."
+                    detail="Username is already assigned to an employee."
                 )
 
-            # 2. Insert new record if no duplicate exists
             insert_query = """
-                INSERT INTO employees (name, email, phone, role, status)
+                INSERT INTO employees (name, username, phone, role, status)
                 VALUES (%s, %s, %s, %s, %s);
             """
             cursor.execute(
                 insert_query,
                 (
                     employee_data.name,
-                    employee_data.email,
+                    employee_data.username,
                     employee_data.phone,
                     employee_data.role,
                     employee_data.status,
@@ -83,11 +63,16 @@ def add_employee(employee_data: EmployeeCreate) -> Dict[str, Any]:
             connection.commit()
             employee_id = cursor.lastrowid
 
-            # 3. Fetch newly created employee record
             cursor.execute("SELECT * FROM employees WHERE employee_id = %s;", (employee_id,))
             new_employee = cursor.fetchone()
             return new_employee
-            
+    except pymysql.err.IntegrityError as exc:
+        if exc.args and exc.args[0] == 1452:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username not found, please enter correct username or add a new user before creating an employee."
+            ) from exc
+        raise
     finally:
         connection.close()
 
@@ -114,6 +99,22 @@ def update_employee(employee_id: int, employee_data: EmployeeUpdate) -> Optional
     
     try:
         with connection.cursor() as cursor:
+            username = update_data.get("username")
+            if username is not None:
+                cursor.execute(
+                    """
+                    SELECT employee_id FROM employees
+                    WHERE username = %s AND employee_id != %s
+                    LIMIT 1;
+                    """,
+                    (username, employee_id)
+                )
+                if cursor.fetchone():
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail="Username is already assigned to another employee."
+                    )
+
             query = f"UPDATE employees SET {set_clause} WHERE employee_id = %s;"
             cursor.execute(query, values)
 
@@ -125,6 +126,13 @@ def update_employee(employee_id: int, employee_data: EmployeeUpdate) -> Optional
 
             cursor.execute("SELECT * FROM employees WHERE employee_id = %s;", (employee_id,))
             return cursor.fetchone()
+    except pymysql.err.IntegrityError as exc:
+        if exc.args and exc.args[0] == 1452:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username not found, please enter correct username or add a new user before creating an employee."
+            ) from exc
+        raise
     finally:
         connection.close()
 
@@ -142,6 +150,69 @@ def get_employee_by_id(employee_id: int) -> Optional[Dict[str, Any]]:
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM employees WHERE employee_id = %s;", (employee_id,))
             return cursor.fetchone()
+    finally:
+        connection.close()
+
+
+def get_employee_details(employee_id: int) -> Dict[str, Any]:
+    """Fetch an employee profile, order totals, and recent orders."""
+    connection = get_connection()
+    if not connection:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Database connection failed."
+        )
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT employee_id, name, username, phone, role, status, created_at,
+                       GREATEST(DATEDIFF(CURRENT_DATE, created_at) + 1, 0) AS days_worked
+                FROM employees
+                WHERE employee_id = %s
+            """, (employee_id,))
+            employee = cursor.fetchone()
+            if not employee:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Employee with ID {employee_id} not found."
+                )
+
+            cursor.execute("""
+                SELECT COUNT(*) AS total_orders,
+                       COALESCE(SUM(total_amount), 0) AS total_sales
+                FROM orders
+                WHERE employee_id = %s
+            """, (employee_id,))
+            stats = cursor.fetchone()
+
+            cursor.execute("""
+                SELECT o.order_id, o.created_at, o.deliver_status,
+                       o.total_amount, c.name AS customer_name,
+                       COALESCE(
+                           GROUP_CONCAT(
+                               CONCAT(p.name, ' × ', oi.quantity)
+                               ORDER BY oi.order_item_id SEPARATOR ', '
+                           ),
+                           '—'
+                       ) AS items
+                FROM orders o
+                LEFT JOIN customers c ON c.customer_id = o.customer_id
+                LEFT JOIN order_items oi ON oi.order_id = o.order_id
+                LEFT JOIN products p ON p.product_id = oi.product_id
+                WHERE o.employee_id = %s
+                GROUP BY o.order_id, o.created_at, o.deliver_status,
+                         o.total_amount, c.name
+                ORDER BY o.created_at DESC, o.order_id DESC
+                LIMIT 10
+            """, (employee_id,))
+            recent_orders = cursor.fetchall()
+
+            return {
+                "employee": employee,
+                "stats": stats,
+                "recent_orders": recent_orders
+            }
     finally:
         connection.close()
 

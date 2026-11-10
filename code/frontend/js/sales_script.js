@@ -1,4 +1,4 @@
-const API_SALES_URL = "http://127.0.0.1:8000/api/sales";
+const API_SALES_URL = "https://small-shop-tailscale.onrender.com/sales";
 
 const toast = document.getElementById('toastNotification');
 
@@ -185,7 +185,7 @@ async function loadSalesCategoriesDropdown() {
   if (!categorySelect) return;
 
   try {
-    const response = await fetch("http://127.0.0.1:8000/api/categories");
+    const response = await fetch("https://small-shop-tailscale.onrender.com/categories");
     if (!response.ok) throw new Error("Failed to load categories");
     
     const categories = await response.json();

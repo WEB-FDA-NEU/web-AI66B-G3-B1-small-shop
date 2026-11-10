@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://127.0.0.1:8000/api";
+const API_BASE_URL = "https://small-shop-tailscale.onrender.com";
 
 let orders = [];
 let renderVersion = 0;
@@ -8,8 +8,27 @@ const ordersTableBody = document.querySelector(".orders-table tbody");
 const searchInput = document.querySelector(".order-search input");
 const statusFilter = document.querySelector("#statusFilter");
 
+
+//HELPER FUNCTS AND THINGS
 function formatCurrency(amount) {
     return amount.toLocaleString("vi-VN") + "VND";
+}
+
+function formatDateTime(dateTime) {
+    if (!dateTime) return "Unknown";
+
+    const date = new Date(dateTime);
+
+    if (isNaN(date.getTime())) return "Unknown";
+
+    return date.toLocaleString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+    });
 }
 
 function getStatusLabel(status) {
@@ -30,7 +49,7 @@ function getStatusClass(status) {
     return "";
 }
 
-//to avoid shoving API data directly into html without processing
+//to avoid shoving API data directly into html without escaping
 function escapeHtml(value) {
     return String(value ?? "").replace(/[&<>"']/g, char => {
         const entities = {
@@ -45,6 +64,19 @@ function escapeHtml(value) {
 }
 
 
+// ORDER FUNCTIONS
+async function loadOrderDetails(orderId) {
+    const response = await fetch(
+        `${API_BASE_URL}/orders/${encodeURIComponent(orderId)}`
+    );
+    if (!response.ok) {
+        throw new Error(`Failed to load order ${orderId}`);
+    }
+    return await response.json();
+}
+
+
+// RENDER ORDER
 async function renderOrders(data) {
     const currentRenderVersion = ++renderVersion;
     ordersTableBody.innerHTML = "";
@@ -62,7 +94,7 @@ async function renderOrders(data) {
 
     ordersTableBody.innerHTML = `
         <tr>
-            <td colspan="6" style="text-align: center; padding: 30px;">
+            <td colspan="7" style="text-align: center; padding: 30px;">
                 Loading order details...
             </td>
         </tr>
@@ -107,6 +139,7 @@ async function renderOrders(data) {
             <td>${totalQuantity}</td>
             <td>${formatCurrency(order.total_amount)}</td>
             <td>${escapeHtml(order.customer_name || "Guest")}</td>
+            <td>${formatDateTime(order.created_at)}</td>
             <td>
                 <span class="status-badge ${getStatusClass(order.deliver_status)}">
                     ${escapeHtml(getStatusLabel(order.deliver_status))}
@@ -124,6 +157,37 @@ async function renderOrders(data) {
 }
 
 
+// SEARCH AND FILTER
+async function filterOrdersByDishName(filteredOrders, searchTerm) {
+    const currentSearchVersion = ++searchVersion;
+    if (!searchTerm) {
+        renderOrders(filteredOrders);
+        return;
+    }
+    const ordersWithDetails = await Promise.all(
+        filteredOrders.map(async order => {
+            try {
+                return await loadOrderDetails(order.order_id);
+            } catch (error) {
+                console.error(
+                    `Could not load order ${order.order_id}:`,
+                    error
+                );
+                return { ...order, items: [] };
+            }
+        })
+    );
+    //to forget old searching result if user enters new searching keywords
+    if (currentSearchVersion !== searchVersion) return;
+    const matchedOrders = ordersWithDetails.filter(order =>
+        (order.items || []).some(item =>
+            String(item.name || "")
+                .toLowerCase()
+                .includes(searchTerm)
+        )
+    );
+    renderOrders(matchedOrders);
+}
 
 function filterData() {
     const searchTerm = searchInput.value.toLowerCase().trim();
@@ -141,48 +205,12 @@ function filterData() {
     filterOrdersByDishName(filteredOrders, searchTerm);
 }
 
-async function filterOrdersByDishName(filteredOrders, searchTerm) {
-    const currentSearchVersion = ++searchVersion;
 
-    if (!searchTerm) {
-        renderOrders(filteredOrders);
-        return;
-    }
-
-    const ordersWithDetails = await Promise.all(
-        filteredOrders.map(async order => {
-            try {
-                return await loadOrderDetails(order.order_id);
-            } catch (error) {
-                console.error(
-                    `Could not load order ${order.order_id}:`,
-                    error
-                );
-                return { ...order, items: [] };
-            }
-        })
-    );
-
-    //to forget old searching result if user enters new searching keywords
-    if (currentSearchVersion !== searchVersion) return;
-
-    const matchedOrders = ordersWithDetails.filter(order =>
-        (order.items || []).some(item =>
-            String(item.name || "")
-                .toLowerCase()
-                .includes(searchTerm)
-        )
-    );
-
-    renderOrders(matchedOrders);
-}
-
-
-//ok we take real real data from backend now !!!!
+// LOAD ORDERS
 async function loadOrders() {
     ordersTableBody.innerHTML = `
         <tr>
-            <td colspan="6" style="text-align: center; padding: 30px;">
+            <td colspan="7" style="text-align: center; padding: 30px;">
                 Loading orders...
             </td>
         </tr>
@@ -215,16 +243,8 @@ async function loadOrders() {
 }
 
 
-async function loadOrderDetails(orderId) {
-    const response = await fetch(
-        `${API_BASE_URL}/orders/${encodeURIComponent(orderId)}`
-    );
-    if (!response.ok) {
-        throw new Error(`Failed to load order ${orderId}`);
-    }
-    return await response.json();
-}
 
 searchInput.addEventListener("input", filterData);
 statusFilter.addEventListener("change", filterData);
+
 loadOrders();

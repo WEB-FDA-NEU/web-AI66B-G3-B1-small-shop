@@ -20,7 +20,6 @@ CREATE TABLE `employees` (
   `name` varchar(100) NOT NULL,
   `username` varchar(50) ,
   `phone` VARCHAR(20),
-  `email` varchar(100),
   `role` varchar(30) NOT NULL, -- Manager, Cashier, Staff
   `status` varchar(20) NOT NULL,
   `created_at` date NOT NULL DEFAULT (CURRENT_DATE)
@@ -36,10 +35,9 @@ CREATE TABLE `customers` (
   `customer_id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `phone` VARCHAR(20) NOT NULL,
-  `email` varchar(100),
   `total_spent` decimal(12,2) NOT NULL DEFAULT 0,
   `customer_type_id` int DEFAULT 1,
-  `created_at` date 
+  `created_at` date DEFAULT (CURRENT_DATE)
 );
 
 CREATE TABLE `categories` (
@@ -71,6 +69,7 @@ CREATE TABLE `orders` (
   `deliver_status` varchar(30) NOT NULL DEFAULT 'not_deliver',
   `total_amount` decimal(12,2) NOT NULL DEFAULT 0,
   `discount_amount` decimal(12,2) NOT NULL DEFAULT 0,
+  `note` text NULL,
   `created_at` datetime NOT NULL DEFAULT NOW()
 );
 
