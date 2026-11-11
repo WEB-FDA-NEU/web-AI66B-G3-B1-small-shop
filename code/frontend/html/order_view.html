@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>View Order's Detail</title>
     <link rel="stylesheet" href="../css/employee.css">
+    <link rel="stylesheet" href="../css/sales.css">
     <link rel="stylesheet" href="../css/order_view.css">
     <link rel="stylesheet" href="../css/profile.css">
     
@@ -63,23 +64,23 @@
         <!--main zone-->
         <main class="main-content">
             <!--page header-->
-            <header class="page-header">
-                <div class="page-heading">
-                    <h1>Order Directory</h1>
+            <header class="top-header">
+                <div class="header-title">
+                    <h2>Order Directory</h2>
                     <p>Create and manage orders</p>
                 </div>
-                <div class="account-card">
-                    <div class="avatar">AD</div>
-                    <div class="account-info">
-                        <div class="role-name">Store Manager</div>
-                        <div class="role-sub">ADMINISTRATOR</div>
+                <div class="user-profile">
+                    <div class="user-avatar">AD</div>
+                    <div class="user-info">
+                        <div class="user-name">Store Manager</div>
+                        <div class="user-role">Administrator</div>
                     </div>
                 </div>
             </header>
             <!--switching buttons between New and Check-->
-            <div class="order-tabs">
-                <a class="tab-btn" href="order_create_edit.html">New order</a>
-                <a class="tab-btn active" href="order_check.html">Check all orders</a>
+            <div class="tab-navigation">
+                <a class="tab-btn" id="btn-overview" href="order_create_edit.html">New order</a>
+                <a class="tab-btn active" id="btn-prediction" href="order_check.html">Check all orders</a>
             </div>
             <!--order detail zone-->
             <section class="order-detail">
