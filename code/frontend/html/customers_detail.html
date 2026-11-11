@@ -18,7 +18,7 @@
     <!-- CSS -->
      <link rel="stylesheet" href="../css/employee.css">
     <link rel="stylesheet" href="../css/profile.css">
-    <link rel="stylesheet" href="../css/customers_detail.css?v=2">
+    <link rel="stylesheet" href="../css/customers_detail.css?v=5">
 </head>
 
 <body>
@@ -77,7 +77,7 @@
 
                 <a class="btn-secondary" href="customers.html">
                     <i class="fa-solid fa-arrow-left"></i>
-                    Back to Customers
+                    Back
                 </a>
 
             </div>
@@ -144,7 +144,7 @@
             </div>
 
             <div class="stat-card">
-                <h4>Recorded Spending</h4>
+                <h4>Delivered Spending</h4>
                 <h2 id="totalSpending">0 ₫</h2>
             </div>
 
@@ -160,7 +160,7 @@
 
         </section>
         <p class="stats-note">
-            Recorded spending matches the customer profile. Average order uses delivered orders; order discounts include all orders.
+            Spending and average order include delivered orders only; discounts include all orders.
         </p>
 
 
@@ -170,23 +170,22 @@
         <div class="section-header">
             <h3>Recent Orders</h3>
         </div>
-        <section class="table-wrapper">
+        <section class="table-wrapper" tabindex="0" aria-label="Recent orders. Scroll horizontally and vertically to view the table.">
             <table class="orders-table">
 
                 <thead>
                     <tr>
                         <th>Order ID</th>
-                        <th>Date</th>
+                        <th>Created At</th>
                         <th>Items</th>
                         <th>Total</th>
                         <th>Discount</th>
-                        <th>Status</th>
                     </tr>
                 </thead>
 
                 <tbody id="recentOrdersBody">
                     <tr>
-                        <td colspan="6" class="table-message">Loading orders...</td>
+                        <td colspan="5" class="table-message">Loading orders...</td>
                     </tr>
                 </tbody>
 
@@ -198,6 +197,6 @@
     </main>
 
     <script src="../js/home.js"></script>
-    <script src="../js/customers_detail.js?v=2"></script>
+    <script src="../js/customers_detail.js?v=3"></script>
 </body>
 </html>

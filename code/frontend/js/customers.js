@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE_URL = 'https://small-shop-tailscale.onrender.com';
+    const API_BASE_URL = 'http://127.0.0.1:8000';
     let customers = [];
     let customerTypes = [];
 
@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmDeleteButton = document.getElementById('confirmDeleteCustomerBtn');
     const addForm = document.getElementById('customerForm');
     const editForm = document.getElementById('editCustomerForm');
-    const addTypeSelect = document.getElementById('membershipTier');
     const editTypeSelect = document.getElementById('editMembershipTier');
     const phoneInputs = [
         {
@@ -36,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let sortAscending = true;
     let pendingDeleteId = null;
     let deleteTrigger = null;
+    let rockCustomerTypeId = null;
 
     function customerLabel(id) {
         return `CUS-${String(id).padStart(3, '0')}`;
@@ -193,11 +193,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadCustomerTypes() {
         customerTypes = await request('/customers/customer-types');
-        [addTypeSelect, editTypeSelect].forEach(select => {
-            select.innerHTML = customerTypes.map(type =>
-                `<option value="${type.customer_type_id}">${escapeHTML(type.type_name)}</option>`
-            ).join('');
-        });
+        const rockType = customerTypes.find(type =>
+            type.type_name.toLowerCase() === 'rock'
+        );
+        if (!rockType) throw new Error('Rock membership type is unavailable.');
+
+        rockCustomerTypeId = Number(rockType.customer_type_id);
+        editTypeSelect.innerHTML = customerTypes.map(type =>
+            `<option value="${type.customer_type_id}">${escapeHTML(type.type_name)}</option>`
+        ).join('');
     }
 
     function openModal(modal) {
@@ -243,12 +247,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function customerPayload(form, typeSelect) {
+    function customerPayload(form, customerTypeId) {
         const formData = new FormData(form);
         return {
             name: formData.get('name').trim(),
             phone: formData.get('phone').trim(),
-            customer_type_id: Number(typeSelect.value)
+            customer_type_id: Number(customerTypeId)
         };
     }
 
@@ -297,10 +301,14 @@ document.addEventListener('DOMContentLoaded', () => {
             phoneInputs[0].input.reportValidity();
             return;
         }
+        if (!rockCustomerTypeId) {
+            showToast('Rock membership type is unavailable. Please try again.');
+            return;
+        }
         try {
             await request('/customers', {
                 method: 'POST',
-                body: JSON.stringify(customerPayload(addForm, addTypeSelect))
+                body: JSON.stringify(customerPayload(addForm, rockCustomerTypeId))
             });
             closeModal(addModal);
             addForm.reset();
@@ -344,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             await request(`/customers/${id}`, {
                 method: 'PUT',
-                body: JSON.stringify(customerPayload(editForm, editTypeSelect))
+                body: JSON.stringify(customerPayload(editForm, editTypeSelect.value))
             });
             closeModal(editModal);
             await loadCustomers();
