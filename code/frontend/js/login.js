@@ -50,7 +50,7 @@ if (loginForm) {
         }
 
         try {
-            const response = await fetch("https://small-shop-tailscale.onrender.com/auth/login", {
+            const response = await fetch("http://127.0.0.1:8000/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password }),
@@ -63,7 +63,9 @@ if (loginForm) {
 
             const user = await response.json();
             sessionStorage.setItem("authenticatedUser", JSON.stringify(user));
-            window.location.href = "../html/home.html";
+            window.location.href = user.must_change_password
+                ? "../html/change_password.html"
+                : "../html/home.html";
         } catch (error) {
             if (message) {
                 message.textContent = error.message || "Unable to connect to the server.";

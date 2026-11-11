@@ -64,16 +64,30 @@ def init_db():
             )
             cursor.execute(f"USE `{db_name}`;")
 
-            # 3. Execute SQL files in order
             db_dir = Path(__file__).resolve().parent
-            sql_files = [
-                db_dir / "schema.sql",
-                db_dir / "triggers.sql",
-                db_dir / "seed.sql",
-            ]
+            cursor.execute(
+                """
+                SELECT COUNT(*) AS table_count
+                FROM information_schema.TABLES
+                WHERE TABLE_SCHEMA = %s AND TABLE_NAME = 'users'
+                """,
+                (db_name,),
+            )
+            has_existing_schema = cursor.fetchone()[0] > 0
 
-            for sql_file in sql_files:
-                execute_sql_file(cursor, sql_file)
+            if not has_existing_schema:
+                for sql_file in (
+                    db_dir / "schema.sql",
+                    db_dir / "triggers.sql",
+                    db_dir / "seed.sql",
+                ):
+                    execute_sql_file(cursor, sql_file)
+            else:
+                print("Existing schema detected; preserving all existing data.")
+
+            migrations_dir = db_dir / "migrations"
+            for migration_file in sorted(migrations_dir.glob("*.sql")):
+                execute_sql_file(cursor, migration_file)
 
         connection.commit()
         print(f"Database '{db_name}' initialized successfully!")

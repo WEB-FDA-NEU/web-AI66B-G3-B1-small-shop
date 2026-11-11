@@ -5,6 +5,7 @@ from typing import List, Optional
 from database.connect_db import get_connection
 from fastapi import APIRouter, FastAPI, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Depends
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
@@ -13,8 +14,25 @@ from schema.employee import EmployeeCreate, EmployeeUpdate, EmployeeResponse
 from services.employee import add_employee, update_employee, get_all_employees, delete_employee, get_employee_by_id, get_employee_details
 
 # Authentication schemas and services
-from schema.auth import LoginRequest
-from services.auth import authenticate_user
+from schema.auth import ForgotPasswordRequest, LoginRequest
+from schema.user import PasswordChange, UserCreate, UserResponse, UserUpdate
+from backend.services.auth import (
+    authenticate_user,
+    change_password,
+    require_authenticated_user,
+    require_completed_user,
+    require_user_manager,
+)
+from backend.services.users import (
+    approve_password_reset,
+    create_password_reset_request,
+    create_user,
+    delete_user,
+    get_password_reset_requests,
+    get_users,
+    reset_user_password,
+    update_user,
+)
 
 # Order schemas and services
 from schema.order import OrderCreate, DeliveryResponse
@@ -52,15 +70,52 @@ app.add_middleware(
 )
 
 # Router declarations
-emp_router = APIRouter(prefix="/employees", tags=["Employees"])
+emp_router = APIRouter(
+    prefix="/employees",
+    tags=["Employees"],
+    dependencies=[Depends(require_completed_user)],
+)
 auth_router = APIRouter(prefix="/auth", tags=["Authentication"])
-cus_router = APIRouter(prefix="/customers", tags=["Customers"])
-ord_router = APIRouter(prefix="/orders", tags=["Orders"])
-prod_router = APIRouter(prefix="/products", tags=["Products"])
-inv_router = APIRouter(prefix="/inventory", tags=["Inventory"])
-cat_router = APIRouter(prefix="/categories", tags=["Categories"])
-sales_router = APIRouter(prefix="/sales", tags=["Sales"])
-sales_test_router = APIRouter(prefix="/sales", tags=["Sales Test Alias"])
+users_router = APIRouter(
+    prefix="/users",
+    tags=["Users"],
+    dependencies=[Depends(require_completed_user)],
+)
+cus_router = APIRouter(
+    prefix="/customers",
+    tags=["Customers"],
+    dependencies=[Depends(require_completed_user)],
+)
+ord_router = APIRouter(
+    prefix="/orders",
+    tags=["Orders"],
+    dependencies=[Depends(require_completed_user)],
+)
+prod_router = APIRouter(
+    prefix="/products",
+    tags=["Products"],
+    dependencies=[Depends(require_completed_user)],
+)
+inv_router = APIRouter(
+    prefix="/inventory",
+    tags=["Inventory"],
+    dependencies=[Depends(require_completed_user)],
+)
+cat_router = APIRouter(
+    prefix="/categories",
+    tags=["Categories"],
+    dependencies=[Depends(require_completed_user)],
+)
+sales_router = APIRouter(
+    prefix="/sales",
+    tags=["Sales"],
+    dependencies=[Depends(require_completed_user)],
+)
+sales_test_router = APIRouter(
+    prefix="/sales",
+    tags=["Sales Test Alias"],
+    dependencies=[Depends(require_completed_user)],
+)
 
 # Employee endpoints
 @emp_router.get(
@@ -150,6 +205,81 @@ def delete_employee_endpoint(employee_id: int):
 @auth_router.post("/login", summary="Authenticate user and return token")
 def login_endpoint(payload: LoginRequest):
     return authenticate_user(payload.username, payload.password)
+
+
+@auth_router.post("/change-password", summary="Change the signed-in user's password")
+def change_password_endpoint(
+    payload: PasswordChange,
+    user: dict = Depends(require_authenticated_user),
+):
+    change_password(user["user_id"], payload.new_password)
+    return {"message": "Password changed successfully.", "must_change_password": False}
+
+
+@auth_router.post("/forgot-password", summary="Request a manager password reset")
+def forgot_password_endpoint(payload: ForgotPasswordRequest):
+    create_password_reset_request(payload.username)
+    return {
+        "message": "If the account exists, a password reset request has been sent to a manager."
+    }
+
+
+@auth_router.get(
+    "/password-reset-requests",
+    summary="List pending password reset requests",
+)
+def list_password_reset_requests_endpoint(
+    _manager: dict = Depends(require_user_manager),
+):
+    return get_password_reset_requests()
+
+
+@auth_router.post(
+    "/password-reset-requests/{user_id}/approve",
+    summary="Approve a password reset request",
+)
+def approve_password_reset_endpoint(
+    user_id: int,
+    _manager: dict = Depends(require_user_manager),
+):
+    approve_password_reset(user_id)
+    return {"message": "Password reset successfully. The user must change it after signing in."}
+
+
+# User management endpoints
+@users_router.get("", response_model=List[UserResponse])
+def list_users_endpoint(_manager: dict = Depends(require_user_manager)):
+    return get_users()
+
+@users_router.post("", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+def create_user_endpoint(
+    payload: UserCreate,
+    _manager: dict = Depends(require_user_manager),
+):
+    return create_user(payload)
+
+@users_router.put("/{user_id}", response_model=UserResponse)
+def update_user_endpoint(
+    user_id: int,
+    payload: UserUpdate,
+    manager: dict = Depends(require_user_manager),
+):
+    return update_user(user_id, payload, manager)
+
+@users_router.post("/{user_id}/reset-password")
+def reset_user_password_endpoint(
+    user_id: int,
+    _manager: dict = Depends(require_user_manager),
+):
+    reset_user_password(user_id)
+    return {"message": "Password reset successfully."}
+
+@users_router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user_endpoint(
+    user_id: int,
+    manager: dict = Depends(require_user_manager),
+):
+    delete_user(user_id, manager)
 
 # Order endpoints
 @ord_router.post("", status_code=status.HTTP_201_CREATED)
@@ -400,6 +530,7 @@ def health():
 # Register all routers after their endpoint declarations
 app.include_router(emp_router)
 app.include_router(auth_router)
+app.include_router(users_router)
 app.include_router(cus_router)
 app.include_router(ord_router)
 app.include_router(prod_router)

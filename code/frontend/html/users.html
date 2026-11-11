@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUMS - User Management</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/employee.css">
+    <link rel="stylesheet" href="../css/profile.css">
+    <link rel="stylesheet" href="../css/customers.css">
+    <link rel="stylesheet" href="../css/users.css">
+</head>
+<body>
+    <button class="menu-btn" type="button" aria-label="Toggle navigation">☰</button>
+
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-brand">
+                <a href="home.html"><h1>YUMS</h1></a>
+                <p>You Manage your Shop</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="order_create_edit.html"><i class="fa-solid fa-receipt"></i> Orders</a></li>
+                <li><a href="customers.html"><i class="fa-solid fa-users"></i> Customers</a></li>
+                <li><a href="inventory.html"><i class="fa-solid fa-utensils"></i> Inventory</a></li>
+                <li><a href="employees.html"><i class="fa-solid fa-id-badge"></i> Employees</a></li>
+                <li><a href="sales.html"><i class="fa-solid fa-chart-line"></i> Sales</a></li>
+                <li class="active"><a href="users.html"><i class="fa-solid fa-user-gear"></i> Users</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-footer"><p>&copy; 2026 YUMS v1.0</p></div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="header-title">
+                <h2>User Management</h2>
+                <p>Manage sign-in accounts and access roles</p>
+            </div>
+            <div class="user-profile">
+                <div class="user-avatar">AD</div>
+                <div class="user-info">
+                    <div class="user-name">Administrator</div>
+                    <div class="user-role">Account management</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="customer-summary kpi-grid users-summary">
+            <div class="kpi-card">
+                <span class="kpi-title">Total users</span>
+                <span class="kpi-value" id="totalUsers">0</span>
+                <span class="kpi-subtext">All sign-in accounts</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-title">Managers</span>
+                <span class="kpi-value" id="totalManagers">0</span>
+                <span class="kpi-subtext">Manager and administrator roles</span>
+            </div>
+        </div>
+
+        <section class="action-bar">
+            <div class="filter-group">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                    <input type="search" id="userSearch" placeholder="Search by username or user ID">
+                </div>
+            </div>
+            <button type="button" class="btn-add" id="openAddUserBtn">
+                <i class="fa-solid fa-user-plus" aria-hidden="true"></i> Add User
+            </button>
+        </section>
+
+        <section class="reset-requests-panel" id="resetRequestsPanel" hidden>
+            <div class="reset-requests-heading">
+                <h3>Password reset requests</h3>
+                <span id="resetRequestCount">0 pending</span>
+            </div>
+            <div class="table-wrapper">
+                <table class="users-table reset-requests-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Username</th>
+                            <th scope="col">Role</th>
+                            <th scope="col">Requested At</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resetRequestsBody">
+                        <tr><td colspan="4" class="table-message">Loading requests...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="table-wrapper users-table-region" tabindex="0" aria-label="User list. Scroll horizontally to view all columns.">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th scope="col">User ID</th>
+                        <th scope="col">Username</th>
+                        <th scope="col">Role</th>
+                        <th scope="col">Created At</th>
+                        <th scope="col">Reset Request</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <tr><td colspan="6" class="table-message">Loading users...</td></tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <div class="modal-overlay" id="userModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="userModalTitle">Add User</h3>
+                <button type="button" class="modal-close" id="closeUserModalBtn" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <input type="hidden" id="userId">
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="userUsername">Username *</label>
+                            <input type="text" id="userUsername" minlength="1" maxlength="50" autocomplete="off" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userRole">Role *</label>
+                            <select id="userRole" required>
+                                <option value="Employee">Employee</option>
+                                <option value="Manager">Manager</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p class="users-password-note" id="defaultPasswordNote">
+                        New accounts are assigned the temporary password <strong>password123</strong>.
+                        Share it with the account owner securely.
+                    </p>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="cancelUserModalBtn">Cancel</button>
+                <button type="submit" form="userForm" class="btn-primary" id="saveUserBtn">Save User</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toastNotification" role="status" aria-live="polite"></div>
+    <script src="../js/session.js?v=1"></script>
+    <script src="../js/session.js?v=1"></script>
+    <script src="../js/users.js?v=2"></script>
+    <script src="../js/home.js?v=3"></script>
+</body>
+</html>

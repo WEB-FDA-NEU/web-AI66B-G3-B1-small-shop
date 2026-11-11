@@ -29,6 +29,14 @@ const roleNames = {
 };
 const username = authenticatedUser.username || "";
 const role = roleNames[authenticatedUser.role] || authenticatedUser.role || "";
+if (["Admin", "Manager"].includes(authenticatedUser.role)) {
+    const sidebarMenu = document.querySelector(".sidebar-menu");
+    if (sidebarMenu && !sidebarMenu.querySelector('a[href="users.html"]')) {
+        const usersItem = document.createElement("li");
+        usersItem.innerHTML = '<a href="users.html"><i class="fa-solid fa-user-gear"></i> Users</a>';
+        sidebarMenu.append(usersItem);
+    }
+}
 const initials = username
     .trim()
     .split(/\s+/)
@@ -145,4 +153,66 @@ if (profile) {
         sessionStorage.removeItem("authenticatedUser");
         window.location.href = "index.html";
     });
+}
+
+if (["Admin", "Manager"].includes(authenticatedUser.role)) {
+    const resetRequests = () => fetch("http://127.0.0.1:8000/auth/password-reset-requests")
+        .then(async response => {
+            if (!response.ok) {
+                throw new Error(`Could not load password reset requests (${response.status}).`);
+            }
+            return response.json();
+        });
+
+    resetRequests()
+        .then(requests => {
+            if (!requests.length) return;
+            const notice = document.createElement("aside");
+            notice.setAttribute("role", "status");
+            notice.style.cssText = [
+                "position:fixed",
+                "right:20px",
+                "top:20px",
+                "z-index:2000",
+                "max-width:360px",
+                "padding:14px 18px",
+                "border:1px solid #D2C7B8",
+                "border-radius:8px",
+                "background:#FAF6F0",
+                "color:#2A2421",
+                "box-shadow:0 4px 16px rgba(0,0,0,.16)",
+            ].join(";");
+            const text = document.createElement("span");
+            text.textContent = `${requests.length} password reset request${requests.length === 1 ? "" : "s"} need review. `;
+            const link = document.createElement("a");
+            link.href = "users.html#resetRequestsPanel";
+            link.textContent = "Review";
+            link.style.color = "#7F0303";
+            notice.append(text, link);
+            document.body.append(notice);
+        })
+        .catch(error => console.error("Password reset request notification failed.", error));
+
+    window.setInterval(() => {
+        resetRequests()
+            .then(requests => {
+                const badge = document.querySelector(".reset-request-badge");
+                if (!requests.length) {
+                    badge?.remove();
+                    return;
+                }
+                const menuLink = document.querySelector('.sidebar-menu a[href="users.html"]');
+                if (!menuLink) return;
+                const currentBadge = menuLink.querySelector(".reset-request-badge");
+                const requestsBadge = currentBadge || document.createElement("span");
+                requestsBadge.className = "reset-request-badge";
+                requestsBadge.textContent = String(requests.length);
+                requestsBadge.setAttribute(
+                    "aria-label",
+                    `${requests.length} pending password reset requests`
+                );
+                if (!currentBadge) menuLink.append(requestsBadge);
+            })
+            .catch(error => console.error("Password reset request badge refresh failed.", error));
+    }, 60_000);
 }
