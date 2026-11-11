@@ -340,7 +340,13 @@
 .table-wrapper {
     width: 100%;
 
+    max-height: 420px;
+
+    overflow: auto;
+
     margin-bottom: 22px;
+
+    overscroll-behavior: contain;
 }
 
 
@@ -391,6 +397,12 @@
 /* Table header */
 
 .orders-table th {
+    position: sticky;
+
+    top: 0;
+
+    z-index: 1;
+
     background-color: #F2EAE0;
 
     color: var(--text-dark);
@@ -459,27 +471,28 @@
 
 .orders-table th:nth-child(2),
 .orders-table td:nth-child(2) {
-    width: 15%;
+    width: 17%;
 }
 
 .orders-table th:nth-child(3),
 .orders-table td:nth-child(3) {
-    width: 25%;
+    width: 40%;
+}
+
+.orders-table td:nth-child(3) {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
 }
 
 .orders-table th:nth-child(4),
 .orders-table td:nth-child(4) {
-    width: 17%;
+    width: 18%;
 }
 
 .orders-table th:nth-child(5),
 .orders-table td:nth-child(5) {
-    width: 12%;
-}
-
-.orders-table th:nth-child(6),
-.orders-table td:nth-child(6) {
-    width: 17%;
+    width: 11%;
 }
 
 
@@ -685,7 +698,7 @@
     .table-wrapper {
         width: 100%;
 
-        overflow-x: auto;
+        overflow: auto;
     }
 
     .orders-table {

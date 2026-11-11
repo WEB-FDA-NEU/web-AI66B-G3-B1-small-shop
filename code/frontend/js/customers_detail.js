@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('customerName').textContent = message;
         document.getElementById('customerTier').textContent = 'Unavailable';
         recentOrdersBody.innerHTML = `
-            <tr><td colspan="6" class="table-message">${escapeHTML(message)}</td></tr>
+            <tr><td colspan="5" class="table-message">${escapeHTML(message)}</td></tr>
         `;
     }
 
@@ -63,14 +63,14 @@ document.addEventListener('DOMContentLoaded', () => {
             `${Number(customer.discount_percent) || 0}%`;
     }
 
-    function renderStats(customer, stats) {
+    function renderStats(stats) {
         const completedOrders = Number(stats.completed_orders) || 0;
         const completedSpending = Number(stats.completed_spending) || 0;
 
         document.getElementById('totalOrders').textContent =
             Number(stats.total_orders) || 0;
         document.getElementById('totalSpending').textContent =
-            formatVND(customer.total_spent);
+            formatVND(completedSpending);
         document.getElementById('averageOrder').textContent = formatVND(
             completedOrders ? completedSpending / completedOrders : 0
         );
@@ -81,15 +81,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderOrders(orders) {
         if (orders.length === 0) {
             recentOrdersBody.innerHTML = `
-                <tr><td colspan="6" class="table-message">This customer has no orders yet.</td></tr>
+                <tr><td colspan="5" class="table-message">This customer has no orders yet.</td></tr>
             `;
             return;
         }
 
         recentOrdersBody.innerHTML = orders.map(order => {
-            const isDelivered = order.deliver_status === 'delivered';
-            const status = isDelivered ? 'Delivered' : 'Not delivered';
-            const statusClass = isDelivered ? 'delivered' : 'pending';
             return `
                 <tr>
                     <td>ORD-${String(order.order_id).padStart(3, '0')}</td>
@@ -97,7 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${escapeHTML(order.items || '—')}</td>
                     <td>${formatVND(order.total_amount)}</td>
                     <td>${formatVND(order.discount_amount)}</td>
-                    <td><span class="order-status ${statusClass}">${status}</span></td>
                 </tr>
             `;
         }).join('');
@@ -119,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             renderCustomer(result.customer);
-            renderStats(result.customer, result.stats);
+            renderStats(result.stats);
             renderOrders(result.recent_orders);
         } catch (error) {
             showError(`Unable to load customer details: ${error.message}`);
