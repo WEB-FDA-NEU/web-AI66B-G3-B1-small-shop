@@ -599,7 +599,7 @@ table.employee-table tbody tr:last-child td {
     transform: translateY(100px);
     opacity: 0;
     transition: all 0.3s ease;
-    z-index: 2000;
+    z-index: 9999   ;
 }
 
 .toast.show {

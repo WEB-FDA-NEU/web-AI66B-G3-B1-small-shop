@@ -60,6 +60,40 @@ const productImages = {
     18: "../img/ice_cream.jpg",
 };
 
+// HELPER FUNCTS AND THINGS
+function formatCurrency(amount) {
+    return amount.toLocaleString("vi-VN") + "VND";
+}
+
+function getStatusLabel(status) {
+    const statusLabels = {
+        delivered: "Delivered",
+        not_deliver: "Not delivered"
+    };
+    return statusLabels[status] || status || "Unknown";
+}
+
+function getStatusClass(status) {
+    if (status === "delivered") {
+        return "success";
+    }
+    if (status === "not_deliver") {
+        return "pending";
+    }
+    return "";
+}
+
+function showToast(message) {
+    const toast = document.getElementById("toastNotification");
+    if (!toast) return;
+
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 3000);
+}
 
 // DISH AND BILL AND THINGS
 async function loadDishes() {
@@ -244,7 +278,7 @@ async function loadRockCustomerTypeId() {
         console.log("Rock customer type ID:", rockCustomerTypeId);
     } catch (error) {
         console.error("Error loading customer types:", error);
-        alert("Unable to load membership types. Please try again.");
+        showToast("Unable to load membership types. Please try again.");
     }
 }
 
@@ -253,7 +287,7 @@ function validateNewCustomer() {
     const phone = orderNewCustomerPhone.value.trim();
     //validate empty name
     if (!name) {
-        alert("Please enter customer name.");
+        showToast("Please enter customer name.");
         orderNewCustomerName.focus();
         return false;
     }
@@ -294,7 +328,7 @@ orderNewCustomerForm.addEventListener("submit", async (event) => {
         return;
     }
     if (!rockCustomerTypeId) {
-        alert("Rock membership type is not available. Please refresh the page.");
+        showToast("Rock membership type is not available. Please refresh the page.");
         return;
     }
     const customerData = {
@@ -337,11 +371,11 @@ orderNewCustomerForm.addEventListener("submit", async (event) => {
         //reset Add New Customer form
         orderNewCustomerForm.reset();
         orderNewCustomerPhoneError.textContent = "";
-        //cuccess msg
-        alert("Customer created and selected successfully!");
+        //success msg
+        showToast("Customer created and selected successfully!");
     } catch (error) {
         console.error("Error creating customer:", error);
-        alert(error.message);
+        showToast(error.message);
     } finally {
         saveOrderNewCustomerBtn.disabled = false;
         saveOrderNewCustomerBtn.textContent = "Save Information";
@@ -533,7 +567,7 @@ async function saveNewOrder(isGuest = false) {
         }
 
         if (!selectedCustomerId) {
-            alert("Please select a customer from the suggestion list.");
+            showToast("Please select a customer from the suggestion list.");
             customerPhoneInput.focus();
             return;
         }
@@ -569,7 +603,7 @@ async function saveNewOrder(isGuest = false) {
         if (!response.ok) {
             console.error("Create order failed:", result);
 
-            alert(
+            showToast(
                 result?.detail
                     ? JSON.stringify(result.detail)
                     : "Unable to create order. Please try again."
@@ -587,7 +621,7 @@ async function saveNewOrder(isGuest = false) {
 
     } catch (error) {
         console.error("Create order request failed:", error);
-        alert("Cannot connect to the server. Please try again.");
+        showToast("Cannot connect to the server. Please try again.");
     } finally {
         isCreatingOrder = false;
         confirmOrderBtn.disabled = false;

@@ -58,6 +58,18 @@ function getStatusClass(status) {
     return "";
 }
 
+function showToast(message) {
+    const toast = document.getElementById("toastNotification");
+    if (!toast) return;
+
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 3000);
+}
+
 //ORDER NOTE
 //save note thru backend api
 async function saveOrderNote(input, button, display, editArea) {
@@ -97,8 +109,7 @@ async function saveOrderNote(input, button, display, editArea) {
 
     } catch (error) {
         console.error("Failed to update order note:", error);
-        alert(`Unable to update Note: ${error.message}`);
-
+        showToast(`Unable to update Note: ${error.message}`);
     } finally {
         button.disabled = false;
     }
@@ -384,7 +395,7 @@ async function confirmOrderDelivery() {
         await loadOrderDetails();
     } catch (error) {
         console.error("Failed to confirm delivery:", error);
-        alert(`Unable to confirm delivery: ${error.message}`);
+        showToast(`Unable to confirm delivery: ${error.message}`);
     } finally {
         statusConfirmYes.disabled = false;
         statusConfirmYes.textContent = "Yes";
