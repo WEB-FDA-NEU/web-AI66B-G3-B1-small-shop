@@ -19,6 +19,8 @@ body {
 /*main layout*/
 .layout {
     display: flex;
+    width: 100%;
+    min-width: 0;
     min-height: 100vh;
 }
 
@@ -28,127 +30,15 @@ body {
 .main-content {
     display: flex;
     flex-direction: column;
-    box-sizing: border-box;
-    width: calc(100% - 260px);
     height: 100dvh;
-    margin-left: 260px;
-    padding: 34px 38px;
     overflow: hidden;
-    transition: 0.25s;
 }
 
-/*page header*/
-.page-header {
-    min-height: 78px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    border-bottom: 1px solid #96C0CE;
-    padding-bottom: 20px;
-    flex-shrink: 0;
-}
-.page-heading h1 {
-    margin: 0;
-    color: #7F0303;
-    font-family: 'Bodoni Moda', serif;
-    font-size: 38px;
-    font-weight: 800;
-    line-height: 1.1;
-}
-.page-heading p {
-    margin: 8px 0 0;
-    color: #77716A;
-    font-size: 13px;
-}
-/*account display card*/
-.account-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background-color: #F8F4ED;
-    border: 1px solid #96C0CE;
-    border-radius: 30px;
-    padding: 7px 17px 7px 8px;
-    min-width: 170px;
-    box-shadow: 0 2px 5px #F8F4ED;
-}
-.avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background-color: #7F0303;
-    color: #EFE8DF;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Bodoni Moda', serif;
-    font-size: 14px;
-}
-.account-info {
-    line-height: 1.2;
-}
-.role-name {
-    color: #292929;
-    font-size: 13px;
-    font-weight: 600;
-}
-.role-sub {
-    margin-top: 3px;
-    color: #8A837C;
-    font-size: 10px;
-    letter-spacing: 0.5px;
-}
+/*page header: take after employee*/
 
-/*2 nút New/Check*/
-.order-tabs {
-    display: flex;
-    align-items: stretch;
-    gap: 10px;
-    width: 100%;
-    height: 52px;
-    margin: 0 0 25px 0;
-    padding: 0;
-    border-bottom: 2px solid #D8BA98;
-    box-sizing: border-box;
-}
-.order-tabs .tab-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 52px;
-    margin: 0;
-    padding: 12px 24px;
-    border: none;
-    border-bottom: 3px solid transparent;
-    border-radius: 0;
-    outline: none;
-    box-shadow: none;
-    background: none;
-    background-color: transparent;
-    color: #6B6B6B;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 18px;
-    font-weight: 800;
-    line-height: 1;
-    text-decoration: none;
-    white-space: nowrap;
-    cursor: pointer;
-    box-sizing: border-box;
-    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
-}
-.order-tabs .tab-btn:hover {
-    background-color: rgba(216, 186, 152, 0.12);
-    color: #0F414A;
-}
-.order-tabs .tab-btn.active {
-    border: none;
-    border-bottom: 3px solid #7F0303;
-    border-radius: 0;
-    background: none;
-    background-color: transparent;
-    box-shadow: none;
-    color: #7F0303;
-}
+/*account display card + user profile: take after employee*/
+
+/*2 nút New/Check: take after sales tab navi*/
 
 /*nhét 2 cột dô container chia ra*/
 .product-menu h2 {

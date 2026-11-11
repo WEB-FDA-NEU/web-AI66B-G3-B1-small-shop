@@ -22,6 +22,7 @@
     cursor: pointer;
     border-bottom: 3px solid transparent;
     transition: all var(--transition-speed) ease;
+    text-decoration: none;
 }
 
 .tab-btn:hover {
