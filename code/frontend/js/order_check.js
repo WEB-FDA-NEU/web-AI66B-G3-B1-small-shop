@@ -134,13 +134,25 @@ async function renderOrders(data) {
         );
 
         row.innerHTML = `
-            <td class="order-id">${escapeHtml(order.order_id)}</td>
-            <td class="order-items">${dishNames}</td>
-            <td>${totalQuantity}</td>
-            <td>${formatCurrency(order.total_amount)}</td>
-            <td>${escapeHtml(order.customer_name || "Guest")}</td>
-            <td>${formatDateTime(order.created_at)}</td>
-            <td>
+            <td class="order-id" data-label="Order ID">
+                ${escapeHtml(order.order_id)}
+            </td>
+            <td class="order-items" data-label="Items">
+                ${dishNames}
+            </td>
+            <td data-label="Quantity">
+                ${totalQuantity}
+            </td>
+            <td data-label="Total">
+                ${formatCurrency(order.total_amount)}
+            </td>
+            <td data-label="Customer">
+                ${escapeHtml(order.customer_name || "Guest")}
+            </td>
+            <td data-label="Created date">
+                ${formatDateTime(order.created_at)}
+            </td>
+            <td data-label="Status">
                 <span class="status-badge ${getStatusClass(order.deliver_status)}">
                     ${escapeHtml(getStatusLabel(order.deliver_status))}
                 </span>
