@@ -1,4 +1,4 @@
-const API_SALES_URL = "https://small-shop-tailscale.onrender.com";
+const API_SALES_URL = "https://small-shop-tailscale.onrender.com/sales";
 
 const toast = document.getElementById('toastNotification');
 
