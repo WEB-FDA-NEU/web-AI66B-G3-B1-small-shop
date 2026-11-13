@@ -273,7 +273,7 @@
    CUSTOMER STATISTICS
 ========================================================= */
 
-.customer-stats {
+.customer-detail-page .customer-stats {
     display: grid;
 
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -593,11 +593,11 @@
 
 @media (max-width: 1100px) {
 
-    .customer-stats {
+    .customer-detail-page .customer-stats {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .customer-profile-card {
+    .customer-detail-page .customer-profile-card {
         grid-template-columns: 180px 1fr;
 
         gap: 25px;
@@ -607,23 +607,42 @@
 
 /* Smaller tablet */
 
-@media (max-width: 850px) {
+@media (max-width: 64rem) {
 
-    .sidebar {
-        width: 220px;
+    .customer-detail-page .sidebar {
+        transform: translateX(-100%);
     }
 
-    .main-content {
-        margin-left: 220px;
-
-        padding: 30px 25px;
+    .customer-detail-page .sidebar.hidden {
+        transform: translateX(0);
     }
 
-    .customer-profile-card {
+    .customer-detail-page .main-content,
+    .customer-detail-page .main-content.expand {
+        width: 100% !important;
+        max-width: 100%;
+        min-width: 0;
+        margin-left: 0 !important;
+        flex: 1 1 100%;
+        padding: 1.25rem;
+    }
+
+    .customer-detail-page .user-profile {
+        padding: 0;
+        border: 0;
+        background: transparent;
+        gap: 0;
+    }
+
+    .customer-detail-page .user-info {
+        display: none;
+    }
+
+    .customer-detail-page .customer-profile-card {
         grid-template-columns: 1fr;
     }
 
-    .customer-avatar-section {
+    .customer-detail-page .customer-avatar-section {
         justify-content: flex-start;
     }
 }
@@ -631,84 +650,176 @@
 
 /* Mobile */
 
-@media (max-width: 650px) {
-
-    .sidebar {
-        display: none;
-    }
-
-    .main-content {
-        margin-left: 0;
-
-        padding: 25px 18px;
+@media (max-width: 48rem) {
+    .customer-detail-page .main-content,
+    .customer-detail-page .main-content.expand {
+        padding: 4.5rem 1rem 1.25rem;
     }
 
 
     /* Header */
 
-    .top-header {
+    .customer-detail-page .top-header {
         flex-direction: column;
 
-        gap: 18px;
-
         align-items: stretch;
+        gap: 1rem;
     }
 
-    .header-title h2 {
-        font-size: 1.8rem;
+    .customer-detail-page .header-title h2 {
+        font-size: 1.6rem;
     }
 
-    .header-title p {
+    .customer-detail-page .header-title p {
         line-height: 1.5;
     }
 
-    .header-actions {
+    .customer-detail-page .header-actions {
         width: 100%;
     }
 
-    .btn-secondary {
+    .customer-detail-page .btn-secondary {
         align-self: flex-start;
     }
 
 
     /* Profile */
 
-    .customer-profile-card {
-        padding: 20px;
-
+    .customer-detail-page .customer-profile-card {
+        gap: 1.25rem;
+        padding: 1.25rem;
         grid-template-columns: 1fr;
     }
 
-    .customer-info-grid {
-        grid-template-columns: 1fr;
+    .customer-detail-page .customer-avatar-section {
+        align-items: center;
+        text-align: center;
+    }
 
-        gap: 15px;
+    .customer-detail-page .customer-info-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
     }
 
 
     /* Statistics */
 
-    .customer-stats {
-        grid-template-columns: 1fr;
+    .customer-detail-page .customer-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
     }
 
 
     /* Table */
 
-    .table-wrapper {
+    .customer-detail-page .table-wrapper {
         width: 100%;
 
-        overflow: auto;
+        max-height: none;
+        overflow: visible;
     }
 
-    .orders-table {
-        min-width: 750px;
+    .customer-detail-page .orders-table {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        table-layout: auto;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .customer-detail-page .orders-table thead {
+        display: none;
+    }
+
+    .customer-detail-page .orders-table tbody {
+        display: block;
+        width: 100%;
+    }
+
+    .customer-detail-page .orders-table tbody tr {
+        display: block;
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        background: var(--card-bg);
+    }
+
+    .customer-detail-page .orders-table tbody td {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100% !important;
+        min-width: 0;
+        padding: 0.625rem 0;
+        border-bottom: 1px solid var(--border-color);
+        white-space: normal;
+        overflow-wrap: anywhere;
+        line-height: 1.4;
+    }
+
+    .customer-detail-page .orders-table tbody td::before {
+        content: attr(data-label);
+        flex: 0 0 6.5rem;
+        min-width: 0;
+        color: var(--text-muted);
+        font-size: 0.72rem;
+        font-weight: 600;
+        line-height: 1.4;
+    }
+
+    .customer-detail-page .orders-table tbody td[colspan] {
+        display: block;
+        text-align: center;
+    }
+
+    .customer-detail-page .orders-table tbody td[colspan]::before {
+        content: none;
+    }
+
+    .customer-detail-page .orders-table tbody td:last-child {
+        border-bottom: 0;
     }
 
 
     /* Notes */
 
-    .customer-notes textarea {
+    .customer-detail-page .customer-notes textarea {
         max-width: 100%;
+    }
+}
+
+@media (max-width: 30rem) {
+    .customer-detail-page .main-content,
+    .customer-detail-page .main-content.expand {
+        padding-right: 0.75rem;
+        padding-left: 0.75rem;
+    }
+
+    .customer-detail-page .header-title h2 {
+        font-size: 1.4rem;
+    }
+
+    .customer-detail-page .customer-profile-card {
+        padding: 1rem;
+    }
+
+    .customer-detail-page .customer-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .customer-detail-page .stat-card {
+        padding: 0.875rem;
+    }
+
+    .customer-detail-page .orders-table tbody td {
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .customer-detail-page .orders-table tbody td::before {
+        flex-basis: 5.5rem;
     }
 }

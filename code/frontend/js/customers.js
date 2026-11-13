@@ -108,13 +108,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const tier = customer.type_name || 'Unknown';
             const tierClass = escapeHTML(tier.toLowerCase());
             row.innerHTML = `
-                <td><strong class="cus-id">${customerLabel(customer.customer_id)}</strong></td>
-                <td>${escapeHTML(customer.name)}</td>
-                <td>${escapeHTML(customer.phone)}</td>
-                <td style="text-align: right;">${formatVND(customer.total_spent)}</td>
-                <td style="text-align: center;"><span class="badge badge-tier ${tierClass}">${escapeHTML(tier)}</span></td>
-                <td style="text-align: center;">${formatDate(customer.created_at)}</td>
-                <td style="text-align: center;">
+                <td data-label="Customer ID"><strong class="cus-id">${customerLabel(customer.customer_id)}</strong></td>
+                <td data-label="Name">${escapeHTML(customer.name)}</td>
+                <td data-label="Phone">${escapeHTML(customer.phone)}</td>
+                <td data-label="Total Spending" style="text-align: right;">${formatVND(customer.total_spent)}</td>
+                <td data-label="Membership" style="text-align: center;"><span class="badge badge-tier ${tierClass}">${escapeHTML(tier)}</span></td>
+                <td data-label="Created At" style="text-align: center;">${formatDate(customer.created_at)}</td>
+                <td data-label="Actions" style="text-align: center;">
                     <div class="action-buttons">
                         <button class="btn-icon btn-edit" data-id="${customer.customer_id}" title="Edit">
                             <i class="fa-solid fa-pen-to-square"></i>
