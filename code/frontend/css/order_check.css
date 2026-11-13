@@ -622,32 +622,60 @@ body {
     .orders-table tbody td {
         display: flex;
         flex-direction: row;
-        align-items: flex-start;
-        gap: 0.75rem;
-        padding: 0.625rem 0;
-        overflow-wrap: anywhere;
-        border-bottom: 1px solid #eee;
+        align-items: center;
+        gap: .75rem;
         box-sizing: border-box;
         width: 100%;
         min-width: 0;
         max-width: none;
+        padding: .625rem 0 .625rem 1rem;
+        padding-left: 1.25rem !important;
+        border-bottom: 1px solid #D8BA98;
         text-align: left;
         white-space: normal;
-    }
-    .orders-table tbody td::before {
-        flex: 0 0 6.5rem;
-        content: attr(data-label);
-        font-weight: 600;
         overflow-wrap: anywhere;
+        font-family: 'Montserrat', sans-serif;
+        font-size: .8125rem;
+        line-height: 1.4;
+    }
+
+    .orders-table tbody td::before {
+        content: attr(data-label);
+        flex: 0 0 6.5rem;
+        min-width: 0;
+        display: block;
+        margin: 0;
+        font-family: 'Montserrat', sans-serif;
+        font-size: .8125rem;
+        font-weight: 600;
+        line-height: 1.4;
+        text-align: left;
+        margin-left: 0 !important;
     }
     .orders-table tbody td > * {
+        flex: 1 1 0;
         min-width: 0;
         max-width: 100%;
+        margin: 0;
+        margin-left: .35rem !important;
+        font-family: 'Montserrat', sans-serif;
+        font-size: .8125rem;
+        line-height: 1.4;
+        text-align: left;
+    }
+    .orders-table tbody td[data-label="Status"] > * {
+        margin-left: 0;
+    }
+    .orders-table th:nth-child(6),
+    .orders-table td:nth-child(6),
+    .orders-table td:nth-child(6)::before,
+    .orders-table td:nth-child(6) > * {
+        font-size: 0.8125rem;
     }
     .orders-table tbody td:last-child {
-        border-bottom: none;
+        border-bottom: 1px solid #D8BA98;
     }
-    .orders-table th,
+        .orders-table th,
     .orders-table td {
         padding: 0.5rem 0.375rem;
         white-space: normal;
@@ -705,5 +733,32 @@ body {
     .orders-table .status-badge {
         font-size: 0.75rem;
         padding: 0.1875rem 0.3125rem;
+    }
+}
+
+/* force sidebar to hide when responsive*/
+@media screen and (max-width: 64rem) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    .sidebar:not(.hidden) {
+        transform: translateX(0);
+    }
+}
+/*force avt responsive*/
+@media (max-width: 64rem) {
+    .user-profile {
+        padding: 0;
+        border: none;
+        background: transparent;
+        gap: 0;
+    }
+    .user-info {
+        display: none;
+    }
+    .user-avatar {
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
     }
 }
