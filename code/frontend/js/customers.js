@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE_URL = 'https://small-shop-tailscale.onrender.com';
+    const API_BASE_URL = 'http://127.0.0.1:8000';
     let customers = [];
     let customerTypes = [];
 

@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const response = await fetch(
-                `https://small-shop-tailscale.onrender.com/employees/${encodeURIComponent(employeeId)}/details`
+                `http://127.0.0.1:8000/employees/${encodeURIComponent(employeeId)}/details`
             );
             const result = await response.json().catch(() => null);
             if (!response.ok) {

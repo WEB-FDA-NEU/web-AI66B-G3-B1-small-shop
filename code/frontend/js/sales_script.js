@@ -185,7 +185,7 @@ async function loadSalesCategoriesDropdown() {
   if (!categorySelect) return;
 
   try {
-    const response = await fetch("https://small-shop-tailscale.onrender.com/categories");
+    const response = await fetch("http://127.0.0.1:8000/categories");
     if (!response.ok) throw new Error("Failed to load categories");
     
     const categories = await response.json();
