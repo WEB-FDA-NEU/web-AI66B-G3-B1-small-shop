@@ -264,13 +264,13 @@ function renderOrder(order) {
             const row = document.createElement("tr");
 
             row.innerHTML = `
-                <td class="dish-id">
+                <td class="dish-id" data-label="Dish code">
                     ${escapeHtml(item.product_id)}
                 </td>
-                <td>${escapeHtml(item.name)}</td>
-                <td>${formatCurrency(item.unit_price)}</td>
-                <td>${Number(item.quantity)}</td>
-                <td>${formatCurrency(item.subtotal)}</td>
+                <td data-label="Dish name">${escapeHtml(item.name)}</td>
+                <td data-label="Unit price">${formatCurrency(item.unit_price)}</td>
+                <td data-label="Quantity">${Number(item.quantity)}</td>
+                <td data-label="Amount">${formatCurrency(item.subtotal)}</td>
             `;
 
             orderItems.appendChild(row);
@@ -281,6 +281,7 @@ function renderOrder(order) {
         //discount line (but only when discount exists)
         if (Number(order.discount_amount) > 0) {
             const discountRow = document.createElement("tr");
+            discountRow.className = "discount-row";
 
             discountRow.innerHTML = `
                 <td colspan="4">Discount</td>
@@ -427,6 +428,29 @@ if (statusConfirmOverlay) {
     });
 }
 
+//force sidebar to hide again
+(() => {
+    const viewSidebar = document.getElementById("sidebar");
+    const viewMenuBtn = document.getElementById("menuBtn");
+    if (!viewSidebar || !viewMenuBtn || !window.matchMedia) return;
+    const viewBreakpoint = window.matchMedia("(max-width: 64rem)");
+    function syncViewSidebar() {
+        if (viewBreakpoint.matches) {
+            viewSidebar.classList.add("hidden");
+        } else {
+            viewSidebar.classList.remove("hidden");
+        }
+    }
+    syncViewSidebar();
+    if (viewBreakpoint.addEventListener) {
+        viewBreakpoint.addEventListener("change", syncViewSidebar);
+    } else {
+        viewBreakpoint.addListener(syncViewSidebar);
+    }
+    viewMenuBtn.addEventListener("click", () => {
+        viewSidebar.classList.toggle("hidden");
+    });
+})();
 
 
 loadOrderDetails();
