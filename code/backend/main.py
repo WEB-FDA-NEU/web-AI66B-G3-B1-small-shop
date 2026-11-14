@@ -1,5 +1,7 @@
 import os
 import sys
+import socket
+import logging
 from typing import List, Optional
 
 from database.connect_db import get_connection
@@ -363,11 +365,7 @@ def update_customer_endpoint(customer_id: int, payload: CustomerUpdate):
 def delete_customer_endpoint(customer_id: int):
     delete_customer(customer_id)
 
-# Product endpoints
-@prod_router.get("")
-def get_products_endpoint():
-    return get_products()
-
+# PRODUCT ENDPOINTS
 @prod_router.get("", response_model=List[ProductResponse])
 def get_all_products_endpoint():
     try:
@@ -396,7 +394,7 @@ def delete_product_endpoint(product_id: int):
         raise HTTPException(status_code=404, detail=f"Product with ID {product_id} not found.")
     return {"message": f"Product {product_id} deleted successfully."}
 
-# Inventory endpoints
+# INVENTORY ENDPOINTS 
 @inv_router.get("", response_model=List[InventoryResponse])
 def get_all_inventory_endpoint():
     try:
@@ -424,61 +422,41 @@ def delete_inventory_endpoint(sku: str):
         raise HTTPException(status_code=404, detail=f"Product SKU {sku} not found.")
     return {"message": f"Product {sku} deleted successfully."}
 
-# Category endpoints
+# CATEGORY ENDPOINTS 
 @cat_router.get("")
 def get_categories_endpoint():
     conn = None
     try:
-        from database.connect_db import get_connection
         conn = get_connection()
         with conn.cursor() as cursor:
             cursor.execute("SELECT category_id, category_name FROM categories")
             categories = cursor.fetchall()
             return categories if categories else []
     except Exception as e:
-        print(f"Error details: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch categories: {str(e)}")
     finally:
         if conn and conn.open:
             conn.close()
 
-# Sales analytics endpoints
-@sales_router.get("/sales/overview", response_model=List[SalesItemOverview], tags=["Sales"])
+# SALES ANALYTICS ENDPOINTS
+@sales_router.get("/overview")
 def get_sales_overview_endpoint(
     top_n: Optional[str] = Query("5"),
     category: Optional[str] = Query(None),
-    timeframe: Optional[str] = Query("monthly")
+    timeframe: Optional[str] = Query("this_month")
 ):
     try:
-        return get_sales_overview(top_n=top_n, category=category)
+        # Truyền đầy đủ top_n, category và timeframe vào service mới
+        return get_sales_overview(top_n=top_n, category=category, timeframe=timeframe)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch sales overview: {str(e)}")
 
-@sales_router.get("/sales/predictions", tags=["Sales"])
+@sales_router.get("/predictions")
 def get_demand_predictions_endpoint(window_days: int = Query(30)):
     try:
         return get_demand_predictions(window_days=window_days)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to calculate predictions: {str(e)}")
-
-@sales_test_router.get("/overview", response_model=List[SalesItemOverview])
-def get_sales_overview_alias(
-    top_n: Optional[str] = Query("5"),
-    category: Optional[str] = Query(None),
-    timeframe: Optional[str] = Query("monthly")
-):
-    try:
-        return get_sales_overview(top_n=top_n, category=category)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch sales overview: {str(e)}")
-
-@sales_test_router.get("/predictions")
-def get_demand_predictions_alias(window_days: int = Query(30)):
-    try:
-        return get_demand_predictions(window_days=window_days)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to calculate predictions: {str(e)}")
-
 
 import logging
 logger = logging.getLogger(__name__)
