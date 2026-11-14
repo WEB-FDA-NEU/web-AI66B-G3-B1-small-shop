@@ -164,8 +164,10 @@ if (authenticatedUser.role === "Employee") {
     loadEmployeeDashboard();
 }
 
+let employeeRevenueChartInstance = null;
+let employeeOrdersChartInstance = null;
+
 function renderEmployeeCharts(monthlySales) {
-    const svgNamespace = "http://www.w3.org/2000/svg";
     const monthTotals = new Map(
         monthlySales.map(item => [
             String(item.month || "").slice(0, 7),
@@ -187,120 +189,84 @@ function renderEmployeeCharts(monthlySales) {
         };
     });
 
-    document.getElementById("employeeCurrentMonthRevenue").textContent =
-        formatDashboardCurrency(months[5].revenue);
-    document.getElementById("employeePreviousMonthRevenue").textContent =
-        formatDashboardCurrency(months[4].revenue);
-
-    const makeSvgElement = (name, attributes, text) => {
-        const element = document.createElementNS(svgNamespace, name);
-        Object.entries(attributes).forEach(([key, value]) => {
-            element.setAttribute(key, String(value));
-        });
-        if (text !== undefined) element.textContent = text;
-        return element;
-    };
-    const renderGrid = (svg, maxValue, formatAxis) => {
-        const left = 64;
-        const right = 620;
-        const top = 20;
-        const bottom = 220;
-        const plotHeight = bottom - top;
-        for (let index = 0; index <= 4; index += 1) {
-            const ratio = index / 4;
-            const y = bottom - ratio * plotHeight;
-            svg.append(
-                makeSvgElement("line", {
-                    x1: left,
-                    x2: right,
-                    y1: y,
-                    y2: y,
-                    class: "employee-dashboard-chart-grid",
-                }),
-                makeSvgElement("text", {
-                    x: left - 8,
-                    y: y + 4,
-                    "text-anchor": "end",
-                    class: "employee-dashboard-chart-axis",
-                }, formatAxis(maxValue * ratio))
-            );
+    if (employeeRevenueChartInstance) employeeRevenueChartInstance.destroy();
+    employeeRevenueChartInstance = new Chart(
+        document.getElementById("employeeRevenueChart"),
+        {
+            type: "line",
+            data: {
+                labels: months.map(month => month.label),
+                datasets: [{
+                    label: "Sales (₫)",
+                    data: months.map(month => month.revenue),
+                    borderColor: "#800000",
+                    backgroundColor: "rgba(128, 0, 0, 0.08)",
+                    borderWidth: 2.5,
+                    pointBackgroundColor: "#800000",
+                    pointRadius: 4,
+                    fill: true,
+                    tension: 0.35,
+                }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: context =>
+                                ` ${Number(context.parsed.y).toLocaleString("vi-VN")} ₫`,
+                        },
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: "#e5ddd3" },
+                    },
+                    x: { grid: { display: false } },
+                },
+            },
         }
-        return { left, right, top, bottom, plotHeight };
-    };
-    const drawMonthLabels = (svg, geometry) => {
-        const slotWidth = (geometry.right - geometry.left) / months.length;
-        months.forEach((month, index) => {
-            svg.appendChild(makeSvgElement("text", {
-                x: geometry.left + slotWidth * (index + 0.5),
-                y: geometry.bottom + 27,
-                "text-anchor": "middle",
-                class: "employee-dashboard-chart-axis",
-            }, month.label));
-        });
-    };
-
-    const revenueSvg = document.getElementById("employeeRevenueChart");
-    const maxRevenue = Math.max(...months.map(month => month.revenue), 0);
-    revenueSvg.replaceChildren();
-    const revenueGeometry = renderGrid(revenueSvg, maxRevenue || 1, value =>
-        value >= 1_000_000
-            ? `${(value / 1_000_000).toFixed(value % 1_000_000 ? 1 : 0)}M`
-            : Math.round(value).toLocaleString("vi-VN")
     );
-    const revenueSlotWidth = (revenueGeometry.right - revenueGeometry.left) / months.length;
-    months.forEach((month, index) => {
-        const barHeight = maxRevenue ? month.revenue / maxRevenue * revenueGeometry.plotHeight : 0;
-        revenueSvg.appendChild(makeSvgElement("rect", {
-            x: revenueGeometry.left + revenueSlotWidth * (index + 0.25),
-            y: revenueGeometry.bottom - barHeight,
-            width: revenueSlotWidth * 0.5,
-            height: barHeight,
-            rx: 5,
-            class: `employee-dashboard-chart-bar${index === 5 ? " current" : ""}`,
-        }));
-    });
-    drawMonthLabels(revenueSvg, revenueGeometry);
-    if (!maxRevenue) {
-        revenueSvg.appendChild(makeSvgElement("text", {
-            x: (revenueGeometry.left + revenueGeometry.right) / 2,
-            y: (revenueGeometry.top + revenueGeometry.bottom) / 2,
-            class: "employee-dashboard-chart-empty",
-        }, "No revenue recorded in this period"));
-    }
 
-    const ordersSvg = document.getElementById("employeeOrdersChart");
-    const maxOrders = Math.max(...months.map(month => month.orderCount), 0);
-    ordersSvg.replaceChildren();
-    const ordersGeometry = renderGrid(ordersSvg, maxOrders || 1, value =>
-        Math.round(value).toLocaleString("vi-VN")
+    if (employeeOrdersChartInstance) employeeOrdersChartInstance.destroy();
+    employeeOrdersChartInstance = new Chart(
+        document.getElementById("employeeOrdersChart"),
+        {
+            type: "bar",
+            data: {
+                labels: months.map(month => month.label),
+                datasets: [{
+                    label: "Orders Served",
+                    data: months.map(month => month.orderCount),
+                    backgroundColor: "#0F414A",
+                    borderRadius: 6,
+                    maxBarThickness: 42,
+                }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: context => ` ${context.parsed.y} orders served`,
+                        },
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: "#e5ddd3" },
+                    },
+                    x: { grid: { display: false } },
+                },
+            },
+        }
     );
-    const ordersSlotWidth = (ordersGeometry.right - ordersGeometry.left) / months.length;
-    const points = months.map((month, index) => ({
-        x: ordersGeometry.left + ordersSlotWidth * (index + 0.5),
-        y: ordersGeometry.bottom - (
-            maxOrders ? month.orderCount / maxOrders * ordersGeometry.plotHeight : 0
-        ),
-    }));
-    ordersSvg.appendChild(makeSvgElement("polyline", {
-        points: points.map(point => `${point.x},${point.y}`).join(" "),
-        class: "employee-dashboard-chart-line",
-    }));
-    points.forEach(point => {
-        ordersSvg.appendChild(makeSvgElement("circle", {
-            cx: point.x,
-            cy: point.y,
-            r: 5,
-            class: "employee-dashboard-chart-point",
-        }));
-    });
-    drawMonthLabels(ordersSvg, ordersGeometry);
-    if (!maxOrders) {
-        ordersSvg.appendChild(makeSvgElement("text", {
-            x: (ordersGeometry.left + ordersGeometry.right) / 2,
-            y: (ordersGeometry.top + ordersGeometry.bottom) / 2,
-            class: "employee-dashboard-chart-empty",
-        }, "No orders recorded in this period"));
-    }
 }
 
 function formatDashboardCurrency(value) {

@@ -61,6 +61,28 @@ const productImages = {
 };
 
 // HELPER FUNCTS AND THINGS
+// Auto hide sidebar on tablet and mobile - New Order only
+(() => {
+    const sidebar = document.getElementById("sidebar");
+    const menuBtn = document.getElementById("menuBtn");
+    const main = document.querySelector(".main-content");
+    if (!sidebar || !menuBtn || !main || !window.matchMedia) return;
+    const breakpoint = window.matchMedia("(max-width: 64rem)");
+    const syncSidebar = () => {
+        const isMobile = breakpoint.matches;
+
+        sidebar.classList.toggle("hidden", isMobile);
+        main.classList.toggle("expand", isMobile);
+        menuBtn.classList.toggle("update", isMobile);
+    };
+    syncSidebar();
+    if (breakpoint.addEventListener) {
+        breakpoint.addEventListener("change", syncSidebar);
+    } else {
+        breakpoint.addListener(syncSidebar);
+    }
+})();
+
 function formatCurrency(amount) {
     return amount.toLocaleString("vi-VN") + "VND";
 }
@@ -83,13 +105,12 @@ function getStatusClass(status) {
     return "";
 }
 
-function showToast(message) {
+function showToast(message, isError = false) {
     const toast = document.getElementById("toastNotification");
     if (!toast) return;
-
     toast.textContent = message;
+    toast.classList.toggle("error", isError);
     toast.classList.add("show");
-
     setTimeout(() => {
         toast.classList.remove("show");
     }, 3000);
@@ -120,8 +141,9 @@ async function loadDishes() {
     } catch (error) {
         console.error("Load products failed:", error);
         dishGrid.innerHTML = `
-            <div class="no-dishes">
-                Unable to load products. Please try again.
+            <div class="loading-state">
+                <span class="loading-spinner"></span>
+                <span>Loading menu...</span>
             </div>
         `;
     }
@@ -278,7 +300,7 @@ async function loadRockCustomerTypeId() {
         console.log("Rock customer type ID:", rockCustomerTypeId);
     } catch (error) {
         console.error("Error loading customer types:", error);
-        showToast("Unable to load membership types. Please try again.");
+        showToast("Unable to load membership types. Please try again.", true);
     }
 }
 
@@ -287,7 +309,7 @@ function validateNewCustomer() {
     const phone = orderNewCustomerPhone.value.trim();
     //validate empty name
     if (!name) {
-        showToast("Please enter customer name.");
+        showToast("Please enter customer name.", true);
         orderNewCustomerName.focus();
         return false;
     }
@@ -328,7 +350,7 @@ orderNewCustomerForm.addEventListener("submit", async (event) => {
         return;
     }
     if (!rockCustomerTypeId) {
-        showToast("Rock membership type is not available. Please refresh the page.");
+        showToast("Rock membership type is not available. Please refresh the page.", true);
         return;
     }
     const customerData = {
@@ -375,7 +397,7 @@ orderNewCustomerForm.addEventListener("submit", async (event) => {
         showToast("Customer created and selected successfully!");
     } catch (error) {
         console.error("Error creating customer:", error);
-        showToast(error.message);
+        showToast(error.message, true);
     } finally {
         saveOrderNewCustomerBtn.disabled = false;
         saveOrderNewCustomerBtn.textContent = "Save Information";
@@ -567,7 +589,7 @@ async function saveNewOrder(isGuest = false) {
         }
 
         if (!selectedCustomerId) {
-            showToast("Please select a customer from the suggestion list.");
+            showToast("Please select a customer from the suggestion list.", true);
             customerPhoneInput.focus();
             return;
         }
@@ -606,7 +628,8 @@ async function saveNewOrder(isGuest = false) {
             showToast(
                 result?.detail
                     ? JSON.stringify(result.detail)
-                    : "Unable to create order. Please try again."
+                    : "Unable to create order. Please try again.",
+                true
             );
             return;
         }
@@ -621,7 +644,7 @@ async function saveNewOrder(isGuest = false) {
 
     } catch (error) {
         console.error("Create order request failed:", error);
-        showToast("Cannot connect to the server. Please try again.");
+        showToast("Cannot connect to the server. Please try again.", true);
     } finally {
         isCreatingOrder = false;
         confirmOrderBtn.disabled = false;

@@ -1,3 +1,8 @@
+.btn-add[hidden],
+table.inventory-table th[hidden] {
+    display: none !important;
+}
+
 table.inventory-table {
     width: 100%;
     border-collapse: collapse;
