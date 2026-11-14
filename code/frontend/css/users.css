@@ -1,0 +1,200 @@
+.users-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.users-table-region {
+    max-width: 100%;
+}
+
+.users-table {
+    width: 100%;
+    min-width: 930px;
+    table-layout: fixed;
+    border-collapse: collapse;
+    text-align: left;
+    background: var(--card-bg);
+}
+
+.users-table th {
+    padding: 14px 12px;
+    background: #F2EAE0;
+    border-bottom: 2px solid var(--border-color);
+    color: var(--text-dark);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.users-table td {
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-dark);
+    font-size: 0.88rem;
+    vertical-align: middle;
+}
+
+.users-table tbody tr:hover {
+    background: var(--hover-beige);
+}
+
+.users-table th:nth-child(1),
+.users-table td:nth-child(1) {
+    width: 100px;
+}
+
+.users-table th:nth-child(2),
+.users-table td:nth-child(2) {
+    width: 28%;
+}
+
+.users-table th:nth-child(3),
+.users-table td:nth-child(3) {
+    width: 20%;
+}
+
+.users-table th:nth-child(4),
+.users-table td:nth-child(4) {
+    width: 20%;
+}
+
+.users-table th:nth-child(5),
+.users-table td:nth-child(5) {
+    width: 14%;
+}
+
+.users-table th:nth-child(6),
+.users-table td:nth-child(6) {
+    width: 250px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.user-role-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 14px;
+    background: #e8edf0;
+    color: var(--text-dark);
+    font-size: 0.78rem;
+}
+
+.user-role-badge.manager,
+.user-role-badge.admin {
+    background: #f7e6bd;
+}
+
+.user-actions {
+    display: inline-flex;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.user-actions button {
+    min-height: 34px;
+    padding: 6px 9px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-dark);
+    cursor: pointer;
+    font: inherit;
+}
+
+.user-actions button:hover,
+.user-actions button:focus-visible {
+    background: var(--hover-beige);
+}
+
+.user-actions .user-delete:hover {
+    color: #a11b1b;
+}
+
+.users-password-note {
+    margin: 18px 0 0;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.reset-request-badge {
+    display: inline-flex;
+    min-width: 20px;
+    height: 20px;
+    margin-left: 8px;
+    padding: 0 6px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #7F0303;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.reset-status {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.reset-status.pending {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    background: #f7e6bd;
+    color: #6a4700;
+    font-weight: 600;
+}
+
+.reset-requests-panel {
+    margin-bottom: 20px;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-bg);
+}
+
+.reset-requests-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.reset-requests-heading h3 {
+    color: var(--text-dark);
+    font-size: 1rem;
+}
+
+.reset-requests-heading span {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.approve-reset-button {
+    padding: 7px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: #f7e6bd;
+    color: var(--text-dark);
+    cursor: pointer;
+    font: inherit;
+}
+
+.approve-reset-button:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
+.users-table-region:focus-visible {
+    outline: 2px solid var(--bg-sidebar);
+    outline-offset: 3px;
+}
+
+@media (max-width: 650px) {
+    .users-summary {
+        grid-template-columns: 1fr;
+    }
+}

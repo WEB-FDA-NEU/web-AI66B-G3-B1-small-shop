@@ -1,7 +1,6 @@
 DROP DATABASE IF EXISTS mini_shop;
 CREATE DATABASE IF NOT EXISTS mini_shop;
 USE mini_shop;
-
 -- ==========================================
 -- 1. TẠO CÁC BẢNG (TABLES)
 -- ==========================================
@@ -12,7 +11,15 @@ CREATE TABLE `users` (
   `password` varchar(255) NOT NULL, 
   `role` varchar(30) NULL DEFAULT "Employee", -- Admin, Manager, Employee
   `is_active` boolean NOT NULL DEFAULT TRUE,
+  `must_change_password` boolean NOT NULL DEFAULT FALSE,
   `created_at` datetime NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE `password_reset_requests` (
+  `user_id` int PRIMARY KEY,
+  `requested_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT `fk_password_reset_requests_user`
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
 );
 
 CREATE TABLE `employees` (
@@ -83,7 +90,9 @@ CREATE TABLE `order_items` (
 );
 
 -- RÀNG BUỘC KHÓA NGOẠI (FOREIGN KEYS)
-ALTER TABLE `employees` ADD FOREIGN KEY (`username`) REFERENCES `users` (`username`);
+ALTER TABLE `employees`
+  ADD FOREIGN KEY (`username`) REFERENCES `users` (`username`)
+  ON UPDATE CASCADE ON DELETE SET NULL;
 ALTER TABLE `orders` ADD FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`);
 ALTER TABLE `orders` ADD FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`);
 ALTER TABLE `inventory` ADD FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`);
@@ -96,4 +105,3 @@ ALTER TABLE `products` ADD FOREIGN KEY (`category_id`) REFERENCES `categories` (
 -- REFERENCES customers(customer_id) ON DELETE SET NULL;
 -- ALTER TABLE orders ADD CONSTRAINT fk_orders_employee FOREIGN KEY (employee_id) 
 -- REFERENCES employees(employee_id) ON DELETE SET NULL;
-
