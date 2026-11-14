@@ -116,6 +116,13 @@ html, body {
     font-weight: 500;
 }
 
+.kpi-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--color-warm-beige);
+    box-shadow: 0 8px 25px rgba(216, 186, 152, 0.45), 0 0 15px rgba(151, 192, 206, 0.3);
+    background-color: #FFFFFF;
+} 
+
 /* 5. Graphs Section (2 Graphs layout) */
 .charts-grid {
     display: grid;
