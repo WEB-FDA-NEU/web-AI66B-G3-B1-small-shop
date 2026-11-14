@@ -3,6 +3,18 @@ const main = document.querySelector(".main-content");
 const sidebar = document.querySelector(".sidebar");
 
 if (menu_btn && main && sidebar) {
+    const mobileViewport = window.matchMedia("(max-width: 900px)");
+    const syncSidebarWithViewport = isMobile => {
+        sidebar.classList.toggle("hidden", isMobile);
+        main.classList.toggle("expand", isMobile);
+        menu_btn.classList.toggle("update", isMobile);
+    };
+
+    syncSidebarWithViewport(mobileViewport.matches);
+    mobileViewport.addEventListener("change", event => {
+        syncSidebarWithViewport(event.matches);
+    });
+
     menu_btn.addEventListener("click", function() {
         main.classList.toggle("expand");
         sidebar.classList.toggle("hidden");
