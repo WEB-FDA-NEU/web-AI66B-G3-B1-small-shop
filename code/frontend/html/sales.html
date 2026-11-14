@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YUMS - Sales & Forecasting Dashboard</title>
     
-    <!-- Google Fonts -->
-   <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons -->
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../css/employee.css">
@@ -62,34 +63,15 @@
         </header>
 
         <div class="tab-navigation">
-            <button class="tab-btn active" id="btn-overview">Sales & Profit Overview</button>
+            <button class="tab-btn active" id="btn-overview">Sales Overview</button>
             <button class="tab-btn" id="btn-prediction">Demand Prediction & Restock</button>
         </div>
 
         <!-- TAB 1: OVERVIEW -->
         <section id="tab-overview" class="tab-content active">
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <span class="kpi-title">Total Sales</span>
-                    <span class="kpi-value" id="kpiSales">45,200,000 ₫</span>
-                    <span class="kpi-subtext">+12% from last period</span>
-                </div>
-                <div class="kpi-card">
-                    <span class="kpi-title">Net Profit</span>
-                    <span class="kpi-value" id="kpiProfit">18,400,000 ₫</span>
-                    <span class="kpi-subtext">40.7% profit margin</span>
-                </div>
-                <div class="kpi-card">
-                    <span class="kpi-title">Completed Orders</span>
-                    <span class="kpi-value" id="kpiOrders">1,240</span>
-                    <span class="kpi-subtext">100% paid</span>
-                </div>
-            </div>
-
+            <!-- Filter Bar (Đã chuyển lên trên KPI Cards) -->
             <section class="action-bar-inline">
                 <div class="filter-group-inline">
-                    
-                    <!-- Filter 1: Top Items -->
                     <div class="filter-item">
                         <label for="topNDropdown">Top Items:</label>
                         <select id="topNDropdown">
@@ -100,32 +82,80 @@
                         </select>
                     </div>
 
-                    <!-- Filter 2: Category Dropdown (Chỉ chọn, không nhập) -->
                     <div class="filter-item">
                         <label for="categoryInput">Category:</label>
                         <select id="categoryInput" class="form-control">
                             <option value="">All Categories</option>
-                            <!-- Các option danh mục sẽ được tự động nạp từ API -->
                         </select>
                     </div>
 
-                    <!-- Filter 3: Timeframe -->
                     <div class="filter-item">
                         <label for="timeframeFilter">Timeframe:</label>
                         <select id="timeframeFilter">
-                            <option value="daily">Today</option>
-                            <option value="weekly">This Week</option>
-                            <option value="monthly" selected>This Month</option>
+                            <option value="this_day">This Day</option>
+                            <option value="this_week">This Week</option>
+                            <option value="this_month" selected>This Month</option>
+                            <option value="all_time">All Time</option>
                         </select>
                     </div>
-
                 </div>
 
-                <!-- Nút Reset màu đỏ -->
                 <button class="btn-reset-red" id="btnResetFilter">
                     <i class="fa-solid fa-rotate-left"></i> Reset
                 </button>
             </section>
+
+            <!-- KPI Cards (Đã bỏ Net Profit, chỉ còn 2 cards) -->
+            <div class="kpi-grid two-cards">
+                <div class="kpi-card">
+                    <span class="kpi-title">Total Sales</span>
+                    <span class="kpi-value" id="kpiSales">--</span>
+                    <span class="kpi-subtext" id="kpiSalesTrend">&nbsp;</span>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-title">Completed Orders</span>
+                    <span class="kpi-value" id="kpiOrders">--</span>
+                    <span class="kpi-subtext" id="kpiOrdersNote">&nbsp;</span>
+                </div>
+            </div>
+
+            <!-- Dashboard Section (2 Graphs nằm cạnh nhau) -->
+            <div class="section-header">
+                <h2>Dashboard</h2>
+                <p id="dashboardSubtitle">Visual breakdown of shop sales trend and product unit performance</p>
+            </div>
+
+            <section class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Shop Sales Trend</div>
+                            <div class="chart-subtitle" id="lineChartSubtitle">Revenue over selected timeframe</div>
+                        </div>
+                    </div>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="salesLineChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Product Performance (Units Sold)</div>
+                            <div class="chart-subtitle">Quantity sold per product</div>
+                        </div>
+                    </div>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="unitsBarChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Summary Table Section -->
+            <div class="section-header">
+                <h2>Summary Table</h2>
+                <p id="summaryTableSubtitle">Top N products ranked by total revenue according to timeframe</p>
+            </div>
 
             <section class="table-wrapper">
                 <table class="employee-table">
@@ -138,7 +168,6 @@
                             <th>Units Sold</th>
                             <th>Unit Price</th>
                             <th>Total Revenue</th>
-                            <th>Profit Margin</th>
                         </tr>
                     </thead>
                     <tbody id="topSellingTableBody">
@@ -154,9 +183,9 @@
                     <div class="filter-item">
                         <label for="predictionWindowSelect">Forecasting Window:</label>
                         <select id="predictionWindowSelect">
-                            <option value="7">Next 7 Days (Short Term)</option>
-                            <option value="14">Next 14 Days</option>
-                            <option value="30" selected>Next 30 Days (Monthly Plan)</option>
+                            <option value="7">Next Day (Short Term)</option>
+                            <option value="14">Next Week</option>
+                            <option value="30" selected>Next Month (Long Term)</option>
                         </select>
                     </div>
                 </div>
@@ -180,9 +209,9 @@
             </section>
         </section>
     </main>
+
     <div class="toast" id="toastNotification">System Notification</div>
-    <script src="../js/session.js?v=1"></script>
     <script src="../js/sales_script.js"></script>
-    <script src="../js/home.js?v=3"></script>
+    <script src="../js/home.js"></script>
 </body>
 </html>
