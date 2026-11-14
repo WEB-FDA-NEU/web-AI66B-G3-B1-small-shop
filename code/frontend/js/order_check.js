@@ -222,8 +222,11 @@ function filterData() {
 async function loadOrders() {
     ordersTableBody.innerHTML = `
         <tr>
-            <td colspan="7" style="text-align: center; padding: 30px;">
-                Loading orders...
+            <td colspan="7">
+                <div class="loading-state">
+                    <span class="loading-spinner"></span>
+                    <span>Loading orders...</span>
+                </div>
             </td>
         </tr>
     `;
@@ -275,9 +278,6 @@ if (checkSidebar && checkMenuBtn) {
         "change",
         initializeCheckSidebar
     );
-    checkMenuBtn.addEventListener("click", () => {
-        checkSidebar.classList.toggle("hidden");
-    });
 }
 
 loadOrders();

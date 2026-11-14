@@ -58,13 +58,12 @@ function getStatusClass(status) {
     return "";
 }
 
-function showToast(message) {
+function showToast(message, isError = false) {
     const toast = document.getElementById("toastNotification");
     if (!toast) return;
-
     toast.textContent = message;
+    toast.classList.toggle("error", isError);
     toast.classList.add("show");
-
     setTimeout(() => {
         toast.classList.remove("show");
     }, 3000);
@@ -109,7 +108,7 @@ async function saveOrderNote(input, button, display, editArea) {
 
     } catch (error) {
         console.error("Failed to update order note:", error);
-        showToast(`Unable to update Note: ${error.message}`);
+        showToast(`Unable to update Note: ${error.message}`, true);
     } finally {
         button.disabled = false;
     }
@@ -316,33 +315,29 @@ async function loadOrderDetails() {
 
     orderItems.innerHTML = `
         <tr>
-            <td colspan="5" style="text-align: center; padding: 30px;">
-                Loading order details...
+            <td colspan="5">
+                <div class="loading-state">
+                    <span class="loading-spinner"></span>
+                    <span>Loading order details...</span>
+                </div>
             </td>
         </tr>
     `;
-
     try {
         const response = await fetch(
             `${API_BASE_URL}/orders/${encodeURIComponent(orderId)}`
         );
-
         if (response.status === 404) {
             showOrderNotFound();
             return;
         }
-
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
-
         const order = await response.json();
-
         renderOrder(order);
-
     } catch (error) {
         console.error("Failed to load order details:", error);
-
         orderItems.innerHTML = `
             <tr>
                 <td colspan="5" style="text-align: center; padding: 30px;">
@@ -396,7 +391,7 @@ async function confirmOrderDelivery() {
         await loadOrderDetails();
     } catch (error) {
         console.error("Failed to confirm delivery:", error);
-        showToast(`Unable to confirm delivery: ${error.message}`);
+        showToast(`Unable to confirm delivery: ${error.message}`, true);
     } finally {
         statusConfirmYes.disabled = false;
         statusConfirmYes.textContent = "Yes";
@@ -447,9 +442,6 @@ if (statusConfirmOverlay) {
     } else {
         viewBreakpoint.addListener(syncViewSidebar);
     }
-    viewMenuBtn.addEventListener("click", () => {
-        viewSidebar.classList.toggle("hidden");
-    });
 })();
 
 
