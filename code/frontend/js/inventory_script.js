@@ -98,7 +98,7 @@ function renderTable(data) {
       <td><span class="badge" style="background: #EAECEE; color: #2C3E50;">${displayCategory}</span></td>
       <td>${formatVND(item.unit_price)}</td>
       <td style="font-weight: 600;">${stockQty}</td>
-      <td>${item.import_date || '2026-11-01'}</td>
+      <td>${item.import_date || '—'}</td>
       <td><span class="badge ${badgeClass}">${statusText}</span></td>
       <td>
         <div class="action-buttons" style="justify-content: flex-end;">
