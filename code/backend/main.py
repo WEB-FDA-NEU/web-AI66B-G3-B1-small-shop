@@ -13,7 +13,15 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 
 # Employee schemas and services
 from schema.employee import EmployeeCreate, EmployeeUpdate, EmployeeResponse
-from services.employee import add_employee, update_employee, get_all_employees, delete_employee, get_employee_by_id, get_employee_details
+from services.employee import (
+    add_employee,
+    update_employee,
+    get_all_employees,
+    delete_employee,
+    get_employee_by_id,
+    get_employee_by_username,
+    get_employee_details,
+)
 
 # Authentication schemas and services
 from schema.auth import ForgotPasswordRequest, LoginRequest
@@ -111,12 +119,12 @@ cat_router = APIRouter(
 sales_router = APIRouter(
     prefix="/sales",
     tags=["Sales"],
-    dependencies=[Depends(require_completed_user)],
+    dependencies=[Depends(require_user_manager)],
 )
 sales_test_router = APIRouter(
     prefix="/sales",
     tags=["Sales Test Alias"],
-    dependencies=[Depends(require_completed_user)],
+    dependencies=[Depends(require_user_manager)],
 )
 
 # Employee endpoints
@@ -125,7 +133,7 @@ sales_test_router = APIRouter(
     response_model=List[EmployeeResponse],
     summary="Get all employees",
 )
-def get_all_employees_endpoint():
+def get_all_employees_endpoint(_manager: dict = Depends(require_user_manager)):
     """Returns a list of all registered employees."""
     try:
         return get_all_employees()
@@ -136,11 +144,44 @@ def get_all_employees_endpoint():
         )
 
 @emp_router.get(
+    "/me/dashboard",
+    summary="Get the signed-in employee's dashboard",
+)
+def get_employee_dashboard_endpoint(
+    user: dict = Depends(require_completed_user),
+):
+    if user["role"] != "Employee":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This dashboard is only available to employees.",
+        )
+
+    try:
+        employee = get_employee_by_username(user["username"])
+        if not employee:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Employee profile not found.",
+            )
+        return get_employee_details(employee["employee_id"])
+    except HTTPException:
+        raise
+    except Exception as error:
+        logger.exception("Employee dashboard request failed.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Employee dashboard is unavailable. Check the database connection.",
+        ) from error
+
+@emp_router.get(
     "/{employee_id}",
     response_model=EmployeeResponse,
     summary="Get employee by ID",
 )
-def get_employee_by_id_endpoint(employee_id: int):
+def get_employee_by_id_endpoint(
+    employee_id: int,
+    user: dict = Depends(require_completed_user),
+):
     """Retrieves a single employee record by ID."""
     employee = get_employee_by_id(employee_id)
     if not employee:
@@ -148,15 +189,35 @@ def get_employee_by_id_endpoint(employee_id: int):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Employee with ID {employee_id} not found.",
         )
+    if user["role"] not in {"Admin", "Manager"} and employee["username"] != user["username"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Employees can only view their own information.",
+        )
     return employee
 
 @emp_router.get(
     "/{employee_id}/details",
     summary="Get employee details and order history",
 )
-def get_employee_details_endpoint(employee_id: int):
+def get_employee_details_endpoint(
+    employee_id: int,
+    user: dict = Depends(require_completed_user),
+):
     """Returns an employee profile, sales statistics, and recent orders."""
     try:
+        if user["role"] not in {"Admin", "Manager"}:
+            employee = get_employee_by_id(employee_id)
+            if not employee:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Employee with ID {employee_id} not found.",
+                )
+            if employee["username"] != user["username"]:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Employees can only view their own information and KPIs.",
+                )
         return get_employee_details(employee_id)
     except HTTPException:
         raise
@@ -172,7 +233,10 @@ def get_employee_details_endpoint(employee_id: int):
     status_code=status.HTTP_201_CREATED,
     summary="Add a new employee",
 )
-def create_employee_endpoint(payload: EmployeeCreate):
+def create_employee_endpoint(
+    payload: EmployeeCreate,
+    _manager: dict = Depends(require_user_manager),
+):
     try:
         new_employee = add_employee(payload)
         return new_employee
@@ -190,7 +254,11 @@ def create_employee_endpoint(payload: EmployeeCreate):
     response_model=EmployeeResponse,
     summary="Update employee details",
 )
-def update_employee_endpoint(employee_id: int, payload: EmployeeUpdate):
+def update_employee_endpoint(
+    employee_id: int,
+    payload: EmployeeUpdate,
+    _manager: dict = Depends(require_user_manager),
+):
     updated_employee = update_employee(employee_id, payload)
     if not updated_employee:
         raise HTTPException(
@@ -200,7 +268,10 @@ def update_employee_endpoint(employee_id: int, payload: EmployeeUpdate):
     return updated_employee
 
 @emp_router.delete("/{employee_id}", status_code=status.HTTP_200_OK)
-def delete_employee_endpoint(employee_id: int):
+def delete_employee_endpoint(
+    employee_id: int,
+    _manager: dict = Depends(require_user_manager),
+):
     return delete_employee(employee_id=employee_id)
 
 # Authentication endpoints

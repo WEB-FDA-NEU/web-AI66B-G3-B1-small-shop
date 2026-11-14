@@ -37,6 +37,11 @@ if (["Admin", "Manager"].includes(authenticatedUser.role)) {
         sidebarMenu.append(usersItem);
     }
 }
+if (authenticatedUser.role === "Employee") {
+    document.querySelectorAll(
+        '.sidebar-menu a[href="employees.html"], .sidebar-menu a[href="sales.html"]'
+    ).forEach(link => link.closest("li")?.remove());
+}
 const initials = username
     .trim()
     .split(/\s+/)
@@ -153,6 +158,232 @@ if (profile) {
         sessionStorage.removeItem("authenticatedUser");
         window.location.href = "index.html";
     });
+}
+
+if (authenticatedUser.role === "Employee") {
+    loadEmployeeDashboard();
+}
+
+function renderEmployeeCharts(monthlySales) {
+    const svgNamespace = "http://www.w3.org/2000/svg";
+    const monthTotals = new Map(
+        monthlySales.map(item => [
+            String(item.month || "").slice(0, 7),
+            {
+                revenue: Number(item.revenue) || 0,
+                orderCount: Number(item.order_count) || 0,
+            },
+        ])
+    );
+    const currentMonth = new Date();
+    const firstMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 5, 1);
+    const months = Array.from({ length: 6 }, (_, index) => {
+        const date = new Date(firstMonth.getFullYear(), firstMonth.getMonth() + index, 1);
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        return {
+            key,
+            label: date.toLocaleDateString("en-US", { month: "short" }),
+            ...(monthTotals.get(key) || { revenue: 0, orderCount: 0 }),
+        };
+    });
+
+    document.getElementById("employeeCurrentMonthRevenue").textContent =
+        formatDashboardCurrency(months[5].revenue);
+    document.getElementById("employeePreviousMonthRevenue").textContent =
+        formatDashboardCurrency(months[4].revenue);
+
+    const makeSvgElement = (name, attributes, text) => {
+        const element = document.createElementNS(svgNamespace, name);
+        Object.entries(attributes).forEach(([key, value]) => {
+            element.setAttribute(key, String(value));
+        });
+        if (text !== undefined) element.textContent = text;
+        return element;
+    };
+    const renderGrid = (svg, maxValue, formatAxis) => {
+        const left = 64;
+        const right = 620;
+        const top = 20;
+        const bottom = 220;
+        const plotHeight = bottom - top;
+        for (let index = 0; index <= 4; index += 1) {
+            const ratio = index / 4;
+            const y = bottom - ratio * plotHeight;
+            svg.append(
+                makeSvgElement("line", {
+                    x1: left,
+                    x2: right,
+                    y1: y,
+                    y2: y,
+                    class: "employee-dashboard-chart-grid",
+                }),
+                makeSvgElement("text", {
+                    x: left - 8,
+                    y: y + 4,
+                    "text-anchor": "end",
+                    class: "employee-dashboard-chart-axis",
+                }, formatAxis(maxValue * ratio))
+            );
+        }
+        return { left, right, top, bottom, plotHeight };
+    };
+    const drawMonthLabels = (svg, geometry) => {
+        const slotWidth = (geometry.right - geometry.left) / months.length;
+        months.forEach((month, index) => {
+            svg.appendChild(makeSvgElement("text", {
+                x: geometry.left + slotWidth * (index + 0.5),
+                y: geometry.bottom + 27,
+                "text-anchor": "middle",
+                class: "employee-dashboard-chart-axis",
+            }, month.label));
+        });
+    };
+
+    const revenueSvg = document.getElementById("employeeRevenueChart");
+    const maxRevenue = Math.max(...months.map(month => month.revenue), 0);
+    revenueSvg.replaceChildren();
+    const revenueGeometry = renderGrid(revenueSvg, maxRevenue || 1, value =>
+        value >= 1_000_000
+            ? `${(value / 1_000_000).toFixed(value % 1_000_000 ? 1 : 0)}M`
+            : Math.round(value).toLocaleString("vi-VN")
+    );
+    const revenueSlotWidth = (revenueGeometry.right - revenueGeometry.left) / months.length;
+    months.forEach((month, index) => {
+        const barHeight = maxRevenue ? month.revenue / maxRevenue * revenueGeometry.plotHeight : 0;
+        revenueSvg.appendChild(makeSvgElement("rect", {
+            x: revenueGeometry.left + revenueSlotWidth * (index + 0.25),
+            y: revenueGeometry.bottom - barHeight,
+            width: revenueSlotWidth * 0.5,
+            height: barHeight,
+            rx: 5,
+            class: `employee-dashboard-chart-bar${index === 5 ? " current" : ""}`,
+        }));
+    });
+    drawMonthLabels(revenueSvg, revenueGeometry);
+    if (!maxRevenue) {
+        revenueSvg.appendChild(makeSvgElement("text", {
+            x: (revenueGeometry.left + revenueGeometry.right) / 2,
+            y: (revenueGeometry.top + revenueGeometry.bottom) / 2,
+            class: "employee-dashboard-chart-empty",
+        }, "No revenue recorded in this period"));
+    }
+
+    const ordersSvg = document.getElementById("employeeOrdersChart");
+    const maxOrders = Math.max(...months.map(month => month.orderCount), 0);
+    ordersSvg.replaceChildren();
+    const ordersGeometry = renderGrid(ordersSvg, maxOrders || 1, value =>
+        Math.round(value).toLocaleString("vi-VN")
+    );
+    const ordersSlotWidth = (ordersGeometry.right - ordersGeometry.left) / months.length;
+    const points = months.map((month, index) => ({
+        x: ordersGeometry.left + ordersSlotWidth * (index + 0.5),
+        y: ordersGeometry.bottom - (
+            maxOrders ? month.orderCount / maxOrders * ordersGeometry.plotHeight : 0
+        ),
+    }));
+    ordersSvg.appendChild(makeSvgElement("polyline", {
+        points: points.map(point => `${point.x},${point.y}`).join(" "),
+        class: "employee-dashboard-chart-line",
+    }));
+    points.forEach(point => {
+        ordersSvg.appendChild(makeSvgElement("circle", {
+            cx: point.x,
+            cy: point.y,
+            r: 5,
+            class: "employee-dashboard-chart-point",
+        }));
+    });
+    drawMonthLabels(ordersSvg, ordersGeometry);
+    if (!maxOrders) {
+        ordersSvg.appendChild(makeSvgElement("text", {
+            x: (ordersGeometry.left + ordersGeometry.right) / 2,
+            y: (ordersGeometry.top + ordersGeometry.bottom) / 2,
+            class: "employee-dashboard-chart-empty",
+        }, "No orders recorded in this period"));
+    }
+}
+
+function formatDashboardCurrency(value) {
+    return new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+        maximumFractionDigits: 0,
+    }).format(Number(value) || 0);
+}
+
+async function loadEmployeeDashboard() {
+    const dashboard = document.getElementById("employeeDashboard");
+    const message = document.getElementById("employeeDashboardMessage");
+    const content = document.getElementById("employeeDashboardContent");
+    const ordersBody = document.getElementById("employeeRecentOrdersBody");
+    if (!dashboard || !message || !content || !ordersBody) return;
+
+    dashboard.hidden = false;
+
+    const formatDate = value => {
+        const match = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
+        return match ? `${match[3]}/${match[2]}/${match[1]}` : "—";
+    };
+    const formatVND = value => new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+        maximumFractionDigits: 0,
+    }).format(Number(value) || 0);
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/employees/me/dashboard");
+        const result = await response.json().catch(() => null);
+        if (!response.ok) {
+            throw new Error(result?.detail || `Could not load your dashboard (${response.status}).`);
+        }
+
+        const employee = result.employee || {};
+        const stats = result.stats || {};
+
+        document.getElementById("employeeOrdersKpi").textContent =
+            Number(stats.total_orders) || 0;
+        document.getElementById("employeeSalesKpi").textContent =
+            formatVND(stats.total_sales);
+        document.getElementById("employeeDaysKpi").textContent =
+            Number(employee.days_worked) || 0;
+        renderEmployeeCharts(Array.isArray(result.monthly_sales) ? result.monthly_sales : []);
+
+        const orders = Array.isArray(result.recent_orders) ? result.recent_orders : [];
+        ordersBody.replaceChildren();
+        if (!orders.length) {
+            const row = ordersBody.insertRow();
+            const cell = row.insertCell();
+            cell.colSpan = 6;
+            cell.className = "employee-dashboard-empty";
+            cell.textContent = "You have not served any orders yet.";
+        } else {
+            orders.forEach(order => {
+                const row = ordersBody.insertRow();
+                const values = [
+                    `ORD-${String(order.order_id).padStart(3, "0")}`,
+                    formatDate(order.created_at),
+                    order.customer_name || "Walk-in",
+                    order.items || "—",
+                    formatVND(order.total_amount),
+                ];
+                values.forEach(value => {
+                    row.insertCell().textContent = value;
+                });
+                const statusCell = row.insertCell();
+                const statusBadge = document.createElement("span");
+                const delivered = order.deliver_status === "delivered";
+                statusBadge.className = `employee-dashboard-order-status ${delivered ? "delivered" : "pending"}`;
+                statusBadge.textContent = delivered ? "Delivered" : "In progress";
+                statusCell.append(statusBadge);
+            });
+        }
+
+        content.hidden = false;
+        message.hidden = true;
+    } catch (error) {
+        message.textContent = error.message || "Unable to load your dashboard.";
+        message.setAttribute("role", "alert");
+    }
 }
 
 if (["Admin", "Manager"].includes(authenticatedUser.role)) {

@@ -153,6 +153,25 @@ def get_employee_by_id(employee_id: int) -> Optional[Dict[str, Any]]:
     finally:
         connection.close()
 
+def get_employee_by_username(username: str) -> Optional[Dict[str, Any]]:
+    """Fetch the employee record linked to an authenticated username."""
+    connection = get_connection()
+    if not connection:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Database connection failed."
+        )
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM employees WHERE BINARY username = BINARY %s LIMIT 1;",
+                (username,),
+            )
+            return cursor.fetchone()
+    finally:
+        connection.close()
+
 
 def get_employee_details(employee_id: int) -> Dict[str, Any]:
     """Fetch an employee profile, order totals, and recent orders."""
@@ -187,6 +206,21 @@ def get_employee_details(employee_id: int) -> Dict[str, Any]:
             stats = cursor.fetchone()
 
             cursor.execute("""
+                SELECT DATE_FORMAT(o.created_at, '%%Y-%%m') AS month,
+                       COUNT(*) AS order_count,
+                       COALESCE(SUM(o.total_amount), 0) AS revenue
+                FROM orders o
+                WHERE o.employee_id = %s
+                  AND o.created_at >= DATE_FORMAT(
+                      DATE_SUB(CURRENT_DATE, INTERVAL 5 MONTH),
+                      '%%Y-%%m-01'
+                  )
+                GROUP BY DATE_FORMAT(o.created_at, '%%Y-%%m')
+                ORDER BY month
+            """, (employee_id,))
+            monthly_sales = cursor.fetchall()
+
+            cursor.execute("""
                 SELECT o.order_id, o.created_at, o.deliver_status,
                        o.total_amount, c.name AS customer_name,
                        COALESCE(
@@ -211,6 +245,7 @@ def get_employee_details(employee_id: int) -> Dict[str, Any]:
             return {
                 "employee": employee,
                 "stats": stats,
+                "monthly_sales": monthly_sales,
                 "recent_orders": recent_orders
             }
     finally:
