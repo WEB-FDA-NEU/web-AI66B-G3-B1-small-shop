@@ -1,8 +1,7 @@
 from typing import Optional, List
-from datetime import date
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict
 
-# Schema phản hồi chi tiết mặt hàng bán chạy (Tab 1: Sales & Profit Overview)
+# Schema phản hồi chi tiết mặt hàng bán chạy (Tab 1: Sales Overview)
 class SalesItemOverview(BaseModel):
     rank: Optional[int] = 1
     id: Optional[str] = "P-001"
@@ -11,15 +10,29 @@ class SalesItemOverview(BaseModel):
     units_sold_adjusted: Optional[int] = 0
     price: Optional[float] = 0.0
     revenue_adjusted: Optional[float] = 0.0
-    profit_margin: Optional[float] = 40.0
 
     model_config = ConfigDict(from_attributes=True)
 
-# Schema phản hồi các thẻ KPI tổng quan
+# Schema dữ liệu cho Line Graph hiển thị xu hướng
+class SalesTimelineData(BaseModel):
+    labels: List[str] = []
+    values: List[float] = []
+
+    model_config = ConfigDict(from_attributes=True)
+
+# Schema phản hồi các thẻ KPI tổng quan (Đã bỏ net_profit)
 class SalesKPIResponse(BaseModel):
     total_sales: float = 0.0
-    net_profit: float = 0.0
     completed_orders: int = 0
+    trend: str = "+12% from last period"
+
+    model_config = ConfigDict(from_attributes=True)
+
+# Schema tổng hợp trả về toàn bộ Dashboard Overview (Kpis + Timeline + Products List)
+class SalesOverviewDashboardResponse(BaseModel):
+    kpis: SalesKPIResponse
+    timeline: SalesTimelineData
+    products: List[SalesItemOverview]
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -27,7 +40,7 @@ class SalesKPIResponse(BaseModel):
 class SalesFilterQuery(BaseModel):
     top_n: Optional[str] = "5"  # "3", "5", "10", "ALL"
     category: Optional[str] = None  
-    timeframe: Optional[str] = "monthly"  
+    timeframe: Optional[str] = "this_month"  # "this_day", "this_week", "this_month", "all_time"
 
 # Schema phản hồi Dự báo Nhu cầu & Gợi ý Nhập kho (Tab 2: Demand Prediction & Restock)
 class DemandPredictionResponse(BaseModel):
