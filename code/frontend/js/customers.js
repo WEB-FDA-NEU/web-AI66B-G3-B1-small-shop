@@ -2,6 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = 'http://127.0.0.1:8000';
     let customers = [];
     let customerTypes = [];
+    const authenticatedUser = JSON.parse(sessionStorage.getItem('authenticatedUser') || '{}');
+    const isEmployee = authenticatedUser.role === 'Employee';
 
     const tableBody = document.getElementById('customersTableBody');
     const searchInput = document.getElementById('searchInput');
@@ -116,15 +118,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td style="text-align: center;">${formatDate(customer.created_at)}</td>
                 <td style="text-align: center;">
                     <div class="action-buttons">
-                        <button class="btn-icon btn-edit" data-id="${customer.customer_id}" title="Edit">
-                            <i class="fa-solid fa-pen-to-square"></i>
-                        </button>
+                        ${isEmployee ? '' : `
+                            <button class="btn-icon btn-edit" data-id="${customer.customer_id}" title="Edit">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>`}
                         <a class="btn-icon" href="customers_detail.html?id=${encodeURIComponent(customer.customer_id)}" title="View customer details" aria-label="View details for ${customerLabel(customer.customer_id)}">
                             <i class="fa-solid fa-eye" aria-hidden="true"></i>
                         </a>
-                        <button class="btn-icon btn-delete delete" data-id="${customer.customer_id}" title="Delete">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
+                        ${isEmployee ? '' : `
+                            <button class="btn-icon btn-delete delete" data-id="${customer.customer_id}" title="Delete">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>`}
                     </div>
                 </td>`;
             tableBody.appendChild(row);
