@@ -329,7 +329,7 @@ def create_user_endpoint(
     payload: UserCreate,
     _manager: dict = Depends(require_user_manager),
 ):
-    return create_user(payload)
+    return create_user(payload, _manager)
 
 @users_router.put("/{user_id}", response_model=UserResponse)
 def update_user_endpoint(

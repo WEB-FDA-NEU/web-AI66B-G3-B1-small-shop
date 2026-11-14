@@ -21,7 +21,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const passwordNote = document.getElementById("defaultPasswordNote");
     const saveButton = document.getElementById("saveUserBtn");
     const toast = document.getElementById("toastNotification");
+    const menuButton = document.querySelector(".menu-btn");
+    const sidebar = document.querySelector(".sidebar");
+    const mainContent = document.querySelector(".main-content");
     let users = [];
+
+    if (window.matchMedia("(max-width: 900px)").matches) {
+        sidebar.classList.add("hidden");
+        mainContent.classList.add("expand");
+        menuButton.classList.add("update");
+    }
 
     function escapeHTML(value) {
         return String(value ?? "").replace(/[&<>"']/g, character => ({
@@ -106,23 +115,23 @@ document.addEventListener("DOMContentLoaded", () => {
             const roleClass = user.role.toLowerCase().replace(/[^a-z0-9_-]/g, "");
             return `
                 <tr>
-                    <td>USR-${String(user.user_id).padStart(3, "0")}</td>
-                    <td>${escapeHTML(user.username)}</td>
-                    <td><span class="user-role-badge ${roleClass}">${escapeHTML(user.role)}</span></td>
-                    <td>${formatDate(user.created_at)}</td>
-                    <td>${user.reset_requested
+                    <td class="user-id" data-label="User ID">USR-${String(user.user_id).padStart(3, "0")}</td>
+                    <td data-label="Username">${escapeHTML(user.username)}</td>
+                    <td data-label="Role"><span class="user-role-badge ${roleClass}">${escapeHTML(user.role)}</span></td>
+                    <td data-label="Created At">${formatDate(user.created_at)}</td>
+                    <td data-label="Reset Request">${user.reset_requested
                         ? '<span class="reset-status pending">Requested</span>'
                         : '<span class="reset-status">—</span>'}</td>
-                    <td>
+                    <td data-label="Actions">
                         <div class="user-actions">
-                            <button type="button" data-action="edit" data-id="${user.user_id}" aria-label="Edit ${escapeHTML(user.username)}">
-                                <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Edit
-                            </button>
-                            <button type="button" data-action="reset" data-id="${user.user_id}" aria-label="Reset password for ${escapeHTML(user.username)}">
+                            <button type="button" class="user-action-reset" data-action="reset" data-id="${user.user_id}" aria-label="Reset password for ${escapeHTML(user.username)}" title="Reset password">
                                 <i class="fa-solid fa-key" aria-hidden="true"></i> Reset
                             </button>
-                            <button type="button" class="user-delete" data-action="delete" data-id="${user.user_id}" aria-label="Delete ${escapeHTML(user.username)}">
-                                <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                            <button type="button" class="btn-icon" data-action="edit" data-id="${user.user_id}" aria-label="Edit ${escapeHTML(user.username)}" title="Edit user">
+                                <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                            </button>
+                            <button type="button" class="btn-icon delete user-delete" data-action="delete" data-id="${user.user_id}" aria-label="Delete ${escapeHTML(user.username)}" title="Delete user">
+                                <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
                             </button>
                         </div>
                     </td>
@@ -160,10 +169,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             resetRequestsBody.innerHTML = requests.map(item => `
                 <tr>
-                    <td>${escapeHTML(item.username)}</td>
-                    <td>${escapeHTML(item.role)}</td>
-                    <td>${formatDate(item.requested_at)}</td>
-                    <td>
+                    <td data-label="Username">${escapeHTML(item.username)}</td>
+                    <td data-label="Role">${escapeHTML(item.role)}</td>
+                    <td data-label="Requested At">${formatDate(item.requested_at)}</td>
+                    <td data-label="Action">
                         <button type="button" class="approve-reset-button" data-action="approve-reset" data-id="${item.user_id}">
                             Reset to default
                         </button>
@@ -188,13 +197,8 @@ document.addEventListener("DOMContentLoaded", () => {
         roleSelect.innerHTML = `
             <option value="Employee">Employee</option>
             <option value="Manager">Manager</option>
+            <option value="Admin" ${session.role !== "Admin" && user?.role !== "Admin" ? "disabled" : ""}>Admin</option>
         `;
-        if (user?.role === "Admin") {
-            roleSelect.insertAdjacentHTML(
-                "beforeend",
-                '<option value="Admin">Admin</option>'
-            );
-        }
         roleSelect.value = user?.role || "Employee";
         userModal.classList.add("active");
         usernameInput.focus();

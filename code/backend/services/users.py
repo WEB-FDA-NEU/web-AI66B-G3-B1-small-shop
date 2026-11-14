@@ -60,7 +60,13 @@ def get_users() -> List[Dict[str, Any]]:
         connection.close()
 
 
-def create_user(data: UserCreate) -> Dict[str, Any]:
+def create_user(data: UserCreate, actor: Dict[str, Any]) -> Dict[str, Any]:
+    if data.role == "Admin" and actor["role"] != "Admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only an administrator can create an Admin account.",
+        )
+
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
@@ -93,10 +99,14 @@ def update_user(user_id: int, data: UserUpdate, actor: Dict[str, Any]) -> Dict[s
         connection.begin()
         with connection.cursor() as cursor:
             current_user = _get_user(cursor, user_id, for_update=True)
-            if data.role == "Admin" and current_user["role"] != "Admin":
+            if (
+                data.role == "Admin"
+                and current_user["role"] != "Admin"
+                and actor["role"] != "Admin"
+            ):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Only an existing administrator can retain the Admin role.",
+                    detail="Only an administrator can assign the Admin role.",
                 )
             if int(actor["user_id"]) == user_id and data.role not in PRIVILEGED_ROLES:
                 raise HTTPException(

@@ -19,7 +19,7 @@ class PasswordChange(BaseModel):
 
 class UserCreate(BaseModel):
     username: str = Field(..., min_length=1, max_length=50)
-    role: Literal["Employee", "Manager"]
+    role: Literal["Employee", "Manager", "Admin"]
 
     @field_validator("username")
     @classmethod
