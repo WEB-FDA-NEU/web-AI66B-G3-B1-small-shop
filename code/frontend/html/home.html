@@ -10,8 +10,10 @@
 
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="../css/employee.css">
     <link rel="stylesheet" href="../css/profile.css">
+    <link rel="stylesheet" href="../css/sales.css">
     <link rel="stylesheet" href="../css/home.css">
     
 </head>
@@ -90,45 +92,30 @@
                     </article>
                 </div>
 
-                <section class="employee-dashboard-charts" aria-label="Your performance charts">
-                    <article class="employee-dashboard-chart-card">
-                        <div class="employee-dashboard-chart-heading">
+                <section class="charts-grid" aria-label="Your performance charts">
+                    <article class="chart-card">
+                        <div class="chart-header">
                             <div>
-                                <h3>Revenue by Month</h3>
-                                <p>Monthly revenue over the last six months.</p>
-                            </div>
-                            <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
-                        </div>
-                        <div class="employee-dashboard-month-comparison">
-                            <div>
-                                <span>This month to date</span>
-                                <strong id="employeeCurrentMonthRevenue">0 ₫</strong>
-                            </div>
-                            <div>
-                                <span>Last month</span>
-                                <strong id="employeePreviousMonthRevenue">0 ₫</strong>
+                                <div class="chart-title">Revenue by Month</div>
+                                <div class="chart-subtitle">Monthly revenue over the last six months</div>
                             </div>
                         </div>
-                        <p class="employee-dashboard-chart-note">
-                            This month is month-to-date; last month shows the full month.
-                        </p>
-                        <div class="employee-dashboard-chart-wrap">
-                            <svg id="employeeRevenueChart" viewBox="0 0 640 280"
-                                 role="img" aria-label="Monthly revenue bar chart"></svg>
+                        <div class="chart-canvas-wrapper">
+                            <canvas id="employeeRevenueChart" role="img"
+                                    aria-label="Monthly revenue line chart"></canvas>
                         </div>
                     </article>
 
-                    <article class="employee-dashboard-chart-card">
-                        <div class="employee-dashboard-chart-heading">
+                    <article class="chart-card">
+                        <div class="chart-header">
                             <div>
-                                <h3>Orders Served</h3>
-                                <p>Monthly order count over the last six months.</p>
+                                <div class="chart-title">Orders Served</div>
+                                <div class="chart-subtitle">Monthly order count over the last six months</div>
                             </div>
-                            <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
                         </div>
-                        <div class="employee-dashboard-chart-wrap">
-                            <svg id="employeeOrdersChart" viewBox="0 0 640 280"
-                                 role="img" aria-label="Monthly orders line chart"></svg>
+                        <div class="chart-canvas-wrapper">
+                            <canvas id="employeeOrdersChart" role="img"
+                                    aria-label="Monthly orders bar chart"></canvas>
                         </div>
                     </article>
                 </section>
@@ -163,6 +150,6 @@
     </main>
 
     <script src="../js/session.js?v=1"></script>
-    <script src="../js/home.js?v=5"></script>
+    <script src="../js/home.js?v=6"></script>
 </body>
 </html>

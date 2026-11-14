@@ -9,9 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchInput');
     const roleFilter = document.getElementById('roleFilter');
     const sortToggle = document.getElementById('customerSortToggle');
-    const menuBtn = document.getElementById('menuBtn');
-    const sidebar = document.getElementById('sidebar');
-    const mainContent = document.getElementById('mainContent');
     const totalCustomersEl = document.getElementById('totalCustomers');
     const totalMembersEl = document.getElementById('totalMembers');
     const membersTierLabel = document.getElementById('membersTierLabel');
@@ -378,11 +375,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         filterCustomers();
     });
-    menuBtn?.addEventListener('click', () => {
-        sidebar?.classList.toggle('hidden');
-        mainContent?.classList.toggle('expand');
-    });
-
     (async () => {
         try {
             await loadCustomerTypes();
