@@ -199,10 +199,10 @@ body {
     min-width: 56rem;
     table-layout: fixed;
     border-collapse: collapse;
-    background-color: var(--color-background);
+    background-color: #FAF6F0;
     font-family: 'Montserrat', sans-serif;
     font-size: 0.9375rem;
-    color: var(--color-primary);
+    color: #2A2421;
 }
 
 .orders-table .col-order-id {width: 9%;}
@@ -216,7 +216,7 @@ body {
 .orders-table th,
 .orders-table td {
     padding: 0.6875rem 0.625rem;
-    border: 0.0625rem solid var(--color-border);
+    border: 0.0625rem solid #D2C7B8;
     text-align: left;
     vertical-align: middle;
     overflow-wrap: break-word;
@@ -228,23 +228,23 @@ body {
     position: sticky;
     top: 0;
     z-index: 2;
-    background-color: var(--color-border);
-    color: var(--color-primary);
+    background-color: #F2EAE0;
+    color: #2A2421;
     font-weight: 800;
     font-size: 0.9375rem;
-    border-bottom: 0.1875rem solid var(--color-border);
+    border-bottom: 0.1875rem solid #D2C7B8;
     white-space: nowrap;
 }
 
 
 /* table body */
 .orders-table tbody tr {
-    background-color: var(--color-background);
+    background-color: #FAF6F0;
     transition: background-color 0.2s ease;
 }
 
 .orders-table tbody tr:hover {
-    background-color: #E9DFD2;
+    background-color: #96C0CE;
 }
 
 .orders-table .order-id {
