@@ -33,7 +33,14 @@
 
 .employee-dashboard {
     display: grid;
+    width: 100%;
+    min-width: 0;
     gap: 24px;
+}
+
+#employeeDashboardContent {
+    width: 100%;
+    min-width: 0;
 }
 
 .employee-dashboard[hidden] {
@@ -65,6 +72,8 @@
 .employee-dashboard-kpis {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    min-width: 0;
     gap: 18px;
     margin-bottom: 18px;
 }
@@ -101,6 +110,34 @@
     color: var(--color-accent-red);
     font-size: 1.15rem;
     opacity: 0.7;
+}
+
+.employee-dashboard-card {
+    transition: box-shadow var(--transition-speed) ease,
+        border-color var(--transition-speed) ease,
+        background-color var(--transition-speed) ease;
+}
+
+.employee-dashboard .chart-card {
+    transition: all var(--transition-speed) ease;
+    min-width: 0;
+}
+
+.employee-dashboard .charts-grid {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.employee-dashboard-card:hover,
+.employee-dashboard .chart-card:hover {
+    border-color: var(--color-warm-beige);
+    box-shadow: 0 8px 25px rgba(216, 186, 152, 0.45), 0 0 15px rgba(151, 192, 206, 0.3);
+    background-color: #FFFFFF;
+}
+
+.employee-dashboard .chart-card:hover {
+    transform: translateY(-3px);
 }
 
 .employee-dashboard-section-heading h3 {
@@ -171,9 +208,15 @@
     text-align: center;
 }
 
+@media (max-width: 1024px) {
+    .employee-dashboard .charts-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
 @media (max-width: 650px) {
     .employee-dashboard-kpis {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 
 }
