@@ -1,8 +1,7 @@
-const API_URL = "http://127.0.0.1:8000/products";
+const API_URL = "http://127.0.0.1:8000/inventory";
 const CATEGORIES_URL = "http://127.0.0.1:8000/categories";
 
 let products = [];
-let categoriesList = [];
 let isEditMode = false;
 
 // DOM Elements
@@ -20,11 +19,11 @@ const closeModalBtn = document.getElementById('closeModalBtn');
 const cancelModalBtn = document.getElementById('cancelModalBtn');
 const toast = document.getElementById('toastNotification');
 
-// Form Input Elements
-const productIdInput = document.createElement('input');
-productIdInput.type = 'hidden';
-productIdInput.id = 'productId';
-if (productForm) productForm.appendChild(productIdInput);
+// Form Input Elements (Lưu trữ SKU)
+const skuInput = document.createElement('input');
+skuInput.type = 'hidden';
+skuInput.id = 'sku';
+if (productForm) productForm.appendChild(skuInput);
 
 const productNameInput = document.getElementById('productName');
 const categoryInput = document.getElementById('category');
@@ -46,50 +45,25 @@ function showToast(message) {
   }, 3000);
 }
 
-// Fetch categories from Database API
-async function loadCategories() {
-  try {
-    const response = await fetch(CATEGORIES_URL);
-    if (!response.ok) throw new Error("Failed to load categories.");
-    
-    categoriesList = await response.json();
-    
-    // 1. Populate Filter Select
-    if (categoryFilter) {
-      categoryFilter.innerHTML = '<option value="">All Categories</option>';
-      categoriesList.forEach(cat => {
-        const option = document.createElement('option');
-        option.value = cat.category_name;
-        option.textContent = cat.category_name;
-        categoryFilter.appendChild(option);
-      });
-    }
-
-    // 2. Populate Modal Category Select
-    if (categoryInput) {
-      categoryInput.innerHTML = '<option value="">-- Select Category --</option>';
-      categoriesList.forEach(cat => {
-        const option = document.createElement('option');
-        option.value = cat.category_id; // Lưu category_id để gửi xuống DB chính xác
-        option.textContent = cat.category_name;
-        categoryInput.appendChild(option);
-      });
-    }
-  } catch (error) {
-    console.error("Error loading categories:", error);
-  }
-}
-
-// Fetch products from API
+// Fetch inventory data from API
 async function fetchProducts() {
   try {
     const response = await fetch(API_URL);
-    if (!response.ok) throw new Error("Failed to load products from server.");
+    if (!response.ok) throw new Error("Failed to load inventory from server.");
     
     products = await response.json();
+    
+    // Sắp xếp danh sách theo product_id tăng dần
+    products.sort((a, b) => {
+      const idA = a.product_id || parseInt((a.sku || '').replace(/\D/g, '')) || 0;
+      const idB = b.product_id || parseInt((b.sku || '').replace(/\D/g, '')) || 0;
+      return idA - idB;
+    });
+
     filterData();
   } catch (error) {
-    showToast(error.message);
+    console.error("Server Error Details:", error.message); 
+    showToast("Something went wrong on the server. Please try again later.");
   }
 }
 
@@ -110,26 +84,28 @@ function renderTable(data) {
 
   data.forEach(item => {
     const tr = document.createElement('tr');
-    const idDisplay = `P-${String(item.product_id).padStart(3, '0')}`;
-    const isAvailable = item.is_available !== false;
-    const statusText = isAvailable ? "In Stock" : "Unavailable";
-    const badgeClass = isAvailable ? "badge-instock" : "badge-expired";
+    const skuCode = item.sku || `P-${String(item.product_id).padStart(3, '0')}`;
     const displayCategory = item.category_name || item.category || 'General';
+    const stockQty = item.stock_quantity !== undefined ? item.stock_quantity : (item.stock || 0);
+    
+    // Đảm bảo 3 trạng thái
+    const statusText = item.status || (stockQty > 5 ? "In Stock" : "Low Stock");
+    const badgeClass = item.badge_class || (stockQty > 5 ? "badge-instock" : "badge-expired");
     
     tr.innerHTML = `
-      <td class="item-sku">${idDisplay}</td>
-      <td style="font-weight: 600; color: var(--bg-sidebar);">${item.name}</td>
+      <td class="item-sku">${skuCode}</td>
+      <td style="font-weight: 600; color: var(--bg-sidebar);">${item.product_name || item.name}</td>
       <td><span class="badge" style="background: #EAECEE; color: #2C3E50;">${displayCategory}</span></td>
       <td>${formatVND(item.unit_price)}</td>
-      <td style="font-weight: 600;">${item.stock || 50}</td>
-      <td>2026-10-01</td>
+      <td style="font-weight: 600;">${stockQty}</td>
+      <td>${item.import_date || '2026-11-01'}</td>
       <td><span class="badge ${badgeClass}">${statusText}</span></td>
       <td>
         <div class="action-buttons" style="justify-content: flex-end;">
-          <button class="btn-icon" title="Edit Product" onclick="openEditProductModal(${item.product_id})">
+          <button class="btn-icon" title="Edit Product" onclick="openEditProductModal('${skuCode}')">
             <i class="fa-solid fa-pen-to-square"></i>
           </button>
-          <button class="btn-icon delete" title="Delete Product" onclick="deleteProduct(${item.product_id})">
+          <button class="btn-icon delete" title="Delete Product" onclick="deleteProduct('${skuCode}')">
             <i class="fa-solid fa-trash-can"></i>
           </button>
         </div>
@@ -143,14 +119,20 @@ function renderTable(data) {
 function filterData() {
   const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
   const selectedCategory = categoryFilter ? categoryFilter.value : '';
+  const selectedStatus = statusFilter ? statusFilter.value : '';
 
   const filtered = products.filter(item => {
-    const idFormatted = `p-${String(item.product_id).padStart(3, '0')}`;
-    const matchesSearch = (item.name && item.name.toLowerCase().includes(searchTerm)) || 
-                          idFormatted.includes(searchTerm);
+    const skuCode = (item.sku || `p-${String(item.product_id).padStart(3, '0')}`).toLowerCase();
+    const productName = (item.product_name || item.name || '').toLowerCase();
+    
+    const stockQty = item.stock_quantity !== undefined ? item.stock_quantity : (item.stock || 0);
+    const itemStatus = item.status || (stockQty > 5 ? "In Stock" : "Low Stock");
+    
+    const matchesSearch = productName.includes(searchTerm) || skuCode.includes(searchTerm);
     const matchesCategory = selectedCategory === "" || (item.category_name || item.category) === selectedCategory;
+    const matchesStatus = selectedStatus === "" || (itemStatus === selectedStatus);
 
-    return matchesSearch && matchesCategory;
+    return matchesSearch && matchesCategory && matchesStatus;
   });
 
   renderTable(filtered);
@@ -161,23 +143,23 @@ function openAddProductModal() {
   isEditMode = false;
   if (modalTitle) modalTitle.textContent = "Add New Product";
   if (productForm) productForm.reset();
-  if (productIdInput) productIdInput.value = '';
+  if (skuInput) skuInput.value = '';
   modal.classList.add('active');
 }
 
 // Open Modal in EDIT Mode
-window.openEditProductModal = function(id) {
-  const item = products.find(p => p.product_id === id);
+window.openEditProductModal = function(sku) {
+  const item = products.find(p => (p.sku || `P-${String(p.product_id).padStart(3, '0')}`) === sku);
   if (!item) return;
 
   isEditMode = true;
   if (modalTitle) modalTitle.textContent = "Edit Product";
 
-  if (productIdInput) productIdInput.value = item.product_id;
-  if (productNameInput) productNameInput.value = item.name;
+  if (skuInput) skuInput.value = sku;
+  if (productNameInput) productNameInput.value = item.product_name || item.name;
   if (categoryInput) categoryInput.value = item.category_id || '';
   if (priceInput) priceInput.value = item.unit_price;
-  if (stockInput) stockInput.value = item.stock || 50;
+  if (stockInput) stockInput.value = item.stock_quantity !== undefined ? item.stock_quantity : (item.stock || 0);
 
   modal.classList.add('active');
 };
@@ -193,17 +175,17 @@ async function handleFormSubmit(e) {
   e.preventDefault();
 
   const payload = {
-    name: productNameInput.value.trim(),
+    product_name: productNameInput.value.trim(),
     category_id: parseInt(categoryInput.value) || 1,
     unit_price: parseFloat(priceInput.value) || 0,
-    is_available: true
+    stock_quantity: parseInt(stockInput.value) || 0
   };
 
   try {
     let response;
     if (isEditMode) {
-      const id = productIdInput.value;
-      response = await fetch(`${API_URL}/${id}`, {
+      const sku = skuInput.value;
+      response = await fetch(`${API_URL}/${sku}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -225,16 +207,17 @@ async function handleFormSubmit(e) {
     closeModal();
     fetchProducts();
   } catch (error) {
-    showToast(error.message);
+    console.error("Server Error Details:", error.message); 
+    showToast("Something went wrong on the server. Please try again later.");
   }
 }
 
 // Delete Product Handler
-window.deleteProduct = async function(id) {
-  if (!confirm(`Are you sure you want to delete product ID ${id}?`)) return;
+window.deleteProduct = async function(sku) {
+  if (!confirm(`Are you sure you want to delete product SKU ${sku}?`)) return;
 
   try {
-    const response = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+    const response = await fetch(`${API_URL}/${sku}`, { method: "DELETE" });
     if (!response.ok) {
       const errData = await response.json();
       throw new Error(errData.detail || "Failed to delete product.");
@@ -242,14 +225,18 @@ window.deleteProduct = async function(id) {
     showToast("Deleted product successfully!");
     fetchProducts();
   } catch (error) {
-    showToast(error.message);
+    console.error("Server Error Details:", error.message); 
+    showToast("Something went wrong on the server. Please try again later.");
   }
 };
 
 // Event Listeners Setup
 document.addEventListener('DOMContentLoaded', () => {
+  fetchProducts();   
+  
   if (searchInput) searchInput.addEventListener('input', filterData);
   if (categoryFilter) categoryFilter.addEventListener('change', filterData);
+  if (statusFilter) statusFilter.addEventListener('change', filterData);
 
   if (openModalBtn) openModalBtn.addEventListener('click', openAddProductModal);
   if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
@@ -261,12 +248,4 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.target === modal) closeModal();
     });
   }
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  loadCategories(); // <--- Bắt buộc phải gọi hàm này để hiện đủ 6 categories trên giao diện
-  fetchProducts();   // <--- Gọi hàm lấy sản phẩm để thay thế chữ "General" bằng tên category thực tế
-  
-  if (searchInput) searchInput.addEventListener('input', filterData);
-  if (categoryFilter) categoryFilter.addEventListener('change', filterData);
 });
