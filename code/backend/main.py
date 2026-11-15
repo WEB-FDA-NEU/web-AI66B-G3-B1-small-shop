@@ -13,25 +13,14 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 
 # Employee schemas and services
 from schema.employee import EmployeeCreate, EmployeeUpdate, EmployeeResponse
-from services.employee import (
-    add_employee,
-    update_employee,
-    get_all_employees,
-    delete_employee,
-    get_employee_by_id,
-    get_employee_by_username,
-    get_employee_details,
-)
+from services.employee import add_employee, update_employee, get_all_employees, delete_employee, get_employee_by_id, get_employee_details
 
 # Authentication schemas and services
 from schema.auth import ForgotPasswordRequest, LoginRequest
 from schema.user import PasswordChange, UserCreate, UserResponse, UserUpdate
 from backend.services.auth import (
     authenticate_user,
-    change_password,
-    require_authenticated_user,
-    require_completed_user,
-    require_user_manager,
+    change_password
 )
 from backend.services.users import (
     approve_password_reset,
@@ -70,6 +59,14 @@ from config.api import settings
 
 app = FastAPI(title="YUMS")
 
+@app.on_event("startup")
+def check_mysql_network():
+    try:
+        with socket.create_connection(("100.115.168.64", 3306), timeout=5):
+            logging.info("MYSQL_TCP_CHECK: SUCCESS")
+    except Exception as e:
+        logging.error("MYSQL_TCP_CHECK: FAILED: %s", repr(e))
+
 # Configure CORS so browser fetch requests (POST, PUT, OPTIONS) are permitted
 app.add_middleware(
     CORSMiddleware,
@@ -83,48 +80,35 @@ app.add_middleware(
 emp_router = APIRouter(
     prefix="/employees",
     tags=["Employees"],
-    dependencies=[Depends(require_completed_user)],
 )
 auth_router = APIRouter(prefix="/auth", tags=["Authentication"])
 users_router = APIRouter(
     prefix="/users",
     tags=["Users"],
-    dependencies=[Depends(require_completed_user)],
 )
 cus_router = APIRouter(
     prefix="/customers",
     tags=["Customers"],
-    dependencies=[Depends(require_completed_user)],
 )
 ord_router = APIRouter(
     prefix="/orders",
     tags=["Orders"],
-    dependencies=[Depends(require_completed_user)],
 )
 prod_router = APIRouter(
     prefix="/products",
     tags=["Products"],
-    dependencies=[Depends(require_completed_user)],
 )
 inv_router = APIRouter(
     prefix="/inventory",
     tags=["Inventory"],
-    dependencies=[Depends(require_completed_user)],
 )
 cat_router = APIRouter(
     prefix="/categories",
     tags=["Categories"],
-    dependencies=[Depends(require_completed_user)],
 )
 sales_router = APIRouter(
     prefix="/sales",
     tags=["Sales"],
-    dependencies=[Depends(require_user_manager)],
-)
-sales_test_router = APIRouter(
-    prefix="/sales",
-    tags=["Sales Test Alias"],
-    dependencies=[Depends(require_user_manager)],
 )
 
 # Employee endpoints
@@ -133,7 +117,7 @@ sales_test_router = APIRouter(
     response_model=List[EmployeeResponse],
     summary="Get all employees",
 )
-def get_all_employees_endpoint(_manager: dict = Depends(require_user_manager)):
+def get_all_employees_endpoint():
     """Returns a list of all registered employees."""
     try:
         return get_all_employees()
@@ -144,44 +128,11 @@ def get_all_employees_endpoint(_manager: dict = Depends(require_user_manager)):
         )
 
 @emp_router.get(
-    "/me/dashboard",
-    summary="Get the signed-in employee's dashboard",
-)
-def get_employee_dashboard_endpoint(
-    user: dict = Depends(require_completed_user),
-):
-    if user["role"] != "Employee":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="This dashboard is only available to employees.",
-        )
-
-    try:
-        employee = get_employee_by_username(user["username"])
-        if not employee:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Employee profile not found.",
-            )
-        return get_employee_details(employee["employee_id"])
-    except HTTPException:
-        raise
-    except Exception as error:
-        logger.exception("Employee dashboard request failed.")
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Employee dashboard is unavailable. Check the database connection.",
-        ) from error
-
-@emp_router.get(
     "/{employee_id}",
     response_model=EmployeeResponse,
     summary="Get employee by ID",
 )
-def get_employee_by_id_endpoint(
-    employee_id: int,
-    user: dict = Depends(require_completed_user),
-):
+def get_employee_by_id_endpoint(employee_id: int):
     """Retrieves a single employee record by ID."""
     employee = get_employee_by_id(employee_id)
     if not employee:
@@ -189,35 +140,15 @@ def get_employee_by_id_endpoint(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Employee with ID {employee_id} not found.",
         )
-    if user["role"] not in {"Admin", "Manager"} and employee["username"] != user["username"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Employees can only view their own information.",
-        )
     return employee
 
 @emp_router.get(
     "/{employee_id}/details",
     summary="Get employee details and order history",
 )
-def get_employee_details_endpoint(
-    employee_id: int,
-    user: dict = Depends(require_completed_user),
-):
+def get_employee_details_endpoint(employee_id: int):
     """Returns an employee profile, sales statistics, and recent orders."""
     try:
-        if user["role"] not in {"Admin", "Manager"}:
-            employee = get_employee_by_id(employee_id)
-            if not employee:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Employee with ID {employee_id} not found.",
-                )
-            if employee["username"] != user["username"]:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Employees can only view their own information and KPIs.",
-                )
         return get_employee_details(employee_id)
     except HTTPException:
         raise
@@ -233,10 +164,7 @@ def get_employee_details_endpoint(
     status_code=status.HTTP_201_CREATED,
     summary="Add a new employee",
 )
-def create_employee_endpoint(
-    payload: EmployeeCreate,
-    _manager: dict = Depends(require_user_manager),
-):
+def create_employee_endpoint(payload: EmployeeCreate):
     try:
         new_employee = add_employee(payload)
         return new_employee
@@ -254,11 +182,7 @@ def create_employee_endpoint(
     response_model=EmployeeResponse,
     summary="Update employee details",
 )
-def update_employee_endpoint(
-    employee_id: int,
-    payload: EmployeeUpdate,
-    _manager: dict = Depends(require_user_manager),
-):
+def update_employee_endpoint(employee_id: int, payload: EmployeeUpdate):
     updated_employee = update_employee(employee_id, payload)
     if not updated_employee:
         raise HTTPException(
@@ -268,10 +192,7 @@ def update_employee_endpoint(
     return updated_employee
 
 @emp_router.delete("/{employee_id}", status_code=status.HTTP_200_OK)
-def delete_employee_endpoint(
-    employee_id: int,
-    _manager: dict = Depends(require_user_manager),
-):
+def delete_employee_endpoint(employee_id: int):
     return delete_employee(employee_id=employee_id)
 
 # Authentication endpoints
@@ -283,9 +204,9 @@ def login_endpoint(payload: LoginRequest):
 @auth_router.post("/change-password", summary="Change the signed-in user's password")
 def change_password_endpoint(
     payload: PasswordChange,
-    user: dict = Depends(require_authenticated_user),
+    user: UserResponse,
 ):
-    change_password(user["user_id"], payload.new_password)
+    change_password(user.user_id, payload.new_password)
     return {"message": "Password changed successfully.", "must_change_password": False}
 
 
@@ -293,7 +214,7 @@ def change_password_endpoint(
 def forgot_password_endpoint(payload: ForgotPasswordRequest):
     create_password_reset_request(payload.username)
     return {
-        "message": "If the account exists, a password reset request has been sent to a manager."
+        "message": "Password reset request has been sent to a manager."
     }
 
 
@@ -302,7 +223,7 @@ def forgot_password_endpoint(payload: ForgotPasswordRequest):
     summary="List pending password reset requests",
 )
 def list_password_reset_requests_endpoint(
-    _manager: dict = Depends(require_user_manager),
+
 ):
     return get_password_reset_requests()
 
@@ -313,7 +234,7 @@ def list_password_reset_requests_endpoint(
 )
 def approve_password_reset_endpoint(
     user_id: int,
-    _manager: dict = Depends(require_user_manager),
+
 ):
     approve_password_reset(user_id)
     return {"message": "Password reset successfully. The user must change it after signing in."}
@@ -321,28 +242,25 @@ def approve_password_reset_endpoint(
 
 # User management endpoints
 @users_router.get("", response_model=List[UserResponse])
-def list_users_endpoint(_manager: dict = Depends(require_user_manager)):
+def list_users_endpoint():
     return get_users()
 
 @users_router.post("", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user_endpoint(
-    payload: UserCreate,
-    _manager: dict = Depends(require_user_manager),
-):
+    payload: UserCreate
+    ):
     return create_user(payload)
 
 @users_router.put("/{user_id}", response_model=UserResponse)
 def update_user_endpoint(
     user_id: int,
-    payload: UserUpdate,
-    manager: dict = Depends(require_user_manager),
+    payload: UserUpdate
 ):
-    return update_user(user_id, payload, manager)
+    return update_user(user_id, payload)
 
 @users_router.post("/{user_id}/reset-password")
 def reset_user_password_endpoint(
-    user_id: int,
-    _manager: dict = Depends(require_user_manager),
+    user_id: int
 ):
     reset_user_password(user_id)
     return {"message": "Password reset successfully."}
@@ -350,9 +268,9 @@ def reset_user_password_endpoint(
 @users_router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user_endpoint(
     user_id: int,
-    manager: dict = Depends(require_user_manager),
+
 ):
-    delete_user(user_id, manager)
+    delete_user(user_id)
 
 # Order endpoints
 @ord_router.post("", status_code=status.HTTP_201_CREATED)
@@ -436,7 +354,11 @@ def update_customer_endpoint(customer_id: int, payload: CustomerUpdate):
 def delete_customer_endpoint(customer_id: int):
     delete_customer(customer_id)
 
-# PRODUCT ENDPOINTS
+# Product endpoints
+@prod_router.get("")
+def get_products_endpoint():
+    return get_products()
+
 @prod_router.get("", response_model=List[ProductResponse])
 def get_all_products_endpoint():
     try:
@@ -465,7 +387,7 @@ def delete_product_endpoint(product_id: int):
         raise HTTPException(status_code=404, detail=f"Product with ID {product_id} not found.")
     return {"message": f"Product {product_id} deleted successfully."}
 
-# INVENTORY ENDPOINTS 
+# Inventory endpoints
 @inv_router.get("", response_model=List[InventoryResponse])
 def get_all_inventory_endpoint():
     try:
@@ -493,7 +415,7 @@ def delete_inventory_endpoint(sku: str):
         raise HTTPException(status_code=404, detail=f"Product SKU {sku} not found.")
     return {"message": f"Product {sku} deleted successfully."}
 
-# CATEGORY ENDPOINTS 
+# Category endpoints
 @cat_router.get("")
 def get_categories_endpoint():
     conn = None
@@ -504,32 +426,27 @@ def get_categories_endpoint():
             categories = cursor.fetchall()
             return categories if categories else []
     except Exception as e:
+        print(f"Error details: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch categories: {str(e)}")
     finally:
         if conn and conn.open:
             conn.close()
 
-# SALES ANALYTICS ENDPOINTS
-@sales_router.get("/overview")
+# Sales analytics endpoints
+@sales_router.get("/overview", response_model=SalesItemOverview)
 def get_sales_overview_endpoint(
-    top_n: Optional[str] = Query("5"),
-    category: Optional[str] = Query(None),
-    timeframe: Optional[str] = Query("this_month")
+    top_n: str = "5",
+    category: Optional[str] = None,
+    timeframe: str = "this_month"
 ):
-    try:
-        # Truyền đầy đủ top_n, category và timeframe vào service mới
-        return get_sales_overview(top_n=top_n, category=category, timeframe=timeframe)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch sales overview: {str(e)}")
-
-@sales_router.get("/predictions")
+    return get_sales_overview(top_n=top_n, category=category, timeframe=timeframe)
+@sales_router.get("/predictions", tags=["Sales"])
 def get_demand_predictions_endpoint(window_days: int = Query(30)):
     try:
         return get_demand_predictions(window_days=window_days)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to calculate predictions: {str(e)}")
 
-import logging
 logger = logging.getLogger(__name__)
 
 @app.get("/health")
@@ -586,7 +503,6 @@ app.include_router(prod_router)
 app.include_router(inv_router)
 app.include_router(cat_router)
 app.include_router(sales_router)
-app.include_router(sales_test_router)
 
 if __name__ == "__main__":
     import uvicorn

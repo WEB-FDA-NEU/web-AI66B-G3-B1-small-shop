@@ -17,7 +17,7 @@ CREATE TABLE `users` (
 
 CREATE TABLE `password_reset_requests` (
   `user_id` int PRIMARY KEY,
-  `requested_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `requested_at` datetime NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   CONSTRAINT `fk_password_reset_requests_user`
     FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
 );

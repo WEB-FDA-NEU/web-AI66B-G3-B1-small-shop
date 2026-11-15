@@ -27,7 +27,7 @@ const statusInput = document.getElementById('status');
 
 // Helper to get initials for avatar
 function getInitials(name) {
-  if (!name) return "NV";
+  if (!name) return "EMP";
   const parts = name.trim().split(' ');
   if (parts.length >= 2) {
     return (parts[parts.length - 2][0] + parts[parts.length - 1][0]).toUpperCase();
@@ -91,7 +91,7 @@ function deleteEmployee(employeeId, employeeName) {
   
   const nameEl = document.getElementById('deleteEmployeeName');
   if (nameEl) {
-    nameEl.textContent = `"${employeeName || 'N/A'}" (NV-${String(employeeId).padStart(3, '0')})`;
+    nameEl.textContent = `"${employeeName || 'N/A'}" (EMP-${String(employeeId).padStart(3, '0')})`;
   }
 
   const deleteModal = document.getElementById('deleteEmplohyeeModal');
@@ -169,7 +169,7 @@ function renderTable(data) {
 
   data.forEach(emp => {
     const tr = document.createElement('tr');
-    const idDisplay = `NV-${String(emp.employee_id).padStart(3, '0')}`;
+    const idDisplay = `EMP-${String(emp.employee_id).padStart(3, '0')}`;
     const statusClassMap = {
     'Active': 'badge-active',
     'On Leave': 'badge-leave',
@@ -180,8 +180,8 @@ function renderTable(data) {
     const safeName = (emp.name || '').replace(/'/g, "\\'");
 
     tr.innerHTML = `
-      <td class="emp-id">${idDisplay}</td>
-      <td>
+      <td class="emp-id" data-label="Employee ID">${idDisplay}</td>
+      <td data-label="Name & Username">
         <div class="emp-name-cell">
           <div class="emp-avatar">${getInitials(emp.name)}</div>
           <div>
@@ -190,11 +190,11 @@ function renderTable(data) {
           </div>
         </div>
       </td>
-      <td>${emp.role}</td>
-      <td>${emp.phone || 'N/A'}</td>
-      <td><span class="badge ${badgeClass}">${emp.status}</span></td>
-      <td>${formatDate(emp.created_at)}</td>
-      <td>
+      <td data-label="Position">${emp.role}</td>
+      <td data-label="Phone Number">${emp.phone || 'N/A'}</td>
+      <td data-label="Status"><span class="badge ${badgeClass}">${emp.status}</span></td>
+      <td data-label="Created Date">${formatDate(emp.created_at)}</td>
+      <td data-label="Actions">
         <div class="action-buttons" style="justify-content: flex-end; display: flex; gap: 8px;">
           <button class="btn-icon" title="Edit Employee" onclick="openEditEmployeeModal(${emp.employee_id})">
             <i class="fa-solid fa-pen-to-square"></i>
@@ -220,7 +220,7 @@ function filterData() {
   const selectedRole = roleFilter ? roleFilter.value : '';
 
   const filtered = employees.filter(emp => {
-    const empIdFormatted = `nv-${String(emp.employee_id).padStart(3, '0')}`;
+    const empIdFormatted = `EMP-${String(emp.employee_id).padStart(3, '0')}`;
     const matchesSearch = (emp.name && emp.name.toLowerCase().includes(searchTerm)) || 
                           (emp.username && emp.username.toLowerCase().includes(searchTerm)) ||
                           empIdFormatted.includes(searchTerm);

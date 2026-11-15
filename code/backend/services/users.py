@@ -5,40 +5,10 @@ from fastapi import HTTPException, status
 
 from backend.database.connect_db import get_connection
 from backend.schema.user import UserCreate, UserUpdate
-from backend.services.auth import hash_password, revoke_user_sessions
+from backend.services.auth import hash_password
 
 DEFAULT_PASSWORD = "password123"
 PRIVILEGED_ROLES = {"Admin", "Manager"}
-
-
-def _get_user(cursor: Any, user_id: int, for_update: bool = False) -> Dict[str, Any]:
-    cursor.execute(
-        """
-        SELECT u.user_id, u.username, u.role, u.is_active, u.created_at,
-               EXISTS (
-                   SELECT 1 FROM password_reset_requests r
-                   WHERE r.user_id = u.user_id
-               ) AS reset_requested
-        FROM users u
-        WHERE u.user_id = %s
-        """ + (" FOR UPDATE" if for_update else ""),
-        (user_id,),
-    )
-    user = cursor.fetchone()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found.",
-        )
-    return user
-
-
-def _lock_privileged_users(cursor: Any) -> int:
-    cursor.execute(
-        "SELECT user_id FROM users WHERE role IN ('Admin', 'Manager') FOR UPDATE"
-    )
-    return len(cursor.fetchall())
-
 
 def get_users() -> List[Dict[str, Any]]:
     connection = get_connection()
@@ -71,9 +41,13 @@ def create_user(data: UserCreate) -> Dict[str, Any]:
                 """,
                 (data.username, hash_password(DEFAULT_PASSWORD), data.role),
             )
-            user_id = cursor.lastrowid
+
             connection.commit()
-            return _get_user(cursor, user_id)
+            user_id = cursor.lastrowid
+
+            cursor.execute("SELECT * FROM users WHERE user_id = %s;", (user_id,))
+            new_user = cursor.fetchone()
+            return new_user
     except pymysql.err.IntegrityError as error:
         connection.rollback()
         raise HTTPException(
@@ -87,32 +61,11 @@ def create_user(data: UserCreate) -> Dict[str, Any]:
         connection.close()
 
 
-def update_user(user_id: int, data: UserUpdate, actor: Dict[str, Any]) -> Dict[str, Any]:
+def update_user(user_id: int, data: UserUpdate) -> Dict[str, Any]:
     connection = get_connection()
     try:
         connection.begin()
         with connection.cursor() as cursor:
-            current_user = _get_user(cursor, user_id, for_update=True)
-            if data.role == "Admin" and current_user["role"] != "Admin":
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Only an existing administrator can retain the Admin role.",
-                )
-            if int(actor["user_id"]) == user_id and data.role not in PRIVILEGED_ROLES:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="You cannot remove your own user-management access.",
-                )
-            if (
-                current_user["role"] in PRIVILEGED_ROLES
-                and data.role not in PRIVILEGED_ROLES
-                and _lock_privileged_users(cursor) <= 1
-            ):
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="The last administrator or manager cannot be demoted.",
-                )
-
             cursor.execute(
                 """
                 UPDATE users
@@ -121,8 +74,12 @@ def update_user(user_id: int, data: UserUpdate, actor: Dict[str, Any]) -> Dict[s
                 """,
                 (data.username, data.role, user_id),
             )
-            connection.commit()
-            return _get_user(cursor, user_id)
+            connection.commit()            
+            cursor.execute("SELECT * FROM users WHERE user_id = %s;", (user_id,))
+            updated_user = cursor.fetchone()
+            if not updated_user:
+                raise HTTPException(status_code=404, detail="User not found")
+            return updated_user
     except HTTPException:
         connection.rollback()
         raise
@@ -145,7 +102,6 @@ def reset_user_password(user_id: int) -> None:
     try:
         connection.begin()
         with connection.cursor() as cursor:
-            _get_user(cursor, user_id)
             cursor.execute(
                 """
                 UPDATE users
@@ -167,29 +123,12 @@ def reset_user_password(user_id: int) -> None:
         raise
     finally:
         connection.close()
-    revoke_user_sessions(user_id)
 
-
-def delete_user(user_id: int, actor: Dict[str, Any]) -> None:
-    if int(actor["user_id"]) == user_id:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="You cannot delete the account you are currently using.",
-        )
-
+def delete_user(user_id: int) -> None:
     connection = get_connection()
     try:
         connection.begin()
         with connection.cursor() as cursor:
-            user = _get_user(cursor, user_id, for_update=True)
-            if (
-                user["role"] in PRIVILEGED_ROLES
-                and _lock_privileged_users(cursor) <= 1
-            ):
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="The last administrator or manager cannot be deleted.",
-                )
             cursor.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
         connection.commit()
     except HTTPException:
@@ -200,8 +139,6 @@ def delete_user(user_id: int, actor: Dict[str, Any]) -> None:
         raise
     finally:
         connection.close()
-    revoke_user_sessions(user_id)
-
 
 def create_password_reset_request(username: str) -> None:
     connection = get_connection()
@@ -293,4 +230,3 @@ def approve_password_reset(user_id: int) -> None:
         raise
     finally:
         connection.close()
-    revoke_user_sessions(user_id)

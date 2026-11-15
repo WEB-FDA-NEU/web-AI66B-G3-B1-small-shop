@@ -44,14 +44,6 @@ const openModalBtn = document.getElementById('openAddModalBtn');
 const closeModalBtn = document.getElementById('closeModalBtn');
 const cancelModalBtn = document.getElementById('cancelModalBtn');
 const toast = document.getElementById('toastNotification');
-const inventorySessionUser = JSON.parse(sessionStorage.getItem('authenticatedUser') || '{}');
-const isEmployee = inventorySessionUser.role === 'Employee';
-const actionsHeader = document.getElementById('inventoryActionsHeader');
-
-if (isEmployee) {
-  if (openModalBtn) openModalBtn.hidden = true;
-  if (actionsHeader) actionsHeader.hidden = true;
-}
 
 // Form Input Elements (Lưu trữ SKU)
 const skuInput = document.createElement('input');
@@ -108,7 +100,7 @@ function renderTable(data) {
   if (!data || data.length === 0) {
     tableBody.innerHTML = `
       <tr>
-        <td colspan="${isEmployee ? 7 : 8}" style="text-align: center; color: var(--text-muted); padding: 30px;">
+        <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">
           No matching products found in inventory.
         </td>
       </tr>
@@ -128,14 +120,14 @@ function renderTable(data) {
     const badgeClass = item.badge_class || STATUS_BADGE_CLASS[statusText] || "badge-instock";
     
     tr.innerHTML = `
-      <td class="item-sku">${skuCode}</td>
-      <td style="font-weight: 600; color: var(--bg-sidebar);">${item.product_name || item.name}</td>
-      <td><span class="badge" style="background: #EAECEE; color: #2C3E50;">${displayCategory}</span></td>
-      <td>${formatVND(item.unit_price)}</td>
-      <td style="font-weight: 600;">${stockQty}${expiredQty > 0 ? ` <span style="font-weight: 400; font-size: 0.75rem; color: var(--text-muted);">(+${expiredQty} expired)</span>` : ''}</td>
-      <td>${item.import_date || '—'}</td>
-      <td><span class="badge ${badgeClass}">${statusText}</span></td>
-      ${isEmployee ? '' : `<td>
+      <td class="item-sku" data-label="Product ID">${skuCode}</td>
+      <td data-label="Product Name" style="font-weight: 600; color: var(--bg-sidebar);">${item.product_name || item.name}</td>
+      <td data-label="Category"><span class="badge" style="background: #EAECEE; color: #2C3E50;">${displayCategory}</span></td>
+      <td data-label="Unit Price">${formatVND(item.unit_price)}</td>
+      <td data-label="Stock Qty" style="font-weight: 600;">${stockQty}</td>
+      <td data-label="Import Date">${item.import_date || '2026-11-01'}</td>
+      <td data-label="Status"><span class="badge ${badgeClass}">${statusText}</span></td>
+      <td data-label="Actions">
         <div class="action-buttons" style="justify-content: flex-end;">
           <button class="btn-icon" title="Edit Product" onclick="openEditProductModal('${skuCode}')">
             <i class="fa-solid fa-pen-to-square"></i>
@@ -144,7 +136,7 @@ function renderTable(data) {
             <i class="fa-solid fa-trash-can"></i>
           </button>
         </div>
-      </td>`}
+      </td>
     `;
     tableBody.appendChild(tr);
   });

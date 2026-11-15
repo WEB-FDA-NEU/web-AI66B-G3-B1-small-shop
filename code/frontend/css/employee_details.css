@@ -35,3 +35,190 @@
         grid-template-columns: 1fr;
     }
 }
+
+@media (max-width: 64rem) {
+    body.employee-page .main-content {
+        width: 100%;
+        margin-left: 0;
+        padding: 4.5rem 1.25rem 1.5rem;
+    }
+
+    body.employee-page .sidebar {
+        display: flex;
+    }
+
+    body.employee-page .sidebar:not(.hidden) {
+        transform: translateX(0);
+    }
+}
+
+@media (max-width: 48rem) {
+    body.employee-page .main-content {
+        padding: 4.5rem 1rem 1.25rem;
+    }
+
+    body.employee-page .top-header {
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+    }
+
+    body.employee-page .header-title h2 {
+        font-size: clamp(1.5rem, 7vw, 2rem);
+        line-height: 1.2;
+    }
+
+    body.employee-page .header-actions {
+        width: 100%;
+    }
+
+    body.employee-page .header-actions .btn-secondary {
+        justify-content: center;
+        width: 100%;
+        min-height: 2.75rem;
+    }
+
+    body.employee-page .customer-profile-card {
+        gap: 0.875rem;
+        padding: 0.875rem;
+    }
+
+    body.employee-page .customer-avatar-section {
+        align-items: center;
+        text-align: center;
+    }
+
+    body.employee-page .customer-avatar-section h3 {
+        overflow-wrap: anywhere;
+    }
+
+    body.employee-page .customer-info-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.625rem 0.875rem;
+    }
+
+    body.employee-page .customer-info-grid .info-item {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.2rem 0.4rem;
+    }
+
+    body.employee-page .customer-info-grid .info-item label {
+        display: inline;
+        margin: 0;
+        font-size: 0.65rem;
+    }
+
+    body.employee-page .customer-info-grid .info-item p {
+        display: inline;
+        min-width: 0;
+        font-size: 0.78rem;
+        overflow-wrap: anywhere;
+    }
+
+    body.employee-page .employee-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.5rem;
+    }
+
+    body.employee-page .stat-card {
+        padding: 0.625rem;
+    }
+
+    body.employee-page .stat-card h4 {
+        font-size: 0.62rem;
+        line-height: 1.3;
+    }
+
+    body.employee-page .stat-card h2 {
+        font-size: 1rem;
+    }
+
+    body.employee-page .section-header h3 {
+        font-size: 1.2rem;
+    }
+
+    body.employee-page .employee-orders-section {
+        overflow: visible;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    body.employee-page .employee-orders-section .orders-table,
+    body.employee-page .employee-orders-section .orders-table tbody {
+        display: block;
+        width: 100%;
+        min-width: 0;
+    }
+
+    body.employee-page .employee-orders-section .orders-table thead {
+        display: none;
+    }
+
+    body.employee-page .employee-orders-section .orders-table tbody tr {
+        display: block;
+        margin-bottom: 0.875rem;
+        padding: 0.5rem 0.875rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        background: var(--card-bg);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    }
+
+    body.employee-page .employee-orders-section .orders-table tbody tr:hover {
+        background: var(--card-bg);
+    }
+
+    body.employee-page .employee-orders-section .orders-table tbody td {
+        display: grid;
+        grid-template-columns: minmax(5.5rem, 0.7fr) minmax(0, 1.3fr);
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 0.625rem 0;
+        border-bottom: 1px solid var(--border-color);
+        white-space: normal;
+        overflow-wrap: anywhere;
+        line-height: 1.4;
+    }
+
+    body.employee-page .employee-orders-section .orders-table tbody td::before {
+        content: attr(data-label);
+        color: var(--text-muted);
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    body.employee-page .employee-orders-section .orders-table tbody td:last-child {
+        border-bottom: 0;
+    }
+
+    body.employee-page .employee-orders-section .orders-table tbody td[colspan] {
+        display: block;
+        text-align: center;
+    }
+
+    body.employee-page .employee-orders-section .orders-table tbody td[colspan]::before {
+        content: none;
+    }
+}
+
+@media (max-width: 30rem) {
+    body.employee-page .main-content {
+        padding-right: 0.75rem;
+        padding-left: 0.75rem;
+    }
+
+    body.employee-page .customer-info-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    body.employee-page .employee-orders-section .orders-table tbody tr {
+        padding-right: 0.75rem;
+        padding-left: 0.75rem;
+    }
+}

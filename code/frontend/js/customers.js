@@ -2,8 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = 'http://127.0.0.1:8000';
     let customers = [];
     let customerTypes = [];
-    const authenticatedUser = JSON.parse(sessionStorage.getItem('authenticatedUser') || '{}');
-    const isEmployee = authenticatedUser.role === 'Employee';
+    let rockCustomerTypeId = null;
 
     const tableBody = document.getElementById('customersTableBody');
     const searchInput = document.getElementById('searchInput');
@@ -20,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmDeleteButton = document.getElementById('confirmDeleteCustomerBtn');
     const addForm = document.getElementById('customerForm');
     const editForm = document.getElementById('editCustomerForm');
+    const addTypeSelect = document.getElementById('membershipTier');
     const editTypeSelect = document.getElementById('editMembershipTier');
     const phoneInputs = [
         {
@@ -34,7 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let sortAscending = true;
     let pendingDeleteId = null;
     let deleteTrigger = null;
-    let rockCustomerTypeId = null;
 
     function customerLabel(id) {
         return `CUS-${String(id).padStart(3, '0')}`;
@@ -107,25 +106,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const tier = customer.type_name || 'Unknown';
             const tierClass = escapeHTML(tier.toLowerCase());
             row.innerHTML = `
-                <td><strong class="cus-id">${customerLabel(customer.customer_id)}</strong></td>
-                <td>${escapeHTML(customer.name)}</td>
-                <td>${escapeHTML(customer.phone)}</td>
-                <td style="text-align: right;">${formatVND(customer.total_spent)}</td>
-                <td style="text-align: center;"><span class="badge badge-tier ${tierClass}">${escapeHTML(tier)}</span></td>
-                <td style="text-align: center;">${formatDate(customer.created_at)}</td>
-                <td style="text-align: center;">
+                <td data-label="Customer ID"><strong class="cus-id">${customerLabel(customer.customer_id)}</strong></td>
+                <td data-label="Name">${escapeHTML(customer.name)}</td>
+                <td data-label="Phone">${escapeHTML(customer.phone)}</td>
+                <td data-label="Total Spending" style="text-align: right;">${formatVND(customer.total_spent)}</td>
+                <td data-label="Membership" style="text-align: center;"><span class="badge badge-tier ${tierClass}">${escapeHTML(tier)}</span></td>
+                <td data-label="Created At" style="text-align: center;">${formatDate(customer.created_at)}</td>
+                <td data-label="Actions" style="text-align: center;">
                     <div class="action-buttons">
-                        ${isEmployee ? '' : `
-                            <button class="btn-icon btn-edit" data-id="${customer.customer_id}" title="Edit">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                            </button>`}
+                        <button class="btn-icon btn-edit" data-id="${customer.customer_id}" title="Edit">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
                         <a class="btn-icon" href="customers_detail.html?id=${encodeURIComponent(customer.customer_id)}" title="View customer details" aria-label="View details for ${customerLabel(customer.customer_id)}">
                             <i class="fa-solid fa-eye" aria-hidden="true"></i>
                         </a>
-                        ${isEmployee ? '' : `
-                            <button class="btn-icon btn-delete delete" data-id="${customer.customer_id}" title="Delete">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>`}
+                        <button class="btn-icon btn-delete delete" data-id="${customer.customer_id}" title="Delete">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
                     </div>
                 </td>`;
             tableBody.appendChild(row);
@@ -197,12 +194,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const rockType = customerTypes.find(type =>
             type.type_name.toLowerCase() === 'rock'
         );
-        if (!rockType) throw new Error('Rock membership type is unavailable.');
+        if (!rockType) {
+            throw new Error('Rock membership type is not available.');
+        }
+        rockCustomerTypeId = String(rockType.customer_type_id);
 
-        rockCustomerTypeId = Number(rockType.customer_type_id);
-        editTypeSelect.innerHTML = customerTypes.map(type =>
-            `<option value="${type.customer_type_id}">${escapeHTML(type.type_name)}</option>`
-        ).join('');
+        [addTypeSelect, editTypeSelect].forEach(select => {
+            select.innerHTML = customerTypes.map(type =>
+                `<option value="${type.customer_type_id}">${escapeHTML(type.type_name)}</option>`
+            ).join('');
+        });
+        addTypeSelect.value = rockCustomerTypeId;
     }
 
     function openModal(modal) {
@@ -248,12 +250,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function customerPayload(form, customerTypeId) {
+    function customerPayload(form, typeSelect) {
         const formData = new FormData(form);
         return {
             name: formData.get('name').trim(),
             phone: formData.get('phone').trim(),
-            customer_type_id: Number(customerTypeId)
+            customer_type_id: Number(typeSelect.value)
         };
     }
 
@@ -302,17 +304,14 @@ document.addEventListener('DOMContentLoaded', () => {
             phoneInputs[0].input.reportValidity();
             return;
         }
-        if (!rockCustomerTypeId) {
-            showToast('Rock membership type is unavailable. Please try again.');
-            return;
-        }
         try {
             await request('/customers', {
                 method: 'POST',
-                body: JSON.stringify(customerPayload(addForm, rockCustomerTypeId))
+                body: JSON.stringify(customerPayload(addForm, addTypeSelect))
             });
             closeModal(addModal);
             addForm.reset();
+            addTypeSelect.value = rockCustomerTypeId;
             await loadCustomers();
             showToast('Added customer successfully!');
         } catch (error) {
@@ -353,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             await request(`/customers/${id}`, {
                 method: 'PUT',
-                body: JSON.stringify(customerPayload(editForm, editTypeSelect.value))
+                body: JSON.stringify(customerPayload(editForm, editTypeSelect))
             });
             closeModal(editModal);
             await loadCustomers();

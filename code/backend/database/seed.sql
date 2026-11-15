@@ -1,3 +1,6 @@
+USE mini_shop;
+
+
 -- 1 CUSTOMER_TYPES
 INSERT INTO customer_types (type_name, discount_percent)
 VALUES
@@ -377,4 +380,5 @@ VALUES
     -- ================= Customer 16 (total_spent: 35,000) =================
     -- Order 34
     (34, 1, 1);  -- 1 x Espresso
+
 

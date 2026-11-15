@@ -1,8 +1,3 @@
-.btn-add[hidden],
-table.inventory-table th[hidden] {
-    display: none !important;
-}
-
 table.inventory-table {
     width: 100%;
     border-collapse: collapse;
@@ -57,25 +52,143 @@ table.inventory-table tbody tr:last-child td {
     letter-spacing: 0.3px;
 }
 
+/* Available - còn hàng, bình thường */
 .badge-instock {
     background-color: #E2EFCB;
     color: #2E5A1C;
     border: 1px solid #C4E197;
 }
 
+/* Low Stock - sắp hết hàng */
 .badge-lowstock {
     background-color: #FDF3D6;
     color: #7A5B0B;
     border: 1px solid #F5E1A4;
 }
 
+/* Near Expiration - sắp hết hạn */
+.badge-nearexp {
+    background-color: #FBE5D0;
+    color: #8A4B20;
+    border: 1px solid #EFC6A0;
+}
+
+/* Expired - đã hết hạn */
 .badge-expired {
-    background-color: #F8D7DA;
-    color: #842029;
-    border: 1px solid #F5C2C7;
+    background-color: #FADBD8;
+    color: #78281F;
+    border: 1px solid #F5B7B1;
+}
+
+/* Sold out - hết hàng */
+.badge-soldout {
+    background-color: #E5E7E9;
+    color: #4D5656;
+    border: 1px solid #CACFD2;
 }
 
 .action-buttons {
     display: flex;
     gap: 8px;
+}
+
+@media (max-width: 48rem) {
+    body.employee-page .action-bar {
+        align-items: stretch;
+    }
+
+    body.employee-page .filter-group {
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    body.employee-page .filter-select {
+        width: 100%;
+    }
+
+    body.employee-page .table-wrapper {
+        overflow: visible;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    body.employee-page table.inventory-table,
+    body.employee-page .inventory-table tbody {
+        display: block;
+        width: 100%;
+    }
+
+    body.employee-page .inventory-table thead {
+        display: none;
+    }
+
+    body.employee-page .inventory-table tbody tr {
+        display: block;
+        margin-bottom: 0.875rem;
+        padding: 0.5rem 0.875rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        background: var(--card-bg);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    }
+
+    body.employee-page .inventory-table tbody tr:hover {
+        background: var(--card-bg);
+    }
+
+    body.employee-page .inventory-table tbody td {
+        display: grid;
+        grid-template-columns: minmax(6.5rem, 0.75fr) minmax(0, 1.25fr);
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 0.625rem 0;
+        border-bottom: 1px solid var(--border-color);
+        overflow-wrap: anywhere;
+        white-space: normal;
+    }
+
+    body.employee-page .inventory-table tbody td::before {
+        content: attr(data-label);
+        color: var(--text-muted);
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    body.employee-page .inventory-table tbody td:last-child {
+        border-bottom: 0;
+    }
+
+    body.employee-page .inventory-table tbody td[colspan] {
+        display: block;
+        text-align: center;
+    }
+
+    body.employee-page .inventory-table tbody td[colspan]::before {
+        content: none;
+    }
+
+    body.employee-page .inventory-table .action-buttons {
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 30rem) {
+    body.employee-page .inventory-table tbody tr {
+        padding-right: 0.75rem;
+        padding-left: 0.75rem;
+    }
+
+    body.employee-page .inventory-table tbody td {
+        grid-template-columns: minmax(5.5rem, 0.7fr) minmax(0, 1.3fr);
+        gap: 0.375rem;
+    }
+
+    body.employee-page .inventory-table tbody td::before {
+        font-size: 0.65rem;
+    }
 }

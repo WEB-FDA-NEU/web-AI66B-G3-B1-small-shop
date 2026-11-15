@@ -225,20 +225,17 @@ def delete_customer(customer_id: int) -> None:
             )
             if not cursor.fetchone():
                 raise HTTPException(status_code=404, detail="Customer not found.")
-
-            cursor.execute(
-                "SELECT order_id FROM orders WHERE customer_id = %s LIMIT 1",
-                (customer_id,)
-            )
-            if cursor.fetchone():
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="This customer has orders and cannot be deleted."
-                )
-
+            
             cursor.execute("DELETE FROM customers WHERE customer_id = %s", (customer_id,))
             connection.commit()
-    except HTTPException:
+
+    except Exception as e:
+        # Catch foreign key constraint failures (e.g., if employee is referenced in orders/users)
+        if "foreign key constraint" in str(e).lower() or "1451" in str(e):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot delete customer because they are linked to active orders or user accounts."
+            )
         connection.rollback()
         raise
     except Exception as e:

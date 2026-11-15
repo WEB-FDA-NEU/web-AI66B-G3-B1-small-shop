@@ -1,128 +1,156 @@
+const API_BASE = "http://127.0.0.1:8000";
+
 document.addEventListener("DOMContentLoaded", () => {
-    const API_BASE_URL = "http://127.0.0.1:8000";
-    const session = JSON.parse(sessionStorage.getItem("authenticatedUser") || "null");
-    const allowedRoles = ["Admin", "Manager"];
+    // State
+    let usersList = [];
+    let resetRequestsList = [];
 
-    if (!session?.access_token || !allowedRoles.includes(session.role)) {
-        window.location.replace("index.html");
-        return;
-    }
-
+    // DOM Elements
     const usersTableBody = document.getElementById("usersTableBody");
     const resetRequestsBody = document.getElementById("resetRequestsBody");
     const resetRequestsPanel = document.getElementById("resetRequestsPanel");
-    const userSearch = document.getElementById("userSearch");
+    const resetRequestCount = document.getElementById("resetRequestCount");
+    const totalUsersEl = document.getElementById("totalUsers");
+    const totalManagersEl = document.getElementById("totalManagers");
+    const userSearchInput = document.getElementById("userSearch");
+
+    // Modal elements
     const userModal = document.getElementById("userModal");
+    const openAddUserBtn = document.getElementById("openAddUserBtn");
+    const closeUserModalBtn = document.getElementById("closeUserModalBtn");
+    const cancelUserModalBtn = document.getElementById("cancelUserModalBtn");
     const userForm = document.getElementById("userForm");
+    const userModalTitle = document.getElementById("userModalTitle");
     const userIdInput = document.getElementById("userId");
-    const usernameInput = document.getElementById("userUsername");
-    const roleSelect = document.getElementById("userRole");
-    const modalTitle = document.getElementById("userModalTitle");
-    const passwordNote = document.getElementById("defaultPasswordNote");
-    const saveButton = document.getElementById("saveUserBtn");
-    const toast = document.getElementById("toastNotification");
-    let users = [];
+    const userUsernameInput = document.getElementById("userUsername");
+    const userRoleInput = document.getElementById("userRole");
+    const defaultPasswordNote = document.getElementById("defaultPasswordNote");
+    const confirmModal = document.getElementById("customConfirmModal");
+    const confirmModalTitle = document.getElementById("confirmModalTitle");
+    const confirmModalText = document.getElementById("confirmModalText");
+    const confirmModalClose = document.getElementById("confirmModalClose");
+    const confirmModalCancel = document.getElementById("confirmModalCancel");
+    const confirmModalOk = document.getElementById("confirmModalOk");
+    let pendingConfirmation = null;
 
-    function escapeHTML(value) {
-        return String(value ?? "").replace(/[&<>"']/g, character => ({
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#39;",
-        })[character]);
+    // Initialize data loading
+    loadAllData();
+
+    // Event Listeners
+    if (openAddUserBtn) {
+        openAddUserBtn.addEventListener("click", () => openModalForCreate());
     }
-
-    function formatDate(value) {
-        if (!value) return "—";
-        const parsed = new Date(value);
-        return Number.isNaN(parsed.getTime())
-            ? "—"
-            : new Intl.DateTimeFormat("vi-VN", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-            }).format(parsed);
+    if (closeUserModalBtn) {
+        closeUserModalBtn.addEventListener("click", () => closeModal());
     }
-
-    function showToast(message) {
-        toast.textContent = message;
-        toast.classList.add("show");
-        window.setTimeout(() => toast.classList.remove("show"), 3500);
+    if (cancelUserModalBtn) {
+        cancelUserModalBtn.addEventListener("click", () => closeModal());
     }
-
-    async function request(path, options = {}) {
-        const response = await fetch(`${API_BASE_URL}${path}`, {
-            ...options,
-            headers: {
-                Authorization: `Bearer ${session.access_token}`,
-                ...(options.body ? { "Content-Type": "application/json" } : {}),
-                ...options.headers,
-            },
+    if (userModal) {
+        userModal.addEventListener("click", (e) => {
+            if (e.target === userModal) closeModal();
         });
-
-        if (response.status === 401) {
-            sessionStorage.removeItem("authenticatedUser");
-            window.location.replace("index.html");
-            throw new Error("Your session expired. Please sign in again.");
+    }
+    if (userForm) {
+        userForm.addEventListener("submit", handleSaveUser);
+    }
+    if (userSearchInput) {
+        userSearchInput.addEventListener("input", (e) => filterAndRenderUsers(e.target.value));
+    }
+    if (confirmModalClose) {
+        confirmModalClose.addEventListener("click", closeConfirmModal);
+    }
+    if (confirmModalCancel) {
+        confirmModalCancel.addEventListener("click", closeConfirmModal);
+    }
+    if (confirmModalOk) {
+        confirmModalOk.addEventListener("click", () => {
+            const action = pendingConfirmation;
+            closeConfirmModal();
+            if (action) action();
+        });
+    }
+    if (confirmModal) {
+        confirmModal.addEventListener("click", (e) => {
+            if (e.target === confirmModal) closeConfirmModal();
+        });
+    }
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && confirmModal && confirmModal.classList.contains("active")) {
+            closeConfirmModal();
         }
+    });
 
-        if (!response.ok) {
-            let message = `Request failed (${response.status})`;
-            try {
-                const body = await response.json();
-                message = body.detail || message;
-            } catch {
-                // Keep the HTTP status when the response is not JSON.
-            }
-            throw new Error(message);
+    // Load both Users and Pending Password Reset Requests
+    async function loadAllData() {
+        try {
+            await fetchResetRequests();
+            await fetchUsers();
+        } catch (error) {
+            console.error("Error loading data:", error);
         }
-
-        return response.status === 204 ? null : response.json();
     }
 
-    function renderUsers() {
-        const query = userSearch.value.trim().toLowerCase();
-        const filteredUsers = users.filter(user =>
-            user.username.toLowerCase().includes(query)
-            || String(user.user_id).includes(query)
-        );
+    // 1. FETCH USERS (GET /users)
+    async function fetchUsers() {
+        try {
+            const response = await fetch(`${API_BASE}/users`);
+            if (!response.ok) throw new Error("Failed to load users");
+            usersList = await response.json();
+            renderUsers(usersList);
+            updateKPIs(usersList);
+        } catch (error) {
+            console.error(error);
+            usersTableBody.innerHTML = `<tr><td colspan="6" class="table-message" style="color: red;">Error loading users from server.</td></tr>`;
+            showToast("Failed to fetch users", "error");
+        }
+    }
 
-        document.getElementById("totalUsers").textContent = users.length;
-        document.getElementById("totalManagers").textContent = users.filter(user =>
-            allowedRoles.includes(user.role)
-        ).length;
+    // 2. FETCH PENDING RESET REQUESTS (GET /auth/password-reset-requests)
+    async function fetchResetRequests() {
+        try {
+            const response = await fetch(`${API_BASE}/auth/password-reset-requests`);
+            if (!response.ok) throw new Error("Failed to load reset requests");
+            resetRequestsList = await response.json();
+            renderResetRequests(resetRequestsList);
+        } catch (error) {
+            console.error(error);
+            resetRequestsBody.innerHTML = `<tr><td colspan="4" class="table-message" style="color: red;">Error loading reset requests.</td></tr>`;
+        }
+    }
 
-        if (!filteredUsers.length) {
-            usersTableBody.innerHTML = `
-                <tr><td colspan="6" class="table-message">No users found.</td></tr>
-            `;
+    // Render Users Table
+    function renderUsers(data) {
+        if (!data || data.length === 0) {
+            usersTableBody.innerHTML = `<tr><td colspan="6" class="table-message">No users found.</td></tr>`;
             return;
         }
 
-        usersTableBody.innerHTML = filteredUsers.map(user => {
-            const roleClass = user.role.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+        usersTableBody.innerHTML = data.map(user => {
+            // Check if user has a pending reset request
+                const hasPendingRequest = resetRequestsList.some(req => Number(req.user_id) === Number(user.user_id));            const resetBadge = hasPendingRequest 
+                ? `<span class="badge badge-warning" style="background:#fff3cd; color:#856404; padding:2px 8px; border-radius:4px; font-size:12px;">Reset Requested</span>` 
+                : `<span style="color: #6c757d;">None</span>`;
+
+            const createdAtFormatted = user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A';
+
             return `
                 <tr>
-                    <td>USR-${String(user.user_id).padStart(3, "0")}</td>
-                    <td>${escapeHTML(user.username)}</td>
-                    <td><span class="user-role-badge ${roleClass}">${escapeHTML(user.role)}</span></td>
-                    <td>${formatDate(user.created_at)}</td>
-                    <td>${user.reset_requested
-                        ? '<span class="reset-status pending">Requested</span>'
-                        : '<span class="reset-status">—</span>'}</td>
-                    <td>
-                        <div class="user-actions">
-                            <button type="button" data-action="edit" data-id="${user.user_id}" aria-label="Edit ${escapeHTML(user.username)}">
-                                <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Edit
+                    <td data-label="User ID">US-${String(user.user_id).padStart(3, '0')}</td>
+                    <td data-label="Username"><strong>${escapeHtml(user.username)}</strong></td>
+                    <td data-label="Role"><span class="badge role-${user.role.toLowerCase()}">${escapeHtml(user.role)}</span></td>
+                    <td data-label="Created At">${createdAtFormatted}</td>
+                    <td data-label="Reset Request">${resetBadge}</td>
+                    <td data-label="Actions">
+                        <div class="action-buttons">
+                            <button type="button" class="btn-icon reset-btn" title="Reset Password" onclick="window.appResetPassword(${user.user_id}, '${escapeHtml(user.username)}')">
+                                <i class="fa-solid fa-key"></i> Reset
                             </button>
-                            <button type="button" data-action="reset" data-id="${user.user_id}" aria-label="Reset password for ${escapeHTML(user.username)}">
-                                <i class="fa-solid fa-key" aria-hidden="true"></i> Reset
+                            <button type="button" class="btn-icon edit-btn" title="Edit User" onclick="window.appEditUser(${user.user_id})">
+                                <i class="fa-solid fa-pen-to-square"></i>
                             </button>
-                            <button type="button" class="user-delete" data-action="delete" data-id="${user.user_id}" aria-label="Delete ${escapeHTML(user.username)}">
-                                <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                            <button type="button" class="btn-icon delete-btn" title="Delete User" onclick="window.appDeleteUser(${user.user_id})">
+                                <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
                     </td>
@@ -131,173 +159,207 @@ document.addEventListener("DOMContentLoaded", () => {
         }).join("");
     }
 
-    async function loadUsers() {
-        usersTableBody.innerHTML = `
-            <tr><td colspan="6" class="table-message">Loading users...</td></tr>
-        `;
-        try {
-            users = await request("/users");
-            renderUsers();
-        } catch (error) {
-            usersTableBody.innerHTML = `
-                <tr><td colspan="6" class="table-message">${escapeHTML(error.message)}</td></tr>
-            `;
-            showToast(`Could not load users: ${error.message}`);
+    // Render Reset Requests Section
+    function renderResetRequests(requests) {
+        if (!requests || requests.length === 0) {
+            if (resetRequestsPanel) resetRequestsPanel.hidden = true;
+            return;
         }
-    }
 
-    async function loadResetRequests() {
-        try {
-            const requests = await request("/auth/password-reset-requests");
-            document.getElementById("resetRequestCount").textContent =
-                `${requests.length} pending`;
-            resetRequestsPanel.hidden = requests.length === 0;
-            if (!requests.length) {
-                resetRequestsBody.innerHTML = `
-                    <tr><td colspan="4" class="table-message">No pending requests.</td></tr>
-                `;
-                return;
-            }
-            resetRequestsBody.innerHTML = requests.map(item => `
+        if (resetRequestsPanel) resetRequestsPanel.hidden = false;
+        if (resetRequestCount) resetRequestCount.textContent = `${requests.length} pending`;
+
+        resetRequestsBody.innerHTML = requests.map(req => {
+            const requestedAt = req.requested_at ? new Date(req.requested_at).toLocaleString() : 'N/A';
+            return `
                 <tr>
-                    <td>${escapeHTML(item.username)}</td>
-                    <td>${escapeHTML(item.role)}</td>
-                    <td>${formatDate(item.requested_at)}</td>
-                    <td>
-                        <button type="button" class="approve-reset-button" data-action="approve-reset" data-id="${item.user_id}">
-                            Reset to default
+                    <td data-label="Username"><strong>${escapeHtml(req.username)}</strong></td>
+                    <td data-label="Role">${escapeHtml(req.role || 'User')}</td>
+                    <td data-label="Requested At">${requestedAt}</td>
+                    <td data-label="Action">
+                        <button type="button" class="btn-primary" style="padding: 4px 12px; font-size: 12px;" onclick="window.appApproveReset(${req.user_id})">
+                            Approve Reset
                         </button>
                     </td>
                 </tr>
-            `).join("");
-        } catch (error) {
-            resetRequestsPanel.hidden = false;
-            resetRequestsBody.innerHTML = `
-                <tr><td colspan="4" class="table-message">${escapeHTML(error.message)}</td></tr>
             `;
+        }).join("");
+    }
+
+    // Update KPI statistics
+    function updateKPIs(data) {
+        if (totalUsersEl) totalUsersEl.textContent = data.length;
+        if (totalManagersEl) {
+            const managersCount = data.filter(u => u.role === "Manager" || u.role === "Admin").length;
+            totalManagersEl.textContent = managersCount;
         }
     }
 
-    function openModal(user = null) {
-        userForm.reset();
-        userIdInput.value = user ? user.user_id : "";
-        usernameInput.value = user ? user.username : "";
-        modalTitle.textContent = user ? "Edit User" : "Add User";
-        passwordNote.hidden = Boolean(user);
+    // Filter Users via Search Input
+    function filterAndRenderUsers(query) {
+        const lowerQuery = query.toLowerCase().trim();
+        const filtered = usersList.filter(user => 
+            user.username.toLowerCase().includes(lowerQuery) || 
+            user.user_id.toString().includes(lowerQuery)
+        );
+        renderUsers(filtered);
+    }
 
-        roleSelect.innerHTML = `
-            <option value="Employee">Employee</option>
-            <option value="Manager">Manager</option>
-        `;
-        if (user?.role === "Admin") {
-            roleSelect.insertAdjacentHTML(
-                "beforeend",
-                '<option value="Admin">Admin</option>'
-            );
-        }
-        roleSelect.value = user?.role || "Employee";
-        userModal.classList.add("active");
-        usernameInput.focus();
+    // Modal Handlers
+    function openModalForCreate() {
+        if (userModalTitle) userModalTitle.textContent = "Add User";
+        if (userIdInput) userIdInput.value = "";
+        if (userForm) userForm.reset();
+        if (defaultPasswordNote) defaultPasswordNote.style.display = "block";
+        if (userModal) userModal.classList.add("active");
+    }
+
+    window.appEditUser = function(id) {
+        const user = usersList.find(u => u.user_id === id);
+        if (!user) return;
+
+        if (userModalTitle) userModalTitle.textContent = "Edit User";
+        if (userIdInput) userIdInput.value = user.user_id;
+        if (userUsernameInput) userUsernameInput.value = user.username;
+        if (userRoleInput) userRoleInput.value = user.role;
+        if (defaultPasswordNote) defaultPasswordNote.style.display = "none"; // Password not editable here
+        if (userModal) userModal.classList.add("active");
     }
 
     function closeModal() {
-        userModal.classList.remove("active");
-        userForm.reset();
+        if (userModal) userModal.classList.remove("active");
     }
 
-    document.getElementById("openAddUserBtn").addEventListener("click", () => openModal());
-    document.getElementById("closeUserModalBtn").addEventListener("click", closeModal);
-    document.getElementById("cancelUserModalBtn").addEventListener("click", closeModal);
-    window.addEventListener("click", event => {
-        if (event.target === userModal) closeModal();
-    });
-    userSearch.addEventListener("input", renderUsers);
+    function showConfirmModal(title, message, confirmLabel, action) {
+        if (!confirmModal) {
+            showToast("Confirmation dialog is unavailable.", "error");
+            return;
+        }
 
-    userForm.addEventListener("submit", async event => {
-        event.preventDefault();
-        saveButton.disabled = true;
-        const userId = userIdInput.value;
-        const method = userId ? "PUT" : "POST";
-        const path = userId ? `/users/${userId}` : "/users";
+        if (confirmModalTitle) confirmModalTitle.textContent = title;
+        if (confirmModalText) confirmModalText.textContent = message;
+        if (confirmModalOk) confirmModalOk.textContent = confirmLabel;
+        pendingConfirmation = action;
+        confirmModal.classList.add("active");
+        if (confirmModalCancel) confirmModalCancel.focus();
+    }
+
+    function closeConfirmModal() {
+        if (confirmModal) confirmModal.classList.remove("active");
+        pendingConfirmation = null;
+    }
+
+    // 3. CREATE OR UPDATE USER (POST /users or PUT /users/{id})
+    async function handleSaveUser(e) {
+        e.preventDefault();
+        const id = userIdInput.value;
+        const payload = {
+            username: userUsernameInput.value.trim(),
+            role: userRoleInput.value
+        };
 
         try {
-            await request(path, {
-                method,
-                body: JSON.stringify({
-                    username: usernameInput.value.trim(),
-                    role: roleSelect.value,
-                }),
-            });
+            let response;
+            if (id) {
+                // UPDATE user (PUT /users/{user_id})
+                response = await fetch(`${API_BASE}/users/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                // CREATE user (POST /users)
+                response = await fetch(`${API_BASE}/users`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+            }
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.detail || "Failed to save user");
+            }
+
+            showToast(id ? "User updated successfully!" : "User created successfully!", "success");
             closeModal();
-            await Promise.all([loadUsers(), loadResetRequests()]);
-            showToast(userId ? "User updated." : "User created with the default password.");
+            loadAllData();
         } catch (error) {
-            showToast(`Could not save user: ${error.message}`);
-        } finally {
-            saveButton.disabled = false;
+            showToast(error.message, "error");
         }
-    });
+    }
 
-    usersTableBody.addEventListener("click", async event => {
-        const button = event.target.closest("button[data-action]");
-        if (!button) return;
-
-        const userId = Number(button.dataset.id);
-        const user = users.find(item => item.user_id === userId);
-        if (!user) return;
-
-        if (button.dataset.action === "edit") {
-            openModal(user);
-            return;
-        }
-
-        if (button.dataset.action === "reset") {
-            if (!window.confirm(`Reset ${user.username}'s password to password123?`)) return;
+    // 4. DELETE USER (DELETE /users/{user_id})
+    window.appDeleteUser = function(id) {
+        showConfirmModal("Delete user?", "Are you sure you want to delete this user? This action cannot be undone.", "Delete user", async () => {
             try {
-                await request(`/users/${userId}/reset-password`, { method: "POST" });
-                await Promise.all([loadUsers(), loadResetRequests()]);
-                showToast("Password reset successfully.");
-            } catch (error) {
-                showToast(`Could not reset password: ${error.message}`);
-            }
-            return;
-        }
+                const response = await fetch(`${API_BASE}/users/${id}`, {
+                    method: "DELETE"
+                });
 
-        if (button.dataset.action === "delete") {
-            if (user.user_id === session.user_id) {
-                showToast("You cannot delete the account you are currently using.");
-                return;
+                if (!response.ok && response.status !== 204) {
+                    throw new Error("Failed to delete user");
+                }
+
+                showToast("User deleted successfully", "success");
+                loadAllData();
+            } catch (error) {
+                showToast(error.message, "error");
             }
-            if (!window.confirm(`Delete user ${user.username}? Any linked employee record will be kept without a login account.`)) return;
+        });
+    }
+
+    // 5. ADMIN RESET USER PASSWORD DIRECTLY (POST /users/{user_id}/reset-password)
+    window.appResetPassword = function(id, username) {
+        showConfirmModal("Reset password?", `Reset the password for "${username}" back to the default password?`, "Reset password", async () => {
             try {
-                await request(`/users/${userId}`, { method: "DELETE" });
-                await Promise.all([loadUsers(), loadResetRequests()]);
-                showToast("User deleted.");
+                const response = await fetch(`${API_BASE}/users/${id}/reset-password`, {
+                    method: "POST"
+                });
+
+                if (!response.ok) throw new Error("Failed to reset password");
+
+                const result = await response.json();
+                showToast(result.message || "Password reset successfully.", "success");
             } catch (error) {
-                showToast(`Could not delete user: ${error.message}`);
+                showToast(error.message, "error");
             }
-        }
-    });
+        });
+    }
 
-    resetRequestsBody.addEventListener("click", async event => {
-        const button = event.target.closest('button[data-action="approve-reset"]');
-        if (!button) return;
-        const userId = Number(button.dataset.id);
-        const requestedUser = users.find(user => user.user_id === userId);
-        const name = requestedUser?.username || "this account";
-        if (!window.confirm(`Reset ${name}'s password to password123?`)) return;
+    // 6. APPROVE PENDING PASSWORD RESET REQUEST (POST /auth/password-reset-requests/{user_id}/approve)
+    window.appApproveReset = function(userId) {
+        showConfirmModal("Approve password reset?", "Approve the password reset request for this user?", "Approve reset", async () => {
+            try {
+                const response = await fetch(`${API_BASE}/auth/password-reset-requests/${userId}/approve`, {
+                    method: "POST"
+                });
 
-        button.disabled = true;
-        try {
-            await request(`/auth/password-reset-requests/${userId}/approve`, { method: "POST" });
-            await Promise.all([loadUsers(), loadResetRequests()]);
-            showToast("Request approved. The user must change the temporary password after login.");
-        } catch (error) {
-            button.disabled = false;
-            showToast(`Could not approve request: ${error.message}`);
-        }
-    });
+                if (!response.ok) throw new Error("Failed to approve password reset");
 
-    loadUsers();
-    loadResetRequests();
+                const result = await response.json();
+                showToast(result.message || "Password reset approved successfully.", "success");
+                loadAllData();
+            } catch (error) {
+                showToast(error.message, "error");
+            }
+        });
+    }
+
+    // Utility: Toast notifications
+    function showToast(message, type = "success") {
+        const toast = document.getElementById("toastNotification");
+        if (!toast) return;
+        toast.textContent = message;
+        toast.className = `toast show ${type}`;
+        setTimeout(() => {
+            toast.className = "toast";
+        }, 3500);
+    }
+
+    // Utility: Prevent XSS
+    function escapeHtml(str) {
+        if (!str) return "";
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
 });

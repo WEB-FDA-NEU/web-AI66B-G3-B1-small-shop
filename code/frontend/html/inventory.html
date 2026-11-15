@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="../css/sales.css">
     <link rel="stylesheet" href="../css/inventory.css">
 </head>
-<body>
+<body class="employee-page">
 
     <!-- Sidebar Navigation -->
     <button class="menu-btn">☰</button>
@@ -46,6 +46,9 @@
                 </li>
                 <li>
                     <a href="sales.html"><i class="fa-solid fa-chart-line"></i> Sales</a>
+                </li>
+                <li>
+                <a href="users.html"><i class="fa-solid fa-user-gear"></i> Users</a>
                 </li>
             </ul>
         </div>
@@ -119,7 +122,7 @@
                         <th>Stock Qty</th>
                         <th>Import Date</th>
                         <th>Status</th>
-                        <th id="inventoryActionsHeader" style="text-align: right;">Actions</th>
+                        <th style="text-align: right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="inventoryTableBody">
@@ -184,6 +187,5 @@
     <!-- Custom Script -->
     <script src="../js/inventory_script.js"></script>
     <script src="../js/home.js"></script>
-    <script src="../js/session.js?v=1"></script>
 </body>
 </html>

@@ -63,9 +63,7 @@ if (loginForm) {
 
             const user = await response.json();
             sessionStorage.setItem("authenticatedUser", JSON.stringify(user));
-            window.location.href = user.must_change_password
-                ? "../html/change_password.html"
-                : "../html/home.html";
+            window.location.href = "../html/home.html";
         } catch (error) {
             if (message) {
                 message.textContent = error.message || "Unable to connect to the server.";

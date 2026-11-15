@@ -10,14 +10,12 @@
 
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="../css/employee.css">
     <link rel="stylesheet" href="../css/profile.css">
-    <link rel="stylesheet" href="../css/sales.css">
-    <link rel="stylesheet" href="../css/home.css?v=2">
+    
     
 </head>
-<body>
+<body class="employee-page">
     <!--navigation bar at left side-->
     <button class="menu-btn">☰</button>
 
@@ -41,6 +39,9 @@
             </li>
             <li>
                 <a href="sales.html"><i class="fa-solid fa-chart-line"></i> Sales</a>
+            </li>
+            <li>
+                <a href="users.html"><i class="fa-solid fa-user-gear"></i> Users</a>
             </li>
         </ul>
             <!--khi nào ae code thêm html thì đổi tên href vào-->
@@ -67,89 +68,11 @@
             </div>
         </header>
 
-        <section class="employee-dashboard" id="employeeDashboard" hidden>
+        <section>
 
-            <p class="employee-dashboard-message" id="employeeDashboardMessage" role="status">
-                Loading your dashboard...
-            </p>
-
-            <div id="employeeDashboardContent" hidden>
-                <div class="employee-dashboard-kpis">
-                    <article class="employee-dashboard-card">
-                        <span class="employee-dashboard-card-label">Orders Served</span>
-                        <strong id="employeeOrdersKpi">0</strong>
-                        <i class="fa-solid fa-receipt" aria-hidden="true"></i>
-                    </article>
-                    <article class="employee-dashboard-card">
-                        <span class="employee-dashboard-card-label">Total Sales</span>
-                        <strong id="employeeSalesKpi">0 ₫</strong>
-                        <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
-                    </article>
-                    <article class="employee-dashboard-card">
-                        <span class="employee-dashboard-card-label">Days Worked</span>
-                        <strong id="employeeDaysKpi">0</strong>
-                        <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
-                    </article>
-                </div>
-
-                <section class="charts-grid" aria-label="Your performance charts">
-                    <article class="chart-card">
-                        <div class="chart-header">
-                            <div>
-                                <div class="chart-title">Revenue by Month</div>
-                                <div class="chart-subtitle">Monthly revenue over the last six months</div>
-                            </div>
-                        </div>
-                        <div class="chart-canvas-wrapper">
-                            <canvas id="employeeRevenueChart" role="img"
-                                    aria-label="Monthly revenue line chart"></canvas>
-                        </div>
-                    </article>
-
-                    <article class="chart-card">
-                        <div class="chart-header">
-                            <div>
-                                <div class="chart-title">Orders Served</div>
-                                <div class="chart-subtitle">Monthly order count over the last six months</div>
-                            </div>
-                        </div>
-                        <div class="chart-canvas-wrapper">
-                            <canvas id="employeeOrdersChart" role="img"
-                                    aria-label="Monthly orders bar chart"></canvas>
-                        </div>
-                    </article>
-                </section>
-
-                <section class="employee-dashboard-orders" aria-labelledby="employeeRecentOrdersTitle">
-                    <div class="employee-dashboard-section-heading">
-                        <div>
-                            <h3 id="employeeRecentOrdersTitle">Recent Orders Served</h3>
-                            <p>Your latest customer orders.</p>
-                        </div>
-                    </div>
-                    <div class="employee-dashboard-table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Order</th>
-                                    <th>Date</th>
-                                    <th>Customer</th>
-                                    <th>Items</th>
-                                    <th>Total</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="employeeRecentOrdersBody">
-                                <tr><td colspan="6">Loading recent orders...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            </div>
         </section>
     </main>
 
-    <script src="../js/session.js?v=1"></script>
-    <script src="../js/home.js?v=7"></script>
+    <script src="../js/home.js"></script>
 </body>
 </html>

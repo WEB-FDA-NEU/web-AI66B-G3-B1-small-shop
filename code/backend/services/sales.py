@@ -114,7 +114,7 @@ def get_sales_overview(top_n: str = "5", category: Optional[str] = None, timefra
         with connection.cursor() as cursor:
             current_cond, previous_cond = _period_conditions(timeframe)
 
-            # ---------- 1. Danh sách sản phẩm (xếp hạng theo doanh thu) ----------
+            # 1. Base query setup
             query = f"""
                 SELECT
                     p.product_id AS id,
@@ -136,13 +136,19 @@ def get_sales_overview(top_n: str = "5", category: Optional[str] = None, timefra
                 ) s ON s.product_id = p.product_id
                 WHERE 1=1
             """
+            
+            # Parameters list matching the exact order of %s placeholders in the query string:
+            # 1. First %s is o.deliver_status
             params: List[Any] = [COMPLETED_STATUS]
+
+            # 2. Next %s is category (in the outer WHERE clause, which appears BEFORE LIMIT)
             if category:
                 query += " AND c.category_name = %s"
                 params.append(category)
 
             query += " ORDER BY total_revenue DESC, p.name ASC"
 
+            # 3. Last %s is LIMIT (appears at the very end of the query)
             if top_n and str(top_n).upper() != "ALL":
                 query += " LIMIT %s"
                 params.append(int(top_n))
