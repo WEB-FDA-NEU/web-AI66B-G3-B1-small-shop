@@ -44,6 +44,14 @@ const openModalBtn = document.getElementById('openAddModalBtn');
 const closeModalBtn = document.getElementById('closeModalBtn');
 const cancelModalBtn = document.getElementById('cancelModalBtn');
 const toast = document.getElementById('toastNotification');
+const inventorySessionUser = JSON.parse(sessionStorage.getItem('authenticatedUser') || '{}');
+const isEmployee = inventorySessionUser.role === 'Employee';
+const actionsHeader = document.getElementById('inventoryActionsHeader');
+
+if (isEmployee) {
+  if (openModalBtn) openModalBtn.hidden = true;
+  if (actionsHeader) actionsHeader.hidden = true;
+}
 
 // Form Input Elements (Lưu trữ SKU)
 const skuInput = document.createElement('input');
@@ -100,7 +108,7 @@ function renderTable(data) {
   if (!data || data.length === 0) {
     tableBody.innerHTML = `
       <tr>
-        <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">
+        <td colspan="${isEmployee ? 7 : 8}" style="text-align: center; color: var(--text-muted); padding: 30px;">
           No matching products found in inventory.
         </td>
       </tr>
@@ -127,7 +135,7 @@ function renderTable(data) {
       <td style="font-weight: 600;">${stockQty}${expiredQty > 0 ? ` <span style="font-weight: 400; font-size: 0.75rem; color: var(--text-muted);">(+${expiredQty} expired)</span>` : ''}</td>
       <td>${item.import_date || '—'}</td>
       <td><span class="badge ${badgeClass}">${statusText}</span></td>
-      <td>
+      ${isEmployee ? '' : `<td>
         <div class="action-buttons" style="justify-content: flex-end;">
           <button class="btn-icon" title="Edit Product" onclick="openEditProductModal('${skuCode}')">
             <i class="fa-solid fa-pen-to-square"></i>
@@ -136,7 +144,7 @@ function renderTable(data) {
             <i class="fa-solid fa-trash-can"></i>
           </button>
         </div>
-      </td>
+      </td>`}
     `;
     tableBody.appendChild(tr);
   });
