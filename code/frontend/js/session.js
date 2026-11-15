@@ -1,77 +1,112 @@
 (() => {
-    const apiOrigin = "http://127.0.0.1:8000";
-    const page = window.location.pathname.split("/").pop();
-    const publicPages = new Set(["index.html", "forgot_password.html"]);
-    const userJson = sessionStorage.getItem("authenticatedUser");
-    let user = null;
+    if (window.YUMSSessionLoaded) return;
+    window.YUMSSessionLoaded = true;
 
-    if (userJson) {
-        try {
-            user = JSON.parse(userJson);
-        } catch (error) {
-            console.error("Unable to read the authenticated session.", error);
-            sessionStorage.removeItem("authenticatedUser");
-        }
+    const storageKey = "authenticatedUser";
+    const loginPage = "index.html";
+    const userJson = sessionStorage.getItem(storageKey);
+    let user;
+
+    try {
+        user = userJson ? JSON.parse(userJson) : null;
+    } catch (error) {
+        console.error("Unable to read the authenticated user's session.", error);
     }
 
-    if (!publicPages.has(page) && !user?.access_token) {
-        window.location.replace("index.html");
+    if (!user || !user.access_token) {
+        sessionStorage.removeItem(storageKey);
+        window.location.replace(loginPage);
         return;
     }
 
-    if (user?.must_change_password && page !== "change_password.html") {
+    const page = window.location.pathname.split("/").pop() || "";
+    const employeePages = new Set([
+        "home.html",
+        "order_create_edit.html",
+        "order_view.html",
+        "order_check.html",
+        "customers.html",
+        "customers_detail.html",
+        "inventory.html",
+        "employee_details.html",
+        "change_password.html"
+    ]);
+
+    if (user.role === "Employee" && !employeePages.has(page)) {
+        window.location.replace("home.html");
+        return;
+    }
+
+    if (user.must_change_password && page !== "change_password.html") {
         window.location.replace("change_password.html");
         return;
     }
+    if (!user.must_change_password && page === "change_password.html") {
+        window.location.replace("home.html");
+        return;
+    }
 
-    const originalFetch = window.fetch.bind(window);
-    window.fetch = async (input, options = {}) => {
+    window.currentUser = user;
+    document.documentElement.classList.add(
+        `role-${String(user.role).toLowerCase()}`,
+        `page-${page.replace(/\.html$/, "").replace(/[^a-z0-9-]/gi, "-").toLowerCase()}`
+    );
+
+    const roleStyles = document.createElement("style");
+    roleStyles.textContent = `
+        html.role-employee .sidebar-menu a[href="employees.html"],
+        html.role-employee .sidebar-menu a[href="employee_details.html"],
+        html.role-employee .sidebar-menu a[href="sales.html"],
+        html.role-employee .sidebar-menu a[href="users.html"],
+        html.role-employee #backToEmployees {
+            display: none !important;
+        }
+        html.page-customers.role-employee #deleteCustomerModal {
+            display: none !important;
+        }
+        html.page-inventory.role-employee #openAddModalBtn,
+        html.page-inventory.role-employee #productModal,
+        html.page-inventory.role-employee .inventory-table th:last-child {
+            display: none !important;
+        }
+    `;
+    document.head.appendChild(roleStyles);
+
+    const apiPaths = [
+        "/auth/",
+        "/users",
+        "/employees",
+        "/customers",
+        "/orders",
+        "/products",
+        "/inventory",
+        "/categories",
+        "/sales"
+    ];
+    const nativeFetch = window.fetch.bind(window);
+    window.fetch = async (input, init = {}) => {
         const requestUrl = new URL(
-            input instanceof Request ? input.url : input,
+            typeof input === "string" ? input : input.url,
             window.location.href
         );
-        const isLocalApi = requestUrl.origin === apiOrigin;
-        const isProductionApi = requestUrl.hostname === "small-shop-tailscale.onrender.com";
-        if (!isLocalApi && !isProductionApi) {
-            return originalFetch(input, options);
+        const isApiRequest = apiPaths.some(path => requestUrl.pathname.startsWith(path));
+        const isPublicAuthRequest =
+            requestUrl.pathname === "/auth/login" ||
+            requestUrl.pathname === "/auth/forgot-password";
+        const headers = new Headers(input instanceof Request ? input.headers : undefined);
+
+        if (init.headers) {
+            new Headers(init.headers).forEach((value, name) => headers.set(name, value));
+        }
+        if (isApiRequest && !isPublicAuthRequest) {
+            headers.set("Authorization", `Bearer ${user.access_token}`);
         }
 
-        if (isProductionApi) {
-            requestUrl.protocol = "http:";
-            requestUrl.hostname = "127.0.0.1";
-            requestUrl.port = "8000";
+        const response = await nativeFetch(input, { ...init, headers });
+        if (isApiRequest && response.status === 401) {
+            sessionStorage.removeItem(storageKey);
+            window.location.replace(loginPage);
         }
-
-        const headers = new Headers(
-            options.headers || (input instanceof Request ? input.headers : undefined)
-        );
-        const currentSession = JSON.parse(
-            sessionStorage.getItem("authenticatedUser") || "null"
-        );
-        if (currentSession?.access_token) {
-            headers.set("Authorization", `Bearer ${currentSession.access_token}`);
-        }
-
-        const response = await originalFetch(requestUrl, {
-            ...options,
-            headers,
-        });
-
-        if (response.status === 401 && !requestUrl.pathname.endsWith("/auth/login")
-            && !requestUrl.pathname.endsWith("/auth/forgot-password")) {
-            sessionStorage.removeItem("authenticatedUser");
-            window.location.replace("index.html");
-        } else if (response.status === 403) {
-            const body = await response.clone().json().catch(() => null);
-            if (body?.detail === "Password change required.") {
-                if (currentSession) {
-                    currentSession.must_change_password = true;
-                    sessionStorage.setItem("authenticatedUser", JSON.stringify(currentSession));
-                }
-                window.location.replace("change_password.html");
-            }
-        }
-
         return response;
     };
 })();

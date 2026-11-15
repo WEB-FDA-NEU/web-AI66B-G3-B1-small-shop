@@ -156,7 +156,10 @@ function renderOrderNote(order) {
     noteRow.appendChild(noteCell);
 
     // Only not_deliver orders can edit Note
-    if (order.deliver_status === "not_deliver") {
+    if (
+        order.deliver_status === "not_deliver" &&
+        window.currentUser?.role !== "Employee"
+    ) {
         noteDisplay.classList.add("editable");
 
         // Open editor

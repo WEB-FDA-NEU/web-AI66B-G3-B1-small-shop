@@ -8,8 +8,24 @@ sys.path.insert(0, BACKEND_DIR)
 import pytest
 from fastapi.testclient import TestClient
 from backend.main import app
+from backend.services.auth import get_current_user
 
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def authenticate_as_manager():
+    previous_override = app.dependency_overrides.get(get_current_user)
+    app.dependency_overrides[get_current_user] = lambda: {
+        "user_id": 1,
+        "username": "sales-test-manager",
+        "role": "Manager",
+    }
+    yield
+    if previous_override is None:
+        app.dependency_overrides.pop(get_current_user, None)
+    else:
+        app.dependency_overrides[get_current_user] = previous_override
 
 # US11: SALES ANALYTICS 
 

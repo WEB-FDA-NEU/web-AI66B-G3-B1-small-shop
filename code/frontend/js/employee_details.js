@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const isEmployee = window.currentUser?.role === 'Employee';
     const employeeId = Number(new URLSearchParams(window.location.search).get('id'));
     const recentOrdersBody = document.getElementById('recentOrdersBody');
 
@@ -94,14 +95,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function loadEmployeeDetails() {
-        if (!Number.isInteger(employeeId) || employeeId <= 0) {
+        if (!isEmployee && (!Number.isInteger(employeeId) || employeeId <= 0)) {
             showError('Invalid employee ID.');
             return;
         }
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/employees/${encodeURIComponent(employeeId)}/details`
+                isEmployee
+                    ? 'http://127.0.0.1:8000/auth/me/employee-details'
+                    : `http://127.0.0.1:8000/employees/${encodeURIComponent(employeeId)}/details`
             );
             const result = await response.json().catch(() => null);
             if (!response.ok) {

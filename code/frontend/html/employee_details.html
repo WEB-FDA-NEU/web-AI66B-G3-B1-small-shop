@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/employee.css">
     <link rel="stylesheet" href="../css/profile.css">
+    <script src="../js/session.js"></script>
     <link rel="stylesheet" href="../css/customers_detail.css">
     <link rel="stylesheet" href="../css/employee_details.css">
 </head>
@@ -40,10 +41,17 @@
                 <p>View employee information, performance, and recent orders served.</p>
             </div>
             <div class="header-actions">
-                <a class="btn-secondary" href="employees.html">
+                <a class="btn-secondary" id="backToEmployees" href="employees.html">
                     <i class="fa-solid fa-arrow-left"></i>
                     Back to Employees
                 </a>
+                <div class="user-profile">
+                    <div class="user-avatar"></div>
+                    <div class="user-info">
+                        <div class="user-name"></div>
+                        <div class="user-role"></div>
+                    </div>
+                </div>
             </div>
         </header>
 

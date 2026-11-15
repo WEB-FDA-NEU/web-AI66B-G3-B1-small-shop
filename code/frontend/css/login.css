@@ -145,6 +145,16 @@ body {
     color: var(--color-soft-blue);
 }
 
+.form-group input[type="password"]::-ms-reveal,
+.form-group input[type="password"]::-ms-clear {
+    display: none;
+}
+
+.login-form .users-password-note {
+    color: var(--color-soft-blue);
+    line-height: 1.5;
+}
+
 /*FORM IN REGISTER*/
 .login-form-regi {
     display: flex;

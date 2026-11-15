@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let sortAscending = true;
     let pendingDeleteId = null;
     let deleteTrigger = null;
+    const canDeleteCustomers = window.currentUser?.role !== 'Employee';
 
     function customerLabel(id) {
         return `CUS-${String(id).padStart(3, '0')}`;
@@ -120,9 +121,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         <a class="btn-icon" href="customers_detail.html?id=${encodeURIComponent(customer.customer_id)}" title="View customer details" aria-label="View details for ${customerLabel(customer.customer_id)}">
                             <i class="fa-solid fa-eye" aria-hidden="true"></i>
                         </a>
-                        <button class="btn-icon btn-delete delete" data-id="${customer.customer_id}" title="Delete">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
+                        ${canDeleteCustomers ? `
+                            <button class="btn-icon btn-delete delete" data-id="${customer.customer_id}" title="Delete">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        ` : ''}
                     </div>
                 </td>`;
             tableBody.appendChild(row);
@@ -216,6 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openDeleteConfirmation(customer, trigger) {
+        if (!canDeleteCustomers) return;
         pendingDeleteId = customer.customer_id;
         deleteTrigger = trigger;
         deleteCustomerName.textContent = `${customerLabel(customer.customer_id)} — ${customer.name}`;
@@ -233,6 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function deletePendingCustomer() {
+        if (!canDeleteCustomers) return;
         if (pendingDeleteId === null) return;
 
         const id = pendingDeleteId;
@@ -336,6 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (deleteButton) {
+            if (!canDeleteCustomers) return;
             const id = Number(deleteButton.dataset.id);
             const customer = customers.find(item => item.customer_id === id);
             if (customer) openDeleteConfirmation(customer, deleteButton);

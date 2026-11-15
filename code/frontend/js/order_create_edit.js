@@ -134,7 +134,7 @@ async function loadDishes() {
                 name: product.name,
                 price: Number(product.unit_price),
                 image: productImages[Number(product.product_id)]
-                    || "../img/tiramisu.jpg"
+                    || "https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png"
             }));
 
         renderDishes(availableDishes);

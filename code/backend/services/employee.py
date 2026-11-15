@@ -217,6 +217,33 @@ def get_employee_details(employee_id: int) -> Dict[str, Any]:
         connection.close()
 
 
+def get_employee_details_by_username(username: str) -> Dict[str, Any]:
+    """Fetch employee details for the employee account linked to this username."""
+    connection = get_connection()
+    if not connection:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Database connection failed."
+        )
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT employee_id FROM employees WHERE username = %s LIMIT 1;",
+                (username,),
+            )
+            employee = cursor.fetchone()
+    finally:
+        connection.close()
+
+    if not employee:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No employee profile is linked to this account.",
+        )
+    return get_employee_details(employee["employee_id"])
+
+
 def delete_employee(employee_id: int) -> Dict[str, str]:
     """Deletes an employee record from the database by ID."""
     connection = get_connection()

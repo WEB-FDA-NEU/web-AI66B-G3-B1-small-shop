@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="../css/profile.css">
     <link rel="stylesheet" href="../css/sales.css">
     <link rel="stylesheet" href="../css/inventory.css">
+    <script src="../js/session.js"></script>
 </head>
 <body class="employee-page">
 
@@ -79,7 +80,7 @@
             <div class="filter-group">
                 <div class="search-box">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="searchInput" placeholder="Search product name or product ID...">
+                    <input type="text" id="searchInput" placeholder="Search product name or inventory ID...">
                 </div>
 
                 <div class="filter-select">
@@ -115,12 +116,13 @@
             <table class="inventory-table">
                 <thead>
                     <tr>
-                        <th>Product ID</th>
+                        <th>Inventory ID</th>
                         <th>Product Name</th>
                         <th>Category</th>
                         <th>Unit Price</th>
                         <th>Stock Qty</th>
                         <th>Import Date</th>
+                        <th>Expiry Date</th>
                         <th>Status</th>
                         <th style="text-align: right;">Actions</th>
                     </tr>
@@ -168,16 +170,42 @@
                             <label for="stock">Stock Quantity *</label>
                             <input type="number" id="stock" placeholder="15" min="0" required>
                         </div>
-                        <div class="form-group">
-                            <label for="minStock">Low-Stock Alert Level</label>
-                            <input type="number" id="minStock" placeholder="10" value="10" min="1">
-                        </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn-secondary" id="cancelModalBtn">Cancel</button>
                 <button type="submit" form="productForm" class="btn-primary" id="saveProductBtn">Save Product</button>
+            </div>
+        </div>
+    </div>
+
+    <div
+        class="modal-overlay delete-confirmation-overlay"
+        id="deleteInventoryModal"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="deleteInventoryTitle"
+        aria-describedby="deleteInventoryMessage"
+        tabindex="-1"
+    >
+        <div class="modal-container delete-confirmation">
+            <div class="delete-confirmation-icon" aria-hidden="true">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <div class="delete-confirmation-content">
+                <h3 id="deleteInventoryTitle">Delete inventory record?</h3>
+                <p id="deleteInventoryMessage">
+                    Are you sure you want to delete <strong id="deleteInventoryCode"></strong>?
+                    This action cannot be undone.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="cancelDeleteInventoryBtn">Keep record</button>
+                <button type="button" class="btn-delete-confirm" id="confirmDeleteInventoryBtn">
+                    <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                    Delete record
+                </button>
             </div>
         </div>
     </div>

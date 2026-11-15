@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 from typing import Optional, List, Dict, Any
 
@@ -6,60 +7,79 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from database.connect_db import get_connection
 from schema.inventory import InventoryCreate, InventoryUpdate
 
-LOW_STOCK_THRESHOLD = 5      # tồn kho còn hạn <= ngưỡng này là 'Low Stock'
-NEAR_EXPIRY_DAYS = 2         # có lô hết hạn trong vòng N ngày tới là 'Near Expiration'
+LOW_STOCK_THRESHOLD = 5      # lô có số lượng <= ngưỡng này là 'Low Stock'
+NEAR_EXPIRY_DAYS = 2         # lô hết hạn trong vòng N ngày tới là 'Near Expiration'
 SHELF_LIFE_DAYS = 7          # hạn dùng mặc định của lô hàng mới nhập
 
 # Điều kiện một lô hàng còn dùng được (chưa hết hạn)
 NOT_EXPIRED = "(i.expiry_date IS NULL OR i.expiry_date >= CURDATE())"
 
 
-def _inventory_select(where: str = "") -> str:
-    """Câu SELECT dùng chung cho danh sách / thêm / sửa (tránh lặp lại 3 lần)."""
+def _parse_inventory_id(code: str) -> int:
+    """'INV-012' -> 12 (cũng chấp nhận '12')."""
+    digits = re.sub(r"\D", "", str(code))
+    if not digits:
+        raise ValueError("Invalid inventory id")
+    return int(digits)
+
+
+def _batch_select(where: str = "") -> str:
+    """Mỗi dòng = MỘT lô nhập kho (inventory record). Không gộp theo sản phẩm.
+    Trạng thái tính riêng cho từng lô:
+    Sold out > Expired > Low Stock > Near Expiration > Available."""
     return f"""
         SELECT
             t.*,
-            -- 5 trạng thái: Sold out > Expired > Low Stock > Near Expiration > Available
             CASE
-                WHEN t.stock_quantity = 0 AND t.expired_quantity = 0 THEN 'Sold out'
-                WHEN t.stock_quantity = 0 THEN 'Expired'
+                WHEN t.stock_quantity = 0 THEN 'Sold out'
+                WHEN t.expiry_date IS NOT NULL AND t.expiry_date < CURDATE() THEN 'Expired'
                 WHEN t.stock_quantity <= {LOW_STOCK_THRESHOLD} THEN 'Low Stock'
-                WHEN t.near_expiry_quantity > 0 THEN 'Near Expiration'
+                WHEN t.expiry_date IS NOT NULL
+                     AND t.expiry_date <= DATE_ADD(CURDATE(), INTERVAL {NEAR_EXPIRY_DAYS} DAY) THEN 'Near Expiration'
                 ELSE 'Available'
             END AS status,
             CASE
-                WHEN t.stock_quantity = 0 AND t.expired_quantity = 0 THEN 'badge-soldout'
-                WHEN t.stock_quantity = 0 THEN 'badge-expired'
+                WHEN t.stock_quantity = 0 THEN 'badge-soldout'
+                WHEN t.expiry_date IS NOT NULL AND t.expiry_date < CURDATE() THEN 'badge-expired'
                 WHEN t.stock_quantity <= {LOW_STOCK_THRESHOLD} THEN 'badge-lowstock'
-                WHEN t.near_expiry_quantity > 0 THEN 'badge-nearexp'
+                WHEN t.expiry_date IS NOT NULL
+                     AND t.expiry_date <= DATE_ADD(CURDATE(), INTERVAL {NEAR_EXPIRY_DAYS} DAY) THEN 'badge-nearexp'
                 ELSE 'badge-instock'
-            END AS badge_class,
-            CONCAT('P-', LPAD(t.product_id, 3, '0')) AS sku
+            END AS badge_class
         FROM (
             SELECT
+                i.inventory_id,
+                CONCAT('INV-', LPAD(i.inventory_id, 3, '0')) AS inventory_code,
                 p.product_id,
+                CONCAT('P-', LPAD(p.product_id, 3, '0')) AS product_code,
                 p.name AS product_name,
                 p.category_id,
                 COALESCE(c.category_name, 'General') AS category_name,
                 COALESCE(c.category_name, 'General') AS category,
                 p.unit_price,
                 p.is_available,
-                -- stock_quantity: CHỈ tính hàng còn hạn (có thể bán)
-                COALESCE(SUM(CASE WHEN {NOT_EXPIRED} THEN i.quantity ELSE 0 END), 0) AS stock_quantity,
-                -- expired_quantity: hàng đã hết hạn, cần hủy (không cộng vào tồn kho)
-                COALESCE(SUM(CASE WHEN i.expiry_date < CURDATE() THEN i.quantity ELSE 0 END), 0) AS expired_quantity,
-                -- near_expiry_quantity: hàng còn hạn nhưng sắp hết hạn
-                COALESCE(SUM(CASE WHEN i.expiry_date >= CURDATE()
-                                   AND i.expiry_date <= DATE_ADD(CURDATE(), INTERVAL {NEAR_EXPIRY_DAYS} DAY)
-                                  THEN i.quantity ELSE 0 END), 0) AS near_expiry_quantity,
-                MAX(i.stocked_at) AS import_date
-            FROM products p
-            LEFT JOIN categories c ON p.category_id = c.category_id
-            LEFT JOIN inventory i ON p.product_id = i.product_id
+                i.quantity AS stock_quantity,
+                i.stocked_at AS import_date,
+                i.expiry_date
+            FROM inventory i
+            JOIN products p ON p.product_id = i.product_id
+            LEFT JOIN categories c ON c.category_id = p.category_id
             {where}
-            GROUP BY p.product_id, p.name, p.category_id, c.category_name, p.unit_price, p.is_available
         ) t
     """
+
+
+def _sync_batch_status(cursor) -> None:
+    """Giữ cột inventory.status (Available / Near Expiration / Expired) đúng theo ngày hiện tại."""
+    cursor.execute(f"""
+        UPDATE inventory
+        SET status = CASE
+            WHEN expiry_date IS NULL THEN status
+            WHEN expiry_date < CURDATE() THEN 'Expired'
+            WHEN expiry_date <= DATE_ADD(CURDATE(), INTERVAL {NEAR_EXPIRY_DAYS} DAY) THEN 'Near Expiration'
+            ELSE 'Available'
+        END
+    """)
 
 
 def _sync_availability(cursor, product_id: Optional[int] = None) -> None:
@@ -81,91 +101,105 @@ def _sync_availability(cursor, product_id: Optional[int] = None) -> None:
 
 
 def get_all_inventory() -> List[Dict[str, Any]]:
-    """Lấy danh sách tồn kho, sắp xếp theo product_id tăng dần.
-    Trạng thái: Available, Low Stock, Near Expiration, Expired, Sold out."""
+    """Lịch sử nhập kho: mỗi lô một dòng, mới nhập nhất xếp trước."""
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
-            # Hàng có thể hết hạn theo thời gian, nên đồng bộ is_available mỗi lần tải
+            _sync_batch_status(cursor)
             _sync_availability(cursor)
-            cursor.execute(_inventory_select() + " ORDER BY t.product_id ASC")
+            cursor.execute(_batch_select() + " ORDER BY t.import_date DESC, t.inventory_id DESC")
             return cursor.fetchall() or []
     finally:
         connection.close()
 
 
 def add_inventory(item_data: InventoryCreate) -> Dict[str, Any]:
+    """Nhập hàng: luôn tạo MỘT lô mới (dòng mới trong inventory).
+    Nếu sản phẩm (cùng tên + danh mục) đã tồn tại thì dùng lại sản phẩm đó, không tạo trùng."""
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
             cursor.execute(
-                "INSERT INTO products (name, category_id, unit_price, is_available) VALUES (%s, %s, %s, %s)",
-                (item_data.product_name, item_data.category_id, item_data.unit_price, item_data.stock_quantity > 0)
+                "SELECT product_id FROM products WHERE LOWER(name) = LOWER(%s) AND category_id = %s LIMIT 1",
+                (item_data.product_name.strip(), item_data.category_id)
             )
-            product_id = cursor.lastrowid
+            existing = cursor.fetchone()
+
+            if existing:
+                product_id = existing["product_id"]
+                cursor.execute(
+                    "UPDATE products SET unit_price = %s WHERE product_id = %s",
+                    (item_data.unit_price, product_id)
+                )
+            else:
+                cursor.execute(
+                    "INSERT INTO products (name, category_id, unit_price, is_available) VALUES (%s, %s, %s, %s)",
+                    (item_data.product_name.strip(), item_data.category_id, item_data.unit_price,
+                     item_data.stock_quantity > 0)
+                )
+                product_id = cursor.lastrowid
 
             cursor.execute(
                 "INSERT INTO inventory (product_id, quantity, stocked_at, expiry_date, status) "
                 "VALUES (%s, %s, CURDATE(), DATE_ADD(CURDATE(), INTERVAL %s DAY), %s)",
                 (product_id, item_data.stock_quantity, SHELF_LIFE_DAYS, 'Available')
             )
+            inventory_id = cursor.lastrowid
 
             _sync_availability(cursor, product_id)
-            cursor.execute(_inventory_select("WHERE p.product_id = %s"), (product_id,))
+            cursor.execute(_batch_select("WHERE i.inventory_id = %s"), (inventory_id,))
             return cursor.fetchone()
     finally:
         connection.close()
 
 
 def update_inventory(sku: str, item_data: InventoryUpdate) -> Optional[Dict[str, Any]]:
+    """Sửa MỘT lô: số lượng chỉ áp dụng cho lô này.
+    Tên và giá là thông tin của sản phẩm nên áp dụng cho mọi lô của sản phẩm đó.
+    (Tham số 'sku' nay là mã lô, ví dụ 'INV-012'.)"""
     connection = get_connection()
     try:
-        product_id = int(sku.replace("P-", ""))
+        inventory_id = _parse_inventory_id(sku)
         with connection.cursor() as cursor:
+            cursor.execute("SELECT product_id FROM inventory WHERE inventory_id = %s", (inventory_id,))
+            row = cursor.fetchone()
+            if not row:
+                return None
+            product_id = row["product_id"]
+
+            # Trường nào không gửi lên (None) thì giữ nguyên giá trị cũ
             cursor.execute(
-                "UPDATE products SET name = %s, unit_price = %s WHERE product_id = %s",
-                (item_data.product_name, item_data.unit_price, product_id)
+                "UPDATE products SET name = COALESCE(%s, name), unit_price = COALESCE(%s, unit_price), "
+                "category_id = COALESCE(%s, category_id) WHERE product_id = %s",
+                (item_data.product_name, item_data.unit_price, item_data.category_id, product_id)
             )
 
-            # Số lượng người dùng nhập = số lượng CÒN HẠN (có thể bán).
-            # Chỉ điều chỉnh các lô còn hạn, không đụng vào lô đã hết hạn.
-            cursor.execute(
-                f"SELECT inventory_id, quantity FROM inventory i WHERE i.product_id = %s AND {NOT_EXPIRED} "
-                "ORDER BY i.stocked_at DESC, i.inventory_id DESC",
-                (product_id,)
-            )
-            batches = cursor.fetchall() or []
-            desired = int(item_data.stock_quantity)
-
-            if not batches:
-                if desired > 0:
-                    cursor.execute(
-                        "INSERT INTO inventory (product_id, quantity, stocked_at, expiry_date, status) "
-                        "VALUES (%s, %s, CURDATE(), DATE_ADD(CURDATE(), INTERVAL %s DAY), %s)",
-                        (product_id, desired, SHELF_LIFE_DAYS, 'Available')
-                    )
-            else:
-                latest = batches[0]
-                others = sum(int(b["quantity"]) for b in batches[1:])
+            if item_data.stock_quantity is not None:
                 cursor.execute(
                     "UPDATE inventory SET quantity = %s WHERE inventory_id = %s",
-                    (max(0, desired - others), latest["inventory_id"])
+                    (item_data.stock_quantity, inventory_id)
                 )
 
             _sync_availability(cursor, product_id)
-            cursor.execute(_inventory_select("WHERE p.product_id = %s"), (product_id,))
+            cursor.execute(_batch_select("WHERE i.inventory_id = %s"), (inventory_id,))
             return cursor.fetchone()
     finally:
         connection.close()
 
 
 def delete_inventory(sku: str) -> bool:
+    """Xóa MỘT lô nhập kho. Sản phẩm vẫn được giữ lại (đơn hàng cũ còn tham chiếu tới nó)."""
     connection = get_connection()
     try:
-        product_id = int(sku.replace("P-", ""))
+        inventory_id = _parse_inventory_id(sku)
         with connection.cursor() as cursor:
-            cursor.execute("DELETE FROM inventory WHERE product_id = %s;", (product_id,))
-            cursor.execute("DELETE FROM products WHERE product_id = %s;", (product_id,))
-            return cursor.rowcount > 0
+            cursor.execute("SELECT product_id FROM inventory WHERE inventory_id = %s", (inventory_id,))
+            row = cursor.fetchone()
+            if not row:
+                return False
+            cursor.execute("DELETE FROM inventory WHERE inventory_id = %s", (inventory_id,))
+            deleted = cursor.rowcount > 0
+            _sync_availability(cursor, row["product_id"])
+            return deleted
     finally:
         connection.close()

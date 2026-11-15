@@ -133,6 +133,8 @@ body {
     overflow-y: auto;
     overflow-x: auto;
     min-width: 0;
+    border: 1px solid #D2C7B8;
+    border-radius: 0.75rem;
     scrollbar-width: thin;
     scrollbar-color: #D2C7B8 #EFE8DF;
 }

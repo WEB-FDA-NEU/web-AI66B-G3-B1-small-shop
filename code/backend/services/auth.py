@@ -3,14 +3,112 @@ import secrets
 import sys
 import threading
 import time
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 
 import bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+import jwt
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from backend.database.connect_db import get_connection
+from backend.config.api import settings
+
+
+_bearer_scheme = HTTPBearer(auto_error=False)
+_VALID_ROLES = {"Employee", "Manager", "Admin"}
+
+
+def _get_jwt_secret() -> str:
+    secret = settings.JWT_SECRET_KEY
+    if len(secret.encode("utf-8")) < 32 or secret.startswith("replace_"):
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Configure JWT_SECRET_KEY with a random value of at least 32 bytes.",
+        )
+    return secret
+
+
+def _create_access_token(user: Dict[str, Any]) -> str:
+    now = datetime.now(timezone.utc)
+    expires_at = now + timedelta(minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
+    return jwt.encode(
+        {
+            "sub": str(user["user_id"]),
+            "username": user["username"],
+            "role": user["role"],
+            "iat": now,
+            "exp": expires_at,
+        },
+        _get_jwt_secret(),
+        algorithm="HS256",
+    )
+
+
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
+) -> Dict[str, Any]:
+    if credentials is None or credentials.scheme.lower() != "bearer":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    try:
+        claims = jwt.decode(
+            credentials.credentials,
+            _get_jwt_secret(),
+            algorithms=["HS256"],
+            options={"require": ["exp", "iat", "sub"]},
+        )
+        user_id = int(claims["sub"])
+    except (jwt.InvalidTokenError, KeyError, TypeError, ValueError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired access token.",
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from None
+
+    connection = get_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT user_id, username, role
+                FROM users
+                WHERE user_id = %s AND is_active = TRUE
+                """,
+                (user_id,),
+            )
+            user = cursor.fetchone()
+    finally:
+        connection.close()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User account is unavailable. Please sign in again.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if user["role"] not in _VALID_ROLES:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This account does not have a valid application role.",
+        )
+    return user
+
+
+def require_roles(*allowed_roles: str):
+    def role_dependency(user: Dict[str, Any] = Depends(get_current_user)):
+        if user["role"] not in allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to perform this action.",
+            )
+        return user
+
+    return role_dependency
 
 
 def hash_password(password: str) -> str:
@@ -49,12 +147,14 @@ def authenticate_user(username: str, password: str) -> Dict[str, Any]:
                 detail="Invalid username or password.",
             )
 
+        access_token = _create_access_token(user)
         return {
             "user_id": user["user_id"],
             "username": user["username"],
             "role": user["role"],
             "must_change_password": bool(user["must_change_password"]),
-            #"access_token": _create_session(user["user_id"]),
+            "access_token": access_token,
+            "token_type": "bearer",
         }
     finally:
         connection.close()
