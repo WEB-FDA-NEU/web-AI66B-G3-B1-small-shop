@@ -47,6 +47,7 @@ VALUES
 -- 4 EMPLOYEES
 INSERT INTO employees (name, username, phone, role, status, created_at)
 VALUES
+('Nguyen Ha Vy', 'havy', '0334462331', 'Manager', 'Active', '2026-09-02')
 ('Tran Minh Anh', 'minhanh', '0912345678', 'Staff', 'Active', '2026-09-02'),
 ('Le Quang Huy', 'quanghuy', '0923456789', 'Staff', 'On Leave', '2026-09-05'),
 ('Pham Thu Trang', 'thutrang', '0934567890', 'Staff', 'Active', '2026-09-10'),
