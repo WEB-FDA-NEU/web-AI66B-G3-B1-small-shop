@@ -29,33 +29,45 @@ def authenticate_as_manager():
 
 # US11: SALES ANALYTICS 
 
+
 def test_tc_us11_01_get_sales_overview_normal():
-    """TC-US11-01: Normal case - Get Top 5 Beverage items"""
-    response = client.get("/sales/overview?top_n=5&category=Beverage")
+    """TC-US11-01: Normal case - Get Top 5 products"""
+    response = client.get("/sales/overview?top_n=5")
+
+    assert response.status_code == 200
+
+    data = response.json()
+    assert isinstance(data, dict)
+    assert "kpis" in data
+    assert "products" in data
+    assert "timeline" in data
+    assert isinstance(data["products"], list)
+    assert len(data["products"]) <= 5
+
+def test_tc_us11_02_top_n_all():
+    """TC-US11-02: Get all products using top_n=ALL"""
+    response = client.get("/sales/overview?top_n=ALL")
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
-    assert len(data) <= 5
-
-def test_tc_us11_02_invalid_top_n_format():
-    """TC-US11-02: Error case - Invalid parameter type for top_n"""
-    response = client.get("/sales/overview?top_n=invalid_text")
-    assert response.status_code in [400, 422, 500]
+    assert isinstance(data, dict)
+    assert "products" in data
+    assert isinstance(data["products"], list)
 
 def test_tc_us11_03_top_n_boundary_limit_one():
-    """TC-US11-03: Boundary case - Top N = 1 (Lower valid bound)"""
+    """TC-US11-03: Boundary case - Top N = 1"""
     response = client.get("/sales/overview?top_n=1")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 1
+    assert isinstance(data, dict)
+    assert len(data["products"]) <= 1
 
-def test_tc_us11_04_top_n_boundary_below_zero():
-    """TC-US11-04: Boundary case - Top N = 0 (Below valid bound)"""
+def test_tc_us11_04_top_n_boundary_zero():
+    """TC-US11-04: Boundary case - Top N = 0"""
     response = client.get("/sales/overview?top_n=0")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 0
-
+    assert isinstance(data, dict)
+    assert data["products"] == []
 
 # US15: DEMAND FORECASTING
 

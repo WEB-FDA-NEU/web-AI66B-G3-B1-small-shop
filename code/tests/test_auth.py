@@ -44,16 +44,15 @@ class FakeConnection:
         self.closed = True
 
 
-def make_user(password, is_active=True):
+def make_user(password, is_active=True, must_change_password=False):
     return {
         "user_id": 1,
         "username": "havy",
         "password": bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("ascii"),
         "role": "Admin",
         "is_active": is_active,
-        "must_change_password": False,
+        "must_change_password": must_change_password,
     }
-
 
 def test_authenticates_exact_username_and_bcrypt_password(monkeypatch):
     connection = FakeConnection(make_user("12345"))
@@ -65,13 +64,17 @@ def test_authenticates_exact_username_and_bcrypt_password(monkeypatch):
     assert result["user_id"] == 1
     assert result["username"] == "havy"
     assert result["role"] == "Admin"
+    assert result["must_change_password"] is False
+
     assert result["token_type"] == "bearer"
+
     claims = jwt.decode(
         result["access_token"],
         settings.JWT_SECRET_KEY,
         algorithms=["HS256"],
     )
     assert claims["sub"] == "1"
+
     assert connection.cursor_instance.parameters == ("havy",)
     assert "WHERE BINARY username = BINARY %s" in connection.cursor_instance.query
     assert connection.closed
