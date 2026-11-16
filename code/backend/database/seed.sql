@@ -28,7 +28,7 @@ VALUES
 ('quanghuy', '$2b$12$Ys.i/f99eRkkji8Rs.bg/.xM6A.La4rSWRGpowlnZcIOEtDGw/vwS', 'Employee', '2026-09-06 14:00:00'), -- quanghuy
 ('thutrang', '$2b$12$wd79ID6ttO/eb0yt/vI0lO8dZlAIaw0eAUTwuKsSt38hvhSumYh.a', 'Employee', '2026-09-12 10:20:00'), -- thutrang
 ('ducanh', '$2b$12$QWelM1jh2v9qdLZalHn7du.ZermdBxMa3F42nbNGd/ZsevvRIqTz6', 'Employee', '2026-09-16 16:45:00'),	-- ducanh
-('an_nv', 'mã_hoá', 'Manager', '2026-09-19 08:00:00'),
+('an_nv', '$2b$12$todycTPmOSj7lfqUkDo3COA/k5DxYoa9/.UI7Lm0sKFMsG1jyeQSK', 'Manager', '2026-09-19 08:00:00'),
 ('binh_tt', 'mã_hoá', 'Employee', '2026-09-22 09:30:00'),
 ('cuong_lv', 'mã_hoá', 'Employee', '2026-09-27 10:00:00'),
 ('dung_pt', 'mã_hoá', 'Employee', '2026-10-02 11:15:00'),
