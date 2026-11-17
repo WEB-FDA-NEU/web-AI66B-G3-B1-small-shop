@@ -1,7 +1,7 @@
 
 # YUMS (YoU Manage your Shop)
 
-A demand forecasting tool designed for small retail stores. The system allows users to upload historical sales data, forecast product demand for the upcoming weeks or months, and receive inventory replenishment recommendations.
+A managing system designed for small retail stores. The system allows users to upload historical sales data, forecast product demand for the upcoming weeks or months, and receive inventory replenishment recommendations.
 
 # Selected Topic
 
