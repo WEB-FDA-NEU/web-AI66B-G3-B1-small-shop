@@ -429,6 +429,11 @@
     white-space: nowrap;
 }
 
+.orders-table td[data-label="Items"] {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
 
 /* Last row */
 
