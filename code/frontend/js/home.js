@@ -97,7 +97,7 @@ if (profile) {
             </div>
         </section>
         <div class="profile-dropdown-links">
-            <button type="button" class="profile-dropdown-item">
+            <button type="button" class="profile-dropdown-item profile-dropdown-my-profile">
                 <i class="fa-regular fa-user" aria-hidden="true"></i>
                 My Profile
             </button>
@@ -118,6 +118,13 @@ if (profile) {
         </div>
     `;
     container.append(dropdown);
+    const myProfileButton = dropdown.querySelector(".profile-dropdown-my-profile");
+
+myProfileButton.addEventListener("click", () => {
+    if (authenticatedUser.role === "Employee") {
+        window.location.href = "employee_details.html";
+    }
+});
     dropdown.querySelector(".profile-dropdown-avatar").textContent = initials;
     dropdown.querySelector(".profile-dropdown-name").textContent = username;
     dropdown.querySelector(".profile-dropdown-role").textContent = role;
