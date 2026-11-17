@@ -625,10 +625,13 @@ async function saveNewOrder(isGuest = false) {
         if (!response.ok) {
             console.error("Create order failed:", result);
 
+            const detail = result?.detail;
             showToast(
-                result?.detail
-                    ? JSON.stringify(result.detail)
-                    : "Unable to create order. Please try again.",
+                typeof detail === "string"
+                    ? detail
+                    : detail
+                        ? JSON.stringify(detail)
+                        : "Unable to create order. Please try again.",
                 true
             );
             return;
