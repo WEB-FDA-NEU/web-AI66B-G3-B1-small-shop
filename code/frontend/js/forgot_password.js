@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const forgotPasswordForm = document.getElementById("forgotPasswordForm");
     const usernameInput = document.getElementById("username");
     const messageContainer = document.getElementById("forgotPasswordMessage");
+    const submitButton = forgotPasswordForm?.querySelector('button[type="submit"]');
 
     if (forgotPasswordForm) {
         forgotPasswordForm.addEventListener("submit", async (e) => {
@@ -16,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 messageContainer.style.color = "";
             }
 
+            showButtonLoading(submitButton, "Sending...");
             try {
                 const response = await fetch("http://127.0.0.1:8000/auth/forgot-password", {
                     method: "POST",
@@ -51,6 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     alert("An error occurred. Please try again.");
                 }
+            } finally {
+                hideButtonLoading(submitButton);
             }
         });
     }

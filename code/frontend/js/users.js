@@ -93,6 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 1. FETCH USERS (GET /users)
     async function fetchUsers() {
+        showTableLoading(usersTableBody, 6, "Loading users...");
         try {
             const response = await fetch(`${API_BASE}/users`);
             if (!response.ok) throw new Error("Failed to load users");
@@ -108,6 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 2. FETCH PENDING RESET REQUESTS (GET /auth/password-reset-requests)
     async function fetchResetRequests() {
+        showTableLoading(resetRequestsBody, 4, "Loading password reset requests...");
         try {
             const response = await fetch(`${API_BASE}/auth/password-reset-requests`);
             if (!response.ok) throw new Error("Failed to load reset requests");

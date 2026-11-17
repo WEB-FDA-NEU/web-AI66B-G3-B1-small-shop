@@ -41,6 +41,7 @@ function resetSalesKpis() {
 }
 
 async function fetchSalesOverview() {
+  showTableLoading("topSellingTableBody", 7, "Loading sales...");
   const topNDropdown = document.getElementById('topNDropdown');
   const categoryInput = document.getElementById('categoryInput');
   const timeframeFilter = document.getElementById('timeframeFilter');
@@ -64,6 +65,8 @@ async function fetchSalesOverview() {
     renderSalesOverviewDashboard(data, { topN, category, timeframe });
   } catch (error) {
     resetSalesKpis();
+    document.getElementById('topSellingTableBody').innerHTML =
+      `<tr><td colspan="7" class="table-message">Unable to load sales data. Please try again.</td></tr>`;
     console.error("Server Error Details:", error.message); 
     showToast("Something went wrong on the server. Please try again later.");
   }
@@ -229,6 +232,7 @@ function renderSalesTable(dataToRender) {
 }
 
 async function fetchPredictions() {
+  showTableLoading("predictionTableBody", 6, "Loading predictions...");
   const selectElement = document.getElementById('predictionWindowSelect');
   const windowDays = parseInt(selectElement ? selectElement.value : "30");
 
@@ -241,6 +245,8 @@ async function fetchPredictions() {
     const data = await response.json();
     renderPredictionTable(data, windowDays);
   } catch (error) {
+    document.getElementById('predictionTableBody').innerHTML =
+      `<tr><td colspan="6" class="table-message">Unable to load predictions. Please try again.</td></tr>`;
     showToast(error.message);
   }
 }

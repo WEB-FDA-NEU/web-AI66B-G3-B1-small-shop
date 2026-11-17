@@ -15,7 +15,7 @@ if (changePasswordForm) {
             return;
         }
 
-        if (submitButton) submitButton.disabled = true;
+        showButtonLoading(submitButton, "Changing password...");
         try {
             const response = await fetch("http://127.0.0.1:8000/auth/change-password", {
                 method: "POST",
@@ -38,7 +38,7 @@ if (changePasswordForm) {
                 message.textContent = error.message || "Unable to connect to the server.";
             }
         } finally {
-            if (submitButton) submitButton.disabled = false;
+            hideButtonLoading(submitButton);
         }
     });
 }

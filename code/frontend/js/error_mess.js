@@ -58,24 +58,79 @@ function showNetworkError() {
 
 // ==================== LOADING STATE ====================
 
-function showLoading() {
-    if (!tableBody) return;
+function showTableLoading(target, colspan, message = "Loading...") {
+    const body = typeof target === "string"
+        ? document.getElementById(target)
+        : target;
+    if (!body) return;
 
-    tableBody.innerHTML = `
-        <tr class="loading-row">
-            <td colspan="7">
-                <div class="loading-content">
-                    <div class="loading-spinner"></div>
-                    <p>Loading employees...</p>
-                </div>
-            </td>
-        </tr>
-    `;
+    const row = document.createElement("tr");
+    row.className = "loading-row";
+
+    const cell = document.createElement("td");
+    cell.colSpan = colspan;
+
+    const content = document.createElement("div");
+    content.className = "loading-content";
+
+    const spinner = document.createElement("div");
+    spinner.className = "loading-spinner";
+    spinner.setAttribute("aria-hidden", "true");
+
+    const label = document.createElement("p");
+    label.textContent = message;
+
+    content.append(spinner, label);
+    cell.appendChild(content);
+    row.appendChild(cell);
+    body.replaceChildren(row);
+}
+
+function hideTableLoading(target) {
+    const body = typeof target === "string"
+        ? document.getElementById(target)
+        : target;
+    body?.querySelector(".loading-row")?.remove();
+}
+
+function showButtonLoading(button, message = "Loading...") {
+    if (!button || button.dataset.loading === "true") return;
+
+    button.dataset.loading = "true";
+    button.dataset.loadingOriginalHtml = button.innerHTML;
+    button.dataset.loadingWasDisabled = String(button.disabled);
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+
+    const content = document.createElement("span");
+    content.className = "loading-button-content";
+
+    const spinner = document.createElement("span");
+    spinner.className = "loading-spinner loading-spinner-button";
+    spinner.setAttribute("aria-hidden", "true");
+
+    const label = document.createElement("span");
+    label.textContent = message;
+
+    content.append(spinner, label);
+    button.replaceChildren(content);
+}
+
+function hideButtonLoading(button) {
+    if (!button || button.dataset.loading !== "true") return;
+
+    button.innerHTML = button.dataset.loadingOriginalHtml;
+    button.disabled = button.dataset.loadingWasDisabled === "true";
+    button.removeAttribute("aria-busy");
+    delete button.dataset.loading;
+    delete button.dataset.loadingOriginalHtml;
+    delete button.dataset.loadingWasDisabled;
+}
+
+function showLoading() {
+    showTableLoading("employeeTableBody", 7, "Loading employees...");
 }
 
 function hideLoading() {
-  const loadingRow = tableBody?.querySelector(".loading-row");
-  if (loadingRow) {
-    loadingRow.remove();
-  }
+    hideTableLoading("employeeTableBody");
 }

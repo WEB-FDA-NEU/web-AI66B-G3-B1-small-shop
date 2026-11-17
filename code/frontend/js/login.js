@@ -45,9 +45,7 @@ if (loginForm) {
         if (message) {
             message.textContent = "";
         }
-        if (submitButton) {
-            submitButton.disabled = true;
-        }
+        showButtonLoading(submitButton, "Signing in...");
 
         try {
             const response = await fetch("http://127.0.0.1:8000/auth/login", {
@@ -73,9 +71,7 @@ if (loginForm) {
                 message.textContent = error.message || "Unable to connect to the server.";
             }
         } finally {
-            if (submitButton) {
-                submitButton.disabled = false;
-            }
+            hideButtonLoading(submitButton);
         }
     });
 }

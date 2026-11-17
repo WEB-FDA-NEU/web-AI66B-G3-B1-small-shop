@@ -178,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function loadCustomers() {
+        showTableLoading(tableBody, 7, 'Loading customers...');
         try {
             customers = await request('/customers');
             renderTable();

@@ -608,7 +608,7 @@ async function saveNewOrder(isGuest = false) {
     };
 
     isCreatingOrder = true;
-    confirmOrderBtn.disabled = true;
+    showButtonLoading(confirmOrderBtn, "Creating order...");
     guestCustomerBtn.disabled = true;
 
     try {
@@ -650,7 +650,7 @@ async function saveNewOrder(isGuest = false) {
         showToast("Cannot connect to the server. Please try again.", true);
     } finally {
         isCreatingOrder = false;
-        confirmOrderBtn.disabled = false;
+        hideButtonLoading(confirmOrderBtn);
         guestCustomerBtn.disabled = false;
     }
 }

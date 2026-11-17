@@ -109,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        showTableLoading(recentOrdersBody, 6, 'Loading orders...');
         try {
             const response = await fetch(
                 `${API_BASE_URL}/customers/${customerId}/details`
