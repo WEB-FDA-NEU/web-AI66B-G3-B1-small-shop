@@ -12,3 +12,4 @@ sqlalchemy==2.0.22
 PySocks==1.7.1
 pytest
 httpx2
+httpx

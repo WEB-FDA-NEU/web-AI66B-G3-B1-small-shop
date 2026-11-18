@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="../css/profile.css">
     <link rel="stylesheet" href="../css/sales.css">
     <link rel="stylesheet" href="../css/inventory.css">
+    <link rel="stylesheet" href="../css/error_mess.css">
     <script src="../js/session.js"></script>
 </head>
 <body class="employee-page">
@@ -164,11 +165,11 @@
                         
                         <div class="form-group">
                             <label for="price">Unit Price (VND) *</label>
-                            <input type="number" id="price" placeholder="35000" min="0" step="1000" required>
+                            <input type="number" id="price" placeholder="35000" min="0" step="1000" onkeydown="if(event.key==='-' || event.key==='e') event.preventDefault();" oninput="if(this.value < 0) this.value = 0;" required>
                         </div>
                         <div class="form-group">
                             <label for="stock">Stock Quantity *</label>
-                            <input type="number" id="stock" placeholder="15" min="0" required>
+                            <input type="number" id="stock" placeholder="15" min="0" onkeydown="if(event.key==='-' || event.key==='.' || event.key==='e') event.preventDefault();" oninput="if(this.value < 0) this.value = 0;" required>
                         </div>
                     </div>
                 </form>
@@ -213,6 +214,7 @@
     <div class="toast" id="toastNotification">System Notification</div>
     
     <!-- Custom Script -->
+    <script src="../js/error_mess.js"></script>
     <script src="../js/inventory_script.js"></script>
     <script src="../js/home.js"></script>
 </body>

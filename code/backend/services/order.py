@@ -79,6 +79,45 @@ def get_orders() -> List[Dict[str, Any]]:
     finally:
         connection.close()
 
+
+def _stock_validation_error(
+    product_name: str,
+    required_quantity: int,
+    stock_rows: List[Dict[str, Any]],
+) -> Optional[str]:
+    usable_rows = [row for row in stock_rows if row["is_usable"]]
+    usable_quantity = sum(int(row["quantity"]) for row in usable_rows)
+    if usable_quantity == 0:
+        if stock_rows:
+            return f"{product_name} is expired and cannot be ordered."
+        return f"{product_name} is out of stock."
+    if usable_quantity < required_quantity:
+        return (
+            f"Not enough non-expired stock for {product_name}. "
+            f"Only {usable_quantity} available."
+        )
+    if max(int(row["quantity"]) for row in usable_rows) < required_quantity:
+        return (
+            f"No single non-expired inventory batch has enough stock for "
+            f"{product_name} ({required_quantity} required)."
+        )
+    return None
+
+
+def _stock_deduction_error(
+    product_name: str,
+    required_quantity: int,
+    usable_before: int,
+    usable_after: int,
+) -> Optional[str]:
+    if usable_before - usable_after == required_quantity:
+        return None
+    return (
+        f"Could not deduct {required_quantity} units of non-expired stock "
+        f"for {product_name}. The order was cancelled; refresh stock and try again."
+    )
+
+
 #create new order
 def create_order(data: OrderCreate) -> Dict[str, Any]:
     connection = get_connection()
@@ -109,20 +148,63 @@ def create_order(data: OrderCreate) -> Dict[str, Any]:
                 if not cursor.fetchone():
                     raise HTTPException(status_code=400, detail="Customer not found.")
 
-            total = Decimal("0.00")
-            prepared_items = []
+            required_quantities = {}
             for item in data.items:
+                required_quantities[item.product_id] = (
+                    required_quantities.get(item.product_id, 0) + item.quantity
+                )
+
+            products = {}
+            usable_stock_by_product = {}
+            for product_id, required_quantity in required_quantities.items():
                 cursor.execute("""
-                    SELECT product_id, name, unit_price
+                    SELECT product_id, name, unit_price, is_available
                     FROM products
-                    WHERE product_id = %s AND is_available = TRUE
-                """, (item.product_id,))
+                    WHERE product_id = %s
+                """, (product_id,))
                 product = cursor.fetchone()
                 if not product:
                     raise HTTPException(
                         status_code=400,
-                        detail=f"Product {item.product_id} does not exist or is unavailable."
+                        detail=f"Product {product_id} does not exist."
                     )
+
+                cursor.execute("""
+                    SELECT quantity,
+                           (
+                               status <> 'Expired'
+                               AND (expiry_date IS NULL OR expiry_date >= CURRENT_DATE)
+                           ) AS is_usable
+                    FROM inventory
+                    WHERE product_id = %s AND quantity > 0
+                    ORDER BY expiry_date IS NULL, expiry_date, stocked_at, inventory_id
+                    FOR UPDATE
+                """, (product_id,))
+                stock_rows = cursor.fetchall() or []
+                stock_error = _stock_validation_error(
+                    product["name"],
+                    required_quantity,
+                    stock_rows,
+                )
+                if stock_error:
+                    raise HTTPException(status_code=409, detail=stock_error)
+                if not product["is_available"]:
+                    raise HTTPException(
+                        status_code=409,
+                        detail=f"{product['name']} is currently unavailable.",
+                    )
+
+                products[product_id] = product
+                usable_stock_by_product[product_id] = sum(
+                    int(row["quantity"])
+                    for row in stock_rows
+                    if row["is_usable"]
+                )
+
+            total = Decimal("0.00")
+            prepared_items = []
+            for item in data.items:
+                product = products[item.product_id]
                 unit_price = Decimal(str(product["unit_price"]))
                 subtotal = unit_price * item.quantity
                 total += subtotal
@@ -158,6 +240,25 @@ def create_order(data: OrderCreate) -> Dict[str, Any]:
                     item["subtotal"]
                 ))
 
+                cursor.execute("""
+                    SELECT COALESCE(SUM(quantity), 0) AS usable_quantity
+                    FROM inventory
+                    WHERE product_id = %s
+                      AND quantity > 0
+                      AND status <> 'Expired'
+                      AND (expiry_date IS NULL OR expiry_date >= CURRENT_DATE)
+                """, (item["product_id"],))
+                usable_after = int(cursor.fetchone()["usable_quantity"])
+                stock_error = _stock_deduction_error(
+                    products[item["product_id"]]["name"],
+                    item["quantity"],
+                    usable_stock_by_product[item["product_id"]],
+                    usable_after,
+                )
+                if stock_error:
+                    raise HTTPException(status_code=409, detail=stock_error)
+                usable_stock_by_product[item["product_id"]] = usable_after
+
         connection.commit()
         return get_order_by_id(order_id)
     except HTTPException:
@@ -165,6 +266,11 @@ def create_order(data: OrderCreate) -> Dict[str, Any]:
         raise
     except Exception as e:
         connection.rollback()
+        if getattr(e, "args", ()) and e.args[0] == 1644:
+            raise HTTPException(
+                status_code=409,
+                detail="A product is no longer available or has insufficient stock. Refresh the menu and try again.",
+            ) from e
         raise HTTPException(status_code=500, detail=f"Failed to create order: {str(e)}")
     finally:
         connection.close()

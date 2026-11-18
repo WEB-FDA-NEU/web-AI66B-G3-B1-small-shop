@@ -316,16 +316,7 @@ async function loadOrderDetails() {
         return;
     }
 
-    orderItems.innerHTML = `
-        <tr>
-            <td colspan="5">
-                <div class="loading-state">
-                    <span class="loading-spinner"></span>
-                    <span>Loading order details...</span>
-                </div>
-            </td>
-        </tr>
-    `;
+    showTableLoading(orderItems, 5, "Loading order details...");
     try {
         const response = await fetch(
             `${API_BASE_URL}/orders/${encodeURIComponent(orderId)}`

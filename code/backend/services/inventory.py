@@ -116,7 +116,15 @@ def get_all_inventory() -> List[Dict[str, Any]]:
 def add_inventory(item_data: InventoryCreate) -> Dict[str, Any]:
     """Nhập hàng: luôn tạo MỘT lô mới (dòng mới trong inventory).
     Nếu sản phẩm (cùng tên + danh mục) đã tồn tại thì dùng lại sản phẩm đó, không tạo trùng."""
+    
+    # Chặn số lượng hoặc giá tiền âm ở Backend
+    if item_data.stock_quantity < 0:
+        raise ValueError("Stock quantity cannot be negative.")
+    if item_data.unit_price < 0:
+        raise ValueError("Unit price cannot be negative.")
+
     connection = get_connection()
+
     try:
         with connection.cursor() as cursor:
             cursor.execute(
@@ -157,7 +165,15 @@ def update_inventory(sku: str, item_data: InventoryUpdate) -> Optional[Dict[str,
     """Sửa MỘT lô: số lượng chỉ áp dụng cho lô này.
     Tên và giá là thông tin của sản phẩm nên áp dụng cho mọi lô của sản phẩm đó.
     (Tham số 'sku' nay là mã lô, ví dụ 'INV-012'.)"""
+    
+    # Chặn số âm khi update
+    if item_data.stock_quantity is not None and item_data.stock_quantity < 0:
+        raise ValueError("Stock quantity cannot be negative.")
+    if item_data.unit_price is not None and item_data.unit_price < 0:
+        raise ValueError("Unit price cannot be negative.")
+
     connection = get_connection()
+
     try:
         inventory_id = _parse_inventory_id(sku)
         with connection.cursor() as cursor:

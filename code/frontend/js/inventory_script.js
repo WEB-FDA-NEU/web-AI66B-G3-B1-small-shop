@@ -127,6 +127,7 @@ async function loadCategories() {
 
 // ---------- Data ----------
 async function fetchInventory() {
+  showTableLoading?.(tableBody, 9, "Loading inventory...");
   try {
     const response = await fetch(API_URL);
     if (!response.ok) throw new Error("Failed to load inventory from server.");
@@ -144,12 +145,22 @@ async function fetchInventory() {
     filterData();
   } catch (error) {
     console.error("Server Error Details:", error.message);
+    if (tableBody) {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="9" style="text-align: center; color: #b42318; padding: 30px;">
+            Unable to load inventory. Please try again.
+          </td>
+        </tr>
+      `;
+    }
     showToast("Something went wrong on the server. Please try again later.");
   }
 }
 
 // ---------- Render ----------
 function renderTable(data) {
+  if (!tableBody) return;
   tableBody.innerHTML = '';
 
   if (!data || data.length === 0) {
@@ -249,15 +260,28 @@ function closeModal() {
   if (productForm) productForm.reset();
 }
 
-// ---------- Submit ----------
+// ---------- Submit (Có kiểm tra chặn số âm) ----------
 async function handleFormSubmit(e) {
   e.preventDefault();
+
+  const stockQty = parseInt(stockInput.value);
+  const unitPrice = parseFloat(priceInput.value);
+
+  // Chặn không cho nhập số lượng hoặc giá tiền âm
+  if (isNaN(stockQty) || stockQty < 0) {
+    showToast("Stock quantity cannot be negative!");
+    return;
+  }
+  if (isNaN(unitPrice) || unitPrice < 0) {
+    showToast("Unit price cannot be negative!");
+    return;
+  }
 
   const payload = {
     product_name: productNameInput.value.trim(),
     category_id: parseInt(categoryInput.value) || 1,
-    unit_price: parseFloat(priceInput.value) || 0,
-    stock_quantity: parseInt(stockInput.value) || 0
+    unit_price: unitPrice,
+    stock_quantity: stockQty
   };
 
   try {
@@ -286,7 +310,7 @@ async function handleFormSubmit(e) {
     fetchInventory();
   } catch (error) {
     console.error("Server Error Details:", error.message);
-    showToast("Something went wrong on the server. Please try again later.");
+    showToast(error.message || "Something went wrong on the server. Please try again later.");
   }
 }
 
@@ -347,6 +371,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
   if (cancelModalBtn) cancelModalBtn.addEventListener('click', closeModal);
   if (productForm) productForm.addEventListener('submit', handleFormSubmit);
+
+  // Thêm thuộc tính min="0" trực tiếp cho các input số lượng/giá để giao diện tự chặn dấu trừ (-)
+  if (stockInput) stockInput.setAttribute('min', '0');
+  if (priceInput) priceInput.setAttribute('min', '0');
 
   if (modal) {
     modal.addEventListener('click', (e) => {

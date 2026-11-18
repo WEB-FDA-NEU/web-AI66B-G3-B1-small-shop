@@ -608,7 +608,7 @@ async function saveNewOrder(isGuest = false) {
     };
 
     isCreatingOrder = true;
-    confirmOrderBtn.disabled = true;
+    showButtonLoading(confirmOrderBtn, "Creating order...");
     guestCustomerBtn.disabled = true;
 
     try {
@@ -625,10 +625,13 @@ async function saveNewOrder(isGuest = false) {
         if (!response.ok) {
             console.error("Create order failed:", result);
 
+            const detail = result?.detail;
             showToast(
-                result?.detail
-                    ? JSON.stringify(result.detail)
-                    : "Unable to create order. Please try again.",
+                typeof detail === "string"
+                    ? detail
+                    : detail
+                        ? JSON.stringify(detail)
+                        : "Unable to create order. Please try again.",
                 true
             );
             return;
@@ -647,7 +650,7 @@ async function saveNewOrder(isGuest = false) {
         showToast("Cannot connect to the server. Please try again.", true);
     } finally {
         isCreatingOrder = false;
-        confirmOrderBtn.disabled = false;
+        hideButtonLoading(confirmOrderBtn);
         guestCustomerBtn.disabled = false;
     }
 }

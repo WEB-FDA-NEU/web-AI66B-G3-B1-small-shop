@@ -92,13 +92,7 @@ async function renderOrders(data) {
         return;
     }
 
-    ordersTableBody.innerHTML = `
-        <tr>
-            <td colspan="7" style="text-align: center; padding: 30px;">
-                Loading order details...
-            </td>
-        </tr>
-    `;
+    showTableLoading(ordersTableBody, 7, "Loading order details...");
 
     const detailedOrders = await Promise.all(
         data.map(async order => {
@@ -220,16 +214,7 @@ function filterData() {
 
 // LOAD ORDERS
 async function loadOrders() {
-    ordersTableBody.innerHTML = `
-        <tr>
-            <td colspan="7">
-                <div class="loading-state">
-                    <span class="loading-spinner"></span>
-                    <span>Loading orders...</span>
-                </div>
-            </td>
-        </tr>
-    `;
+    showTableLoading(ordersTableBody, 7, "Loading orders...");
 
     try {
         const response = await fetch(`${API_BASE_URL}/orders`);
